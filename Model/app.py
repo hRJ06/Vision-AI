@@ -4,15 +4,14 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.utilities import SQLDatabase
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from langchain_openai import ChatOpenAI, OpenAI
 from flask_cors import CORS
 from langchain_groq import ChatGroq
 from flask import Flask, request, render_template, session, jsonify
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
-from fastapi.middleware.wsgi import WSGIMiddleware
-from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain_openai import OpenAI
-from io import StringIO
 import pandas as pd
 
 import os
@@ -25,6 +24,8 @@ model = genai.GenerativeModel('gemini-pro')
 app.secret_key = ""
 load_dotenv()
 fastapi_app = FastAPI()
+UPLOAD_FOLDER = './files'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
@@ -212,24 +213,31 @@ def report():
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/chatCSV', methods=['POST'])
+def chatCSV():
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "No file part"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "No selected file"}), 400
+    
+    if file:
+        filename ='uploaded_file.csv'
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)  # This will overwrite the file if it already exists
 
-# FastAPI endpoint for querying CSV files
-@fastapi_app.post("/query-csv/")
-async def query_csv(file: UploadFile = File(...), question: str = Form(...)):
-    if file.content_type != 'text/csv':
-        return JSONResponse(content={"error": "Invalid file type. Only CSV files are supported."}, status_code=400)
+        llm = OpenAI(temperature=0, openai_api_key='')
+        try:
+            print("hello")
+            agent = create_csv_agent(llm, filepath, verbose=True)
+            while True:
+                prompt = input()
+                agent.run(prompt)
+        except Exception as e:
+            print("Error:", str(e))
+            return jsonify({"status": "error", "message": str(e)}), 500
 
-    content = await file.read()
-    csv_data = StringIO(content.decode('utf-8'))
-    csv_df = pd.read_csv(csv_data)
-
-    agent = create_csv_agent(OpenAI(temperature=0), csv_df, verbose=True)
-
-    try:
-        response = agent.run(question)
-        return JSONResponse(content={"response": response})
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-
+    return jsonify({"status": "success", "message": "File uploaded and processing started"}), 200
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

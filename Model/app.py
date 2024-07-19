@@ -8,9 +8,12 @@ from flask_cors import CORS
 from langchain_groq import ChatGroq
 from flask import Flask, request, render_template, session, jsonify
 import os
+import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app, origin='*');
+genai.configure(api_key="AIzaSyAekZwuOWfD418tH158IdFAxZinVeyKifc")
+model = genai.GenerativeModel('gemini-pro')
 app.secret_key = "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"
 load_dotenv()
 
@@ -141,6 +144,65 @@ def chat():
         return jsonify({"response": ai_response})
     
     return jsonify({"response": ""})
+@app.route('/report', methods=['POST'])
+def report():
+    data = request.json  # Get the JSON data from the request body
+    print(data)
+    
+    if not data:
+        return jsonify({"status": "error", "message": "No data provided"}), 400
+
+    user = data.get('User')
+    password = data.get('Password')
+    host = data.get('Host')
+    port = data.get('Port')
+    database = data.get('Database')
+
+    if not all([user, password, host, port, database]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    try:
+        # Initialize the database connection
+        db = init_db(user, password, host, port, database)
+        print("Database connected")
+        
+        # Define the constant prompt to get table schema and relationships
+        prompt_text = "Give me the datatypes of each table field and relationships between the tables in the database."
+        
+        # Define a function to get the schema information
+        def get_schema_info(_):
+            return db.get_table_info()
+
+        # Define the prompt template and model for generating the schema description
+        schema_prompt = ChatPromptTemplate.from_template(prompt_text)
+        llm = ChatGroq(model="Mixtral-8x7b-32768", temperature=0)
+        
+        # Create the chain to generate the schema description
+        schema_chain = (
+            RunnablePassthrough.assign(schema=get_schema_info)
+            | schema_prompt
+            | llm.bind(stop=["\nSQL Result:"])
+            | StrOutputParser()
+        )
+        
+        # Get the response from the model
+        schema_description = schema_chain.stream({"question": prompt_text, "chat_history": []})
+        
+        # Store the response in a variable and return it
+        postfix = {"schema_description": schema_description}
+        query=f"give me 4 vulnerabilities in the schema descriptions given below of a database {postfix}"
+
+        result = model.generate_content(query)
+
+
+        response = result.text
+
+        return jsonify(response)
+    
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

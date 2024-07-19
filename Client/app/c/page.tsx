@@ -15,7 +15,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -94,15 +94,47 @@ export default function Component() {
 
 
   const [welcome, setwelcome] = useState(false);
+  const [inputText, setInputText] = useState("");
+
   const [chats, setchats] = useState([{
     msg: "Hi there! How can i help You today?",
     role: "AI"
   }]);
 
 
+  const handleSendMessage = async (e: any) => {
+    e.preventDefault();
+    if (inputText.trim()) {
+
+      setchats([...chats, { msg: inputText, role: "User" }]);
+
+      try {
+        const response = await axios.post("http://127.0.0.1:5000/chat", { message: inputText }, {
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
+
+        setchats(prevChats => [...prevChats, { msg: response.data.response, role: "AI" }])
+
+      } catch (error) {
+        console.log("Error->", error);
+      }
+
+      setInputText("");
+    }
+  };
+
+
+  // useEffect(() => {
+  //   console.log(chats);
+  // }, [chats]);
+
+
   return (
     <div className="grid min-h-screen w-full grid-cols-[280px_1fr] bg-background text-foreground">
       <div className="flex flex-col border-r bg-muted/40 p-4">
+
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">AI Assistant</h2>
           <Button variant="ghost" size="icon">
@@ -110,6 +142,8 @@ export default function Component() {
             <span className="sr-only">Settings</span>
           </Button>
         </div>
+
+        {/* DB Connect */}
         <div className="mt-4 flex-1 space-y-4 overflow-auto">
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">
@@ -226,7 +260,7 @@ export default function Component() {
 
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md">
-          <h1 className="text-xl font-semibold">AI-Powered Chat</h1>
+          <h1 className="text-xl font-semibold">Vision AI </h1>
         </div>
 
         {
@@ -262,26 +296,28 @@ export default function Component() {
 
         {/* Chats */}
         {welcome &&
-          chats.map((chat) => (
-            <div className="flex-1 overflow-auto p-4">
-              <div className="grid gap-4">
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-8 w-8 shrink-0 border">
-                    <AvatarImage src="/placeholder-user.jpg" />
-                    <AvatarFallback>{chat.role}</AvatarFallback>
-                  </Avatar>
+          <div className="flex-1 overflow-auto p-4 max-h-[calc(100vh-10rem)]"> {/* Adjust height as needed */}
+          <div className="flex flex-col gap-4">
+            {chats.map((chat, index) => (
+              <div 
+                key={index} 
+                className={`flex items-start gap-4 `}
+              >
+                <Avatar className="h-8 w-8 shrink-0 border">
+                  <AvatarImage src="/placeholder-user.jpg" />
+                  <AvatarFallback>{chat.role}</AvatarFallback>
+                </Avatar>
+                <div className="max-w-[700px]"> {/* Fixed width for message box */}
                   <div className="grid gap-1">
-                    <div className="font-medium">You</div>
-                    <div className="prose text-muted-foreground">
-                      <p>
-                        {chat.msg}
-                      </p>
+                    <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
+                      <p>{chat.msg}</p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
+        </div>
         }
 
 
@@ -292,11 +328,14 @@ export default function Component() {
               <Textarea
                 placeholder="Type your message..."
                 className="min-h-[48px] w-full rounded-2xl border border-neutral-400 p-4 pr-16 shadow-sm resize-none"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
               />
               <Button
                 type="submit"
                 size="icon"
                 className="absolute right-3 top-3"
+                onClick={(e) => handleSendMessage(e)}
               >
                 <SendIcon className="h-4 w-4" />
                 <span className="sr-only">Send</span>

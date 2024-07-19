@@ -7,12 +7,17 @@ from langchain_core.runnables import RunnablePassthrough
 from flask_cors import CORS
 from langchain_groq import ChatGroq
 from flask import Flask, request, render_template, session, jsonify
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.responses import JSONResponse
+import pandas as pd
+
 import os
 
 app = Flask(__name__)
 CORS(app, origin='*');
 app.secret_key = "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"
 load_dotenv()
+fastapi_app = FastAPI()
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
@@ -141,6 +146,28 @@ def chat():
         return jsonify({"response": ai_response})
     
     return jsonify({"response": ""})
+
+# FastAPI endpoint for querying CSV files
+@fastapi_app.post("/query-csv/")
+async def query_csv(file: UploadFile = File(...), question: str = Form(...)):
+    if file.content_type != 'text/csv':
+        return JSONResponse(content={"error": "Invalid file type. Only CSV files are supported."}, status_code=400)
+
+    content = await file.read()
+    csv_data = StringIO(content.decode('utf-8'))
+    csv_df = pd.read_csv(csv_data)
+
+    agent = create_csv_agent(OpenAI(temperature=0), csv_df, verbose=True)
+
+    try:
+        response = agent.run(question)
+        return JSONResponse(content={"response": response})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+# WSGI integration
+from fastapi.middleware.wsgi import WSGIMiddleware
+app.wsgi_app = WSGIMiddleware(fastapi_app, app.wsgi_app)
 
 if __name__ == '__main__':
     app.run(debug=True)

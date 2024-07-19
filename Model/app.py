@@ -13,24 +13,26 @@ from flask import Flask, request, render_template, session, jsonify
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 import pandas as pd
-
 import os
 import google.generativeai as genai
+from tabulate import tabulate
 
 app = Flask(__name__)
-CORS(app, origin='*');
+CORS(app, origin='*')
 genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-pro')
-app.secret_key = ""
+app.secret_key = "supersecretkey"  # Make sure to set a secret key
 load_dotenv()
 fastapi_app = FastAPI()
 UPLOAD_FOLDER = './files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Initialize the database connection
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
     return SQLDatabase.from_uri(db_uri)
 
+# Get the SQL chain
 def get_sql_chain(db):
     template = """
     You are a data analyst at a company. You are interacting with a user who is asking your question about the company's database.
@@ -67,6 +69,7 @@ def get_sql_chain(db):
         | StrOutputParser()
     )
 
+# Get the response for the SQL query
 def get_response(user_query, db, chat_history):
     sql_chain = get_sql_chain(db)
     
@@ -95,6 +98,7 @@ def get_response(user_query, db, chat_history):
     )
     return chain.stream({"question": user_query, "chat_history": chat_history})
 
+# Index route
 @app.route('/')
 def index():
     if "chat_history" not in session:
@@ -103,10 +107,11 @@ def index():
         ]
     return render_template('index.html', chat_history=session["chat_history"])
 
+# Connect to the database
 @app.route('/connect', methods=['POST'])
 def connect():
     data = request.json  # Get the JSON data from the request body
-    print(data);
+    print(data)
     if not data:
         return jsonify({"status": "error", "message": "No data provided"}), 400
 
@@ -121,19 +126,20 @@ def connect():
 
     try:
         db = init_db(user, password, host, port, database)
-        print(db);
+        print(db)
         session['db_info'] = {
             'user': user,
             'host': host,
             'port': port,
             'database': database
         }
-        print("Done");
+        print("Done")
         return jsonify({"status": "success"})
     except Exception as e:
-        print("Not Done");
+        print("Not Done")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Chat route
 @app.route('/chat', methods=['POST'])
 def chat():
     user_query = request.json['message']
@@ -154,6 +160,8 @@ def chat():
         return jsonify({"response": ai_response})
     
     return jsonify({"response": ""})
+
+# Report route
 @app.route('/report', methods=['POST'])
 def report():
     data = request.json  # Get the JSON data from the request body
@@ -213,8 +221,9 @@ def report():
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/chatCSV', methods=['POST'])
-def chatCSV():
+# CSV upload route
+@app.route('/upload_csv', methods=['POST'])
+def upload_csv():
     if 'file' not in request.files:
         return jsonify({"status": "error", "message": "No file part"}), 400
     
@@ -223,21 +232,38 @@ def chatCSV():
         return jsonify({"status": "error", "message": "No selected file"}), 400
     
     if file:
-        filename ='uploaded_file.csv'
+        filename = 'uploaded_file.csv'
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)  # This will overwrite the file if it already exists
+        session['uploaded_filename'] = filename  # Store the filename in the session
 
-        llm = OpenAI(temperature=0, openai_api_key='')
-        try:
-            print("hello")
-            agent = create_csv_agent(llm, filepath, verbose=True)
-            while True:
-                prompt = input()
-                agent.run(prompt)
-        except Exception as e:
-            print("Error:", str(e))
-            return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "success", "message": "File uploaded successfully", "filename": filename}), 200
 
-    return jsonify({"status": "success", "message": "File uploaded and processing started"}), 200
+# CSV manipulation route
+@app.route('/chatCSV', methods=['POST'])
+def manipulate_csv():
+    filename = session.get('uploaded_filename')
+    
+    if not filename:
+        return jsonify({"status": "error", "message": "No file uploaded"}), 400
+    
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    llm = OpenAI(temperature=0, openai_api_key='')
+    try:
+        print("hello")
+        agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)
+        
+        prompt = request.json.get('prompt')
+        if prompt:
+            response = agent.run(prompt)
+            return jsonify({"status": "success", "response": response}), 200
+        else:
+            return jsonify({"status": "error", "message": "No prompt provided"}), 400
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == '__main__':
     app.run()

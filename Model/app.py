@@ -4,35 +4,34 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.utilities import SQLDatabase
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain.agents.agent_types import AgentType
-from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain_openai import ChatOpenAI, OpenAI
 from flask_cors import CORS
 from langchain_groq import ChatGroq
 from flask import Flask, request, render_template, session, jsonify
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import JSONResponse
-import pandas as pd
-import os
 import google.generativeai as genai
 from tabulate import tabulate
+import os
 
 app = Flask(__name__)
-CORS(app, origin='*')
-genai.configure(api_key="")
+# SET UP CORS
+CORS(app, origin='*');
+# CONFIGURE GEMINI 
+genai.configure(api_key="AIzaSyB5v4JcdsO0gLlgPhSkPD6CZYefcWY7aHk")
 model = genai.GenerativeModel('gemini-pro')
-app.secret_key = "supersecretkey"  # Make sure to set a secret key
-load_dotenv()
-fastapi_app = FastAPI()
+# SET APP SECRET KEY
+app.secret_key = "Vision"
+# SET GROQ API KEY FOR LANGCHAIN
+os.environ['GROQ_API_KEY'] ='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';
+# SET CONFIG FOR CSV BOT
 UPLOAD_FOLDER = './files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Initialize the database connection
+# LOAD ENV
+load_dotenv()
+
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
     return SQLDatabase.from_uri(db_uri)
 
-# Get the SQL chain
 def get_sql_chain(db):
     template = """
     You are a data analyst at a company. You are interacting with a user who is asking your question about the company's database.
@@ -43,6 +42,7 @@ def get_sql_chain(db):
     Conversation History: {chat_history}
     
     Write only the SQL query and nothing else. Do not wrap the SQL query in any other text, not even backticks.
+    Do not add any backslashes before underscores in table or column names. In case even in the schema there are any table or database whose name has a \_ like this simply add _ in query not the backslash.
     
     for example:
     Question: which 3 artists have the most tracks?
@@ -61,15 +61,14 @@ def get_sql_chain(db):
     
     def get_schema(_):
         return db.get_table_info()
-
     return (
+        
         RunnablePassthrough.assign(schema=get_schema)
         | prompt
         | llm.bind(stop=["\nSQL Result:"])
         | StrOutputParser()
     )
 
-# Get the response for the SQL query
 def get_response(user_query, db, chat_history):
     sql_chain = get_sql_chain(db)
     
@@ -90,7 +89,11 @@ def get_response(user_query, db, chat_history):
     chain = (
         RunnablePassthrough.assign(query=sql_chain).assign(
             schema=lambda _: db.get_table_info(),
-            response=lambda vars: db.run(vars["query"])
+            response=lambda vars: (
+                print('VARS', vars['query']),  # Print the vars dictionary
+                vars.update({"modified_query": vars["query"].replace('\\_', '_')}),  # Replace \_ with _
+                db.run(vars["modified_query"])
+            )  
         )
         | prompt
         | llm.bind(stop=["\nSQL Result:"])
@@ -98,20 +101,10 @@ def get_response(user_query, db, chat_history):
     )
     return chain.stream({"question": user_query, "chat_history": chat_history})
 
-# Index route
-@app.route('/')
-def index():
-    if "chat_history" not in session:
-        session["chat_history"] = [
-            AIMessage(content="Hello! I am a SQL Assistant. How can I help you? Ask me anything about your database....")
-        ]
-    return render_template('index.html', chat_history=session["chat_history"])
-
-# Connect to the database
 @app.route('/connect', methods=['POST'])
 def connect():
     data = request.json  # Get the JSON data from the request body
-    print(data)
+    print(data);
     if not data:
         return jsonify({"status": "error", "message": "No data provided"}), 400
 
@@ -126,20 +119,19 @@ def connect():
 
     try:
         db = init_db(user, password, host, port, database)
-        print(db)
-        session['db_info'] = {
+        print(db);
+        session['db'] = {
             'user': user,
             'host': host,
             'port': port,
             'database': database
         }
-        print("Done")
+        print("Done");
         return jsonify({"status": "success"})
     except Exception as e:
-        print("Not Done")
+        print("Not Done");
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Chat route
 @app.route('/chat', methods=['POST'])
 def chat():
     user_query = request.json['message']
@@ -147,17 +139,19 @@ def chat():
     
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
-        db = session.get('db')
-        
+        db = init_db('root', 'rootMySQL','localhost', '3306', 'classroom')
         if db:
             ai_response = get_response(user_query, db, chat_history)
-            chat_history.append(AIMessage(content=ai_response))
+            print('AI', ai_response);
+            ans = ""
+            for item in ai_response:
+                ans += item 
+            print('ANS', ans)
+            chat_history.append(AIMessage(content=ans))
         else:
             ai_response = "Database connection not established."
-            chat_history.append(AIMessage(content=ai_response))
-        
-        session["chat_history"] = chat_history
-        return jsonify({"response": ai_response})
+            chat_history.append(AIMessage(content=ans))
+        return jsonify({"response": ans})
     
     return jsonify({"response": ""})
 
@@ -264,6 +258,6 @@ def manipulate_csv():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
-
+    
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

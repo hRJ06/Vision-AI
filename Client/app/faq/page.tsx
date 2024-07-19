@@ -261,7 +261,7 @@ export default function Component() {
   );
 }
 
-function ChevronDownIcon(props) {
+function ChevronDownIcon(props:any) {
   return (
     <svg
       {...props}
@@ -280,7 +280,7 @@ function ChevronDownIcon(props) {
   );
 }
 
-function XIcon(props) {
+function XIcon(props:any) {
   return (
     <svg
       {...props}

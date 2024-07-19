@@ -1,25 +1,23 @@
 "use client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import { Toaster } from "@/components/ui/toaster";
-import { ToastAction } from "@/components/ui/toast";
-import axios from "axios";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 export default function Component() {
   const { toast } = useToast();
@@ -93,6 +91,15 @@ export default function Component() {
       });
     }
   };
+
+
+  const [welcome, setwelcome] = useState(false);
+  const [chats, setchats] = useState([{
+    msg: "Hi there! How can i help You today?",
+    role: "AI"
+  }]);
+
+
   return (
     <div className="grid min-h-screen w-full grid-cols-[280px_1fr] bg-background text-foreground">
       <div className="flex flex-col border-r bg-muted/40 p-4">
@@ -213,114 +220,96 @@ export default function Component() {
           </Tabs>
         </div>
       </div>
+
+
+      {/* chat Welcome */}
+
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md">
           <h1 className="text-xl font-semibold">AI-Powered Chat</h1>
         </div>
-        <div className="flex-1 overflow-auto p-4">
-          <div className="grid gap-4">
-            <div className="flex items-start gap-4">
-              <Avatar className="h-8 w-8 shrink-0 border">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>YO</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <div className="font-medium">You</div>
-                <div className="prose text-muted-foreground">
-                  <p>
-                    Hi there! I'd like to analyze some data from a CSV file and
-                    a database. Can you help me with that?
-                  </p>
-                </div>
+
+        {
+          chats.length < 2 && !welcome &&
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-5xl font-bold">Welcome to Vision AI</h1>
+                <h2 className="text-3xl font-semibold">Pioneering the Future of Intelligent Solutions</h2>
+                <p className="text-muted-foreground">Start a conversation by connecting to a chat server.</p>
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Avatar className="h-8 w-8 shrink-0 border">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>OA</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <div className="font-medium">AI Assistant</div>
-                <div className="prose text-muted-foreground">
-                  <p>
-                    Absolutely! I'd be happy to help you with that. First,
-                    please provide the database credentials in the sidebar so I
-                    can connect to the database. Once that's set up, we can
-                    start analyzing the data from both the CSV file and the
-                    database.
-                  </p>
-                  <p>
-                    You can also use the attachment and voice message options in
-                    the sidebar to provide the CSV file or any other relevant
-                    files.
-                  </p>
-                  <Button variant="ghost" size="icon" className="ml-auto">
-                    <VolumeIcon className="h-5 w-5" />
-                    <span className="sr-only">Speak</span>
-                  </Button>
-                </div>
+
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  variant="outline"
+                  className="bg-black text-white py-3 px-6 text-lg font-semibold"
+                  onClick={() => setwelcome(true)}
+                >
+                  Get Started
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-black font-bold py-3 px-6 text-lg"
+                >
+                  FAQ
+                </Button>
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Avatar className="h-8 w-8 shrink-0 border">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>YO</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <div className="font-medium">You</div>
-                <div className="prose text-muted-foreground">
-                  <p>
-                    Great, let me get those database credentials set up. I'll
-                    also upload the CSV file shortly. Looking forward to
-                    analyzing the data together!
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <Avatar className="h-8 w-8 shrink-0 border">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>OA</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <div className="font-medium">AI Assistant</div>
-                <div className="prose text-muted-foreground">
-                  <p>
-                    Sounds good! I'll be here waiting for the database
-                    credentials and the CSV file. Once we have those, we can
-                    dive right into the data analysis.
-                  </p>
-                  <Button variant="ghost" size="icon" className="ml-auto">
-                    <VolumeIcon className="h-5 w-5" />
-                    <span className="sr-only">Speak</span>
-                  </Button>
-                </div>
-              </div>
+
             </div>
           </div>
-        </div>
-        <div className="sticky bottom-0 z-10 border-t bg-background/50 p-4 backdrop-blur-md">
-          <div className="relative">
-            <Textarea
-              placeholder="Type your message..."
-              className="min-h-[48px] w-full rounded-2xl border border-neutral-400 p-4 pr-16 shadow-sm resize-none"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="absolute right-3 top-3"
-            >
-              <SendIcon className="h-4 w-4" />
-              <span className="sr-only">Send</span>
-            </Button>
-            <div className="absolute right-12 top-3">
-              <Button variant="ghost" size="icon">
-                <FileIcon className="h-4 w-4" />
-                <span className="sr-only">Attach File</span>
+
+        }
+
+        {/* Chats */}
+        {welcome &&
+          chats.map((chat) => (
+            <div className="flex-1 overflow-auto p-4">
+              <div className="grid gap-4">
+                <div className="flex items-start gap-4">
+                  <Avatar className="h-8 w-8 shrink-0 border">
+                    <AvatarImage src="/placeholder-user.jpg" />
+                    <AvatarFallback>{chat.role}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid gap-1">
+                    <div className="font-medium">You</div>
+                    <div className="prose text-muted-foreground">
+                      <p>
+                        {chat.msg}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+
+
+        {
+          welcome &&
+          <div className="sticky bottom-0 z-10 border-t bg-background/50 p-4 backdrop-blur-md">
+            <div className="relative">
+              <Textarea
+                placeholder="Type your message..."
+                className="min-h-[48px] w-full rounded-2xl border border-neutral-400 p-4 pr-16 shadow-sm resize-none"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                className="absolute right-3 top-3"
+              >
+                <SendIcon className="h-4 w-4" />
+                <span className="sr-only">Send</span>
               </Button>
+              <div className="absolute right-12 top-3">
+                <Button variant="ghost" size="icon">
+                  <FileIcon className="h-4 w-4" />
+                  <span className="sr-only">Attach File</span>
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     </div>
   );

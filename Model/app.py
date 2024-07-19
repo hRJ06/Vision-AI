@@ -9,6 +9,10 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, render_template, session, jsonify
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.wsgi import WSGIMiddleware
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from langchain_openai import OpenAI
+from io import StringIO
 import pandas as pd
 
 import os
@@ -226,10 +230,6 @@ async def query_csv(file: UploadFile = File(...), question: str = Form(...)):
         return JSONResponse(content={"response": response})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
-# WSGI integration
-from fastapi.middleware.wsgi import WSGIMiddleware
-app.wsgi_app = WSGIMiddleware(fastapi_app, app.wsgi_app)
 
 if __name__ == '__main__':
     app.run(debug=True)

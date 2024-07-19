@@ -16,9 +16,9 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app, origin='*');
-genai.configure(api_key="AIzaSyAekZwuOWfD418tH158IdFAxZinVeyKifc")
+genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-pro')
-app.secret_key = "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"
+app.secret_key = ""
 load_dotenv()
 fastapi_app = FastAPI()
 

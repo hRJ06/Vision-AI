@@ -6,9 +6,10 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from flask_cors import CORS
 from langchain_groq import ChatGroq
-from flask import Flask, request, render_template, session, jsonify
+from flask import Flask, request, session, jsonify
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
-from tabulate import tabulate
+from langchain_openai import OpenAI
 import os
 
 app = Flask(__name__)
@@ -90,8 +91,8 @@ def get_response(user_query, db, chat_history):
         RunnablePassthrough.assign(query=sql_chain).assign(
             schema=lambda _: db.get_table_info(),
             response=lambda vars: (
-                print('VARS', vars['query']),  # Print the vars dictionary
-                vars.update({"modified_query": vars["query"].replace('\\_', '_')}),  # Replace \_ with _
+                print('VARS', vars['query']),  
+                vars.update({"modified_query": vars["query"].replace('\\_', '_')}),  
                 db.run(vars["modified_query"])
             )  
         )
@@ -119,14 +120,12 @@ def connect():
 
     try:
         db = init_db(user, password, host, port, database)
-        print(db);
         session['db'] = {
             'user': user,
             'host': host,
             'port': port,
             'database': database
         }
-        print("Done");
         return jsonify({"status": "success"})
     except Exception as e:
         print("Not Done");
@@ -142,11 +141,9 @@ def chat():
         db = init_db('root', 'rootMySQL','localhost', '3306', 'classroom')
         if db:
             ai_response = get_response(user_query, db, chat_history)
-            print('AI', ai_response);
             ans = ""
             for item in ai_response:
                 ans += item 
-            print('ANS', ans)
             chat_history.append(AIMessage(content=ans))
         else:
             ai_response = "Database connection not established."

@@ -28,15 +28,15 @@ export default function Component() {
   const [diagramDefinition, setDiagramDefinition] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleDiagramTypeChange = (type) => {
+  const handleDiagramTypeChange = (type:any) => {
     setDiagramType(type);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e:any) => {
     setSearchTerm(e.target.value);
   };
 
-  const handleKeyPress = async (e) => {
+  const handleKeyPress = async (e:any) => {
     if (e.key === "Enter") {
       setLoading(true);
       const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${searchTerm} and type of diagram is ${diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
@@ -166,7 +166,7 @@ export default function Component() {
   );
 }
 
-function ChevronDownIcon(props) {
+function ChevronDownIcon(props:any) {
   return (
     <svg
       {...props}
@@ -185,7 +185,7 @@ function ChevronDownIcon(props) {
   );
 }
 
-function SearchIcon(props) {
+function SearchIcon(props:any) {
   return (
     <svg
       {...props}
@@ -205,7 +205,7 @@ function SearchIcon(props) {
   );
 }
 
-function XIcon(props) {
+function XIcon(props:any) {
   return (
     <svg
       {...props}

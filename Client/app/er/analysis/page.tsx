@@ -14,18 +14,18 @@ import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 
 export default function Component() {
-  const [loading, setLoading] = useState(false);
-  const [copied, setcopied] = useState(false);
-  const [responses, setResponses] = useState("");
+  const [loading, setLoading] = useState<Boolean>(false);
+  const [copied, setcopied] = useState<Boolean>(false);
+  const [responses, setResponses] = useState<string>("");
   const [formattedResponses, setFormattedResponses] = useState<JSX.Element[]>(
     []
   );
   const [imageUrl, setImageURL] = useState<string>("");
   const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
-  //  image to sql query ------>
-  const handleImage = async (e: any) => {
-    const file = e.target.files[0];
+  /* IMAGE TO SQL */
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files![0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
@@ -43,16 +43,14 @@ export default function Component() {
         );
         const fetchedImageURL = response?.data?.imageUrl;
         setImageURL(fetchedImageURL);
-        console.log("image-->", imageUrl);
         setLoading(false);
-        console.log(response);
         setResponses(response?.data?.generatedContent);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // modifying the query
+  /* QUERY MODIFICATON */
   useEffect(() => {
     if (responses) {
       const formatted = responses
@@ -72,7 +70,7 @@ export default function Component() {
     navigator.clipboard.writeText(responses);
   };
 
-  // chat with respect to image ----->
+  /* CHAT WITH IMAGE */
   const [userPrompt, setuserPrompt] = useState("");
 
   const [chats, setchats] = useState([
@@ -106,7 +104,7 @@ export default function Component() {
           { msg: response?.data?.generatedContent, role: "AI" },
         ]);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error", error);
       }
 
       setuserPrompt("");
@@ -231,7 +229,7 @@ export default function Component() {
   );
 }
 
-function ArrowUpIcon(props: any) {
+function ArrowUpIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -251,7 +249,7 @@ function ArrowUpIcon(props: any) {
   );
 }
 
-function UploadIcon(props: any) {
+function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -272,27 +270,7 @@ function UploadIcon(props: any) {
   );
 }
 
-function XIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  );
-}
-
-function CopyIcon(props: any) {
+function CopyIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

@@ -12,3 +12,8 @@ export interface ComponentState {
   content: boolean;
   loading: boolean;
 }
+
+export interface ChatMessage {
+  msg: string;
+  role: 'AI' | 'User';
+}

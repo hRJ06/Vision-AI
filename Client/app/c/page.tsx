@@ -6,13 +6,14 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { ChatMessage } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -38,6 +39,15 @@ export default function Component() {
       message: "Password must be at least 6 characters.",
     }),
   });
+  const [welcome, setwelcome] = useState<Boolean>(false);
+  const [inputText, setInputText] = useState<string>("");
+  const [chats, setchats] = useState<ChatMessage[]>([
+    {
+      msg: "Hi there! How can i help You today?",
+      role: "AI",
+    },
+  ]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,8 +58,8 @@ export default function Component() {
       Password: "",
     },
   });
+  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Construct a plain JavaScript object from form values
     const data = {
       Host: values.Host,
       Port: values.Port,
@@ -59,14 +69,11 @@ export default function Component() {
     };
 
     try {
-      // Make a POST request with JSON data
       const response = await axios.post("http://127.0.0.1:5000/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(response);
-      // Handle the response
       if (response.data.status === "success") {
         toast({
           variant: "success",
@@ -92,49 +99,37 @@ export default function Component() {
     }
   };
 
-
-  const [welcome, setwelcome] = useState(false);
-  const [inputText, setInputText] = useState("");
-
-  const [chats, setchats] = useState([{
-    msg: "Hi there! How can i help You today?",
-    role: "AI"
-  }]);
-
-
   const handleSendMessage = async (e: any) => {
     e.preventDefault();
     if (inputText.trim()) {
-
       setchats([...chats, { msg: inputText, role: "User" }]);
 
       try {
-        const response = await axios.post("http://127.0.0.1:5000/chat", { message: inputText }, {
-          headers: {
-            "Content-Type": "application/json",
+        const response = await axios.post(
+          "http://127.0.0.1:5000/chat",
+          { message: inputText },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
-        setchats(prevChats => [...prevChats, { msg: response.data.response, role: "AI" }])
-
+        setchats((prevChats) => [
+          ...prevChats,
+          { msg: response.data.response, role: "AI" },
+        ]);
       } catch (error) {
-        console.log("Error->", error);
+        console.error("Error", error);
       }
 
       setInputText("");
     }
   };
 
-
-  // useEffect(() => {
-  //   console.log(chats);
-  // }, [chats]);
-
-
   return (
     <div className="grid min-h-screen w-full grid-cols-[280px_1fr] bg-background text-foreground">
       <div className="flex flex-col border-r bg-muted/40 p-4">
-
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">AI Assistant</h2>
           <Button variant="ghost" size="icon">
@@ -143,7 +138,7 @@ export default function Component() {
           </Button>
         </div>
 
-        {/* DB Connect */}
+        {/* DB CONNECT */}
         <div className="mt-4 flex-1 space-y-4 overflow-auto">
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">
@@ -255,22 +250,24 @@ export default function Component() {
         </div>
       </div>
 
-
-      {/* chat Welcome */}
+      {/* WELCOME CHAT */}
 
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md">
           <h1 className="text-xl font-semibold">Vision AI </h1>
         </div>
 
-        {
-          chats.length < 2 && !welcome &&
+        {chats.length < 2 && !welcome && (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
             <div className="space-y-4">
               <div className="space-y-2">
                 <h1 className="text-5xl font-bold">Welcome to Vision AI</h1>
-                <h2 className="text-3xl font-semibold">Pioneering the Future of Intelligent Solutions</h2>
-                <p className="text-muted-foreground">Start a conversation by connecting to a chat server.</p>
+                <h2 className="text-3xl font-semibold">
+                  Pioneering the Future of Intelligent Solutions
+                </h2>
+                <p className="text-muted-foreground">
+                  Start a conversation by connecting to a chat server.
+                </p>
               </div>
 
               <div className="flex items-center justify-center gap-4">
@@ -288,41 +285,38 @@ export default function Component() {
                   FAQ
                 </Button>
               </div>
-
             </div>
           </div>
-
-        }
+        )}
 
         {/* Chats */}
-        {welcome &&
-          <div className="flex-1 overflow-auto p-4 max-h-[calc(100vh-10rem)]"> {/* Adjust height as needed */}
-          <div className="flex flex-col gap-4">
-            {chats.map((chat, index) => (
-              <div 
-                key={index} 
-                className={`flex items-start gap-4 `}
-              >
-                <Avatar className="h-8 w-8 shrink-0 border">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback>{chat.role}</AvatarFallback>
-                </Avatar>
-                <div className="max-w-[700px]"> {/* Fixed width for message box */}
-                  <div className="grid gap-1">
-                    <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
-                      <p>{chat.msg}</p>
+        {welcome && (
+          <div className="flex-1 overflow-auto p-4 max-h-[calc(100vh-10rem)]">
+            {" "}
+            {/* Adjust height as needed */}
+            <div className="flex flex-col gap-4">
+              {chats.map((chat, index) => (
+                <div key={index} className={`flex items-start gap-4 `}>
+                  <Avatar className="h-8 w-8 shrink-0 border">
+                    <AvatarImage src="/placeholder-user.jpg" />
+                    <AvatarFallback>{chat.role}</AvatarFallback>
+                  </Avatar>
+                  <div className="max-w-[700px]">
+                    {" "}
+                    {/* Fixed width for message box */}
+                    <div className="grid gap-1">
+                      <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
+                        <p>{chat.msg}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-        }
+        )}
 
-
-        {
-          welcome &&
+        {welcome && (
           <div className="sticky bottom-0 z-10 border-t bg-background/50 p-4 backdrop-blur-md">
             <div className="relative">
               <Textarea
@@ -348,13 +342,13 @@ export default function Component() {
               </div>
             </div>
           </div>
-        }
+        )}
       </div>
     </div>
   );
 }
 
-function FileIcon(props: any) {
+function FileIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -374,7 +368,7 @@ function FileIcon(props: any) {
   );
 }
 
-function MicIcon(props: any) {
+function MicIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -395,7 +389,7 @@ function MicIcon(props: any) {
   );
 }
 
-function SendIcon(props: any) {
+function SendIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -415,7 +409,7 @@ function SendIcon(props: any) {
   );
 }
 
-function SettingsIcon(props: any) {
+function SettingsIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -431,45 +425,6 @@ function SettingsIcon(props: any) {
     >
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function VolumeIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-    </svg>
-  );
-}
-
-function XIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
     </svg>
   );
 }

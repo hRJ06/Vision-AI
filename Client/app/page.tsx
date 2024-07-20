@@ -26,7 +26,7 @@ export default function Component() {
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
-            Pricing
+            FAQ
           </Link>
           <Link
             href="#"
@@ -77,7 +77,7 @@ export default function Component() {
                 </div>
               </div>
               <img
-                src="/placeholder.svg"
+                src="./Hero.gif"
                 width="550"
                 height="550"
                 alt="Hero"
@@ -155,11 +155,11 @@ export default function Component() {
                 </ul>
               </div>
               <img
-                src="/placeholder.svg"
-                width="550"
-                height="310"
+                src="/Feature.gif"
+                width="300"
+                height="800"
                 alt="Image"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
+                className="mx-auto h-full rounded-xl object-cover aspect-video object-center sm:w-full lg:order-last"
               />
             </div>
           </div>
@@ -210,11 +210,11 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="/placeholder-user.jpg" />
+                        <AvatarImage src="https://avatar.iran.liara.run/public/92" />
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
-                        <h4 className="text-lg font-semibold">John Doe</h4>
+                        <h4 className="text-lg font-semibold">Smriti Mandana</h4>
                         <p className="text-muted-foreground">CEO, Acme Inc.</p>
                       </div>
                       <p className="mt-4 text-muted-foreground">
@@ -230,11 +230,11 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="/placeholder-user.jpg" />
+                        <AvatarImage src="https://img.freepik.com/premium-vector/adult-male-character-smiling-portrait-rounded-avatar-photo-profile-media-cv-cheerful-man-middle-age-confident-personage-brunette-with-blush-cheeks-vector-flat-style_87689-2387.jpg" />
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
-                        <h4 className="text-lg font-semibold">Jane Smith</h4>
+                        <h4 className="text-lg font-semibold">Rahul Bose</h4>
                         <p className="text-muted-foreground">
                           CTO, Globex Corp.
                         </p>
@@ -252,8 +252,8 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        <AvatarFallback>JD</AvatarFallback>
+                      <AvatarImage src="https://avatar.iran.liara.run/public/37" />
+                        <AvatarFallback>Koushik Sen</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
                         <h4 className="text-lg font-semibold">

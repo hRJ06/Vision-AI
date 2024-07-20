@@ -298,7 +298,7 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div key={index} className={`flex items-start gap-4 `}>
                   <Avatar className="h-8 w-8 shrink-0 border">
-                    <AvatarImage src="/placeholder-user.jpg" />
+                    <AvatarImage src= {`${chat.role==="User"?"https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png":"https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"}`}  />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">

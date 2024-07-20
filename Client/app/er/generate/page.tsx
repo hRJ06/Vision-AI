@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader } from "lucide-react";
+import { Loader, Download } from "lucide-react";
 
 const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
@@ -26,6 +26,7 @@ export default function Component() {
   const [diagramType, setDiagramType] = useState("er-diagram");
   const [searchTerm, setSearchTerm] = useState("");
   const [diagramDefinition, setDiagramDefinition] = useState("");
+  const [content, setContent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleDiagramTypeChange = (type:any) => {
@@ -48,8 +49,22 @@ export default function Component() {
         .replace(/^mermaid/, "")
         .trim();
       setDiagramDefinition(cleanedText);
-      console.log(cleanedText);
       setLoading(false);
+      setContent(true);
+    }
+  };
+
+  const downloadDiagram = () => {
+    const svgElement = document.querySelector(".mermaid svg");
+    if (svgElement) {
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const blob = new Blob([svgData], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "diagram.svg";
+      link.click();
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -113,11 +128,23 @@ export default function Component() {
       </div>
       <div className="grid gap-8">
         {loading ? (
-          <div className="flex justify-center items-center h-48">
+          <div className="inline-flex justify-center items-center h-48">
             <Loader className="animate-spin h-6 w-6 text-primary" />
           </div>
         ) : (
-          <ERDiagram diagramDefinition={diagramDefinition} />
+          <>
+            <ERDiagram diagramDefinition={diagramDefinition} />
+            {content && (
+              <Button
+                variant="outline"
+                onClick={downloadDiagram}
+                className="inline-flex items-center gap-2 bg-black text-white"
+              >
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+            )}
+          </>
         )}
         <div className="flex flex-col gap-4">
           <Card>

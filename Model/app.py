@@ -9,7 +9,6 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
-from tabulate import tabulate
 
 
 import os
@@ -259,4 +258,4 @@ def manipulate_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)

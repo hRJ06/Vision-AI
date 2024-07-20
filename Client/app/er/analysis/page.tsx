@@ -1,10 +1,10 @@
 "use client";
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,102 +14,102 @@ import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 
 export default function Component() {
-    const [loading, setLoading] = useState<Boolean>(false);
-    const [copied, setcopied] = useState<Boolean>(false);
-    const [responses, setResponses] = useState<string>("");
-    const [formattedResponses, setFormattedResponses] = useState<JSX.Element[]>(
-        []
-    );
-    const [imageUrl, setImageURL] = useState<string>("");
-    const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
+  const [loading, setLoading] = useState<Boolean>(false);
+  const [copied, setcopied] = useState<Boolean>(false);
+  const [responses, setResponses] = useState<string>("");
+  const [formattedResponses, setFormattedResponses] = useState<JSX.Element[]>(
+    []
+  );
+  const [imageUrl, setImageURL] = useState<string>("");
+  const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
-    /* IMAGE TO SQL */
-    const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files![0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const formData = new FormData();
-                formData.append("image", file);
-                setLoading(true);
-                const response = await axios.post(
-                    `${BASE_URL}/image/image-analysis`,
-                    formData,
-                    {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
-                const fetchedImageURL = response?.data?.imageUrl;
-                setImageURL(fetchedImageURL);
-                setLoading(false);
-                setResponses(response?.data?.generatedContent);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+  /* IMAGE TO SQL */
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files![0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const formData = new FormData();
+        formData.append("image", file);
+        setLoading(true);
+        const response = await axios.post(
+          `${BASE_URL}/image/image-analysis`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        const fetchedImageURL = response?.data?.imageUrl;
+        setImageURL(fetchedImageURL);
+        setLoading(false);
+        setResponses(response?.data?.generatedContent);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    /* QUERY MODIFICATON */
-    useEffect(() => {
-        if (responses) {
-            const formatted = responses
-                .replace(/```sql\n/, "")
-                .replace(/```$/, "")
-                .split("\n")
-                .map((line: string, index: number) => <div key={index}>{line}</div>);
+  /* QUERY MODIFICATON */
+  useEffect(() => {
+    if (responses) {
+      const formatted = responses
+        .replace(/```sql\n/, "")
+        .replace(/```$/, "")
+        .split("\n")
+        .map((line: string, index: number) => <div key={index}>{line}</div>);
 
-            setFormattedResponses(formatted);
-        } else {
-            setFormattedResponses([]);
-        }
-    }, [responses]);
+      setFormattedResponses(formatted);
+    } else {
+      setFormattedResponses([]);
+    }
+  }, [responses]);
 
-    const handleCopy = () => {
-        setcopied(true);
-        navigator.clipboard.writeText(responses);
-    };
+  const handleCopy = () => {
+    setcopied(true);
+    navigator.clipboard.writeText(responses);
+  };
 
-    /* CHAT WITH IMAGE */
-    const [userPrompt, setuserPrompt] = useState("");
+  /* CHAT WITH IMAGE */
+  const [userPrompt, setuserPrompt] = useState("");
 
-    const [chats, setchats] = useState([
-        {
-            msg: "Hi there! How can i help You with the image you uploaded?",
-            role: "AI",
-        },
-    ]);
+  const [chats, setchats] = useState([
+    {
+      msg: "Hi there! How can i help You with the image you uploaded?",
+      role: "AI",
+    },
+  ]);
 
-    const handleImageChat = async (e: any) => {
-        e.preventDefault();
+  const handleImageChat = async (e: any) => {
+    e.preventDefault();
 
-        if (userPrompt.trim()) {
-            setchats([...chats, { msg: userPrompt, role: "User" }]);
+    if (userPrompt.trim()) {
+      setchats([...chats, { msg: userPrompt, role: "User" }]);
 
-            try {
-                const response = await axios.post(
-                    `${BASE_URL}/image/chat`,
-                    {
-                        imageUrl: imageUrl,
-                        userPrompt: userPrompt,
-                    },
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                setchats((prevChats) => [
-                    ...prevChats,
-                    { msg: response?.data?.generatedContent, role: "AI" },
-                ]);
-            } catch (error) {
-                console.error("Error", error);
-            }
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/image/chat`,
+          {
+            imageUrl: imageUrl,
+            userPrompt: userPrompt,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setchats((prevChats) => [
+          ...prevChats,
+          { msg: response?.data?.generatedContent, role: "AI" },
+        ]);
+      } catch (error) {
+        console.error("Error", error);
+      }
 
-            setuserPrompt("");
-        }
-    };
+      setuserPrompt("");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -120,7 +120,9 @@ export default function Component() {
               <CardHeader>
                 <CardTitle>Image Upload</CardTitle>
                 <CardDescription>
-                  Upload an image of <span className="text-red-500 font-bold">ER diagram</span> to get started
+                  Upload an image of{" "}
+                  <span className="text-red-500 font-bold">ER diagram</span> to
+                  get started
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -188,7 +190,13 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div key={index} className={`flex items-start gap-4 mb-3`}>
                   <Avatar className="h-8 w-8 shrink-0 border">
-                    <AvatarImage src="/placeholder-user.jpg" />
+                    <AvatarImage
+                      src={`${
+                        chat.role === "User"
+                          ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
+                          : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
+                      }`}
+                    />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
@@ -230,63 +238,63 @@ export default function Component() {
 }
 
 function ArrowUpIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m5 12 7-7 7 7" />
-            <path d="M12 19V5" />
-        </svg>
-    );
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m5 12 7-7 7 7" />
+      <path d="M12 19V5" />
+    </svg>
+  );
 }
 
 function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-        </svg>
-    );
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
+  );
 }
 
 function CopyIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M9 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3" />
-            <path d="M16 17h3a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-3" />
-            <path d="M9 9l4-4 4 4" />
-        </svg>
-    );
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3" />
+      <path d="M16 17h3a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-3" />
+      <path d="M9 9l4-4 4 4" />
+    </svg>
+  );
 }

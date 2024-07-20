@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent, KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -13,49 +13,54 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
+import { ComponentState, DiagramType } from "@/types";
 
 const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
 });
 
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(`${API_KEY}`);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export default function Component() {
-  const [diagramType, setDiagramType] = useState("er-diagram");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [diagramDefinition, setDiagramDefinition] = useState("");
-  const [content, setContent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<ComponentState>({
+    diagramType: "er-diagram",
+    searchTerm: "",
+    diagramDefinition: "",
+    content: false,
+    loading: false,
+  });
 
-  const handleDiagramTypeChange = (type:any) => {
-    setDiagramType(type);
+  const handleDiagramTypeChange = (type: DiagramType) => {
+    setState((prevState) => ({ ...prevState, diagramType: type }));
   };
 
-  const handleSearch = (e:any) => {
-    setSearchTerm(e.target.value);
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setState((prevState) => ({ ...prevState, searchTerm: e.target.value }));
   };
 
-  const handleKeyPress = async (e:any) => {
+  const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      setLoading(true);
-      const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${searchTerm} and type of diagram is ${diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
+      setState((prevState) => ({ ...prevState, loading: true }));
+      const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${state.searchTerm} and type of diagram is ${state.diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
       const result = await model.generateContent(prompt);
-      const response = result.response;
-      const text = await response.text();
-      const cleanedText = text
+      const response = await result.response.text();
+      const cleanedText = response
         .replace(/```/g, "")
         .replace(/^mermaid/, "")
         .trim();
-      setDiagramDefinition(cleanedText);
-      setLoading(false);
-      setContent(true);
+      setState((prevState) => ({
+        ...prevState,
+        diagramDefinition: cleanedText,
+        content: true,
+        loading: false,
+      }));
     }
   };
 
   const downloadDiagram = () => {
-    const svgElement = document.querySelector(".mermaid svg");
+    const svgElement = document.querySelector(".mermaid svg") as SVGElement;
     if (svgElement) {
       const svgData = new XMLSerializer().serializeToString(svgElement);
       const blob = new Blob([svgData], { type: "image/svg+xml" });
@@ -77,7 +82,7 @@ export default function Component() {
             type="text"
             placeholder="Search for diagrams..."
             className="w-full rounded-md bg-background pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-            value={searchTerm}
+            value={state.searchTerm}
             onChange={handleSearch}
             onKeyPress={handleKeyPress}
           />
@@ -86,13 +91,13 @@ export default function Component() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <span>
-                {diagramType === "er-diagram"
+                {state.diagramType === "er-diagram"
                   ? "ER Diagram"
-                  : diagramType === "sequence-diagram"
+                  : state.diagramType === "sequence-diagram"
                   ? "Sequence Diagram"
-                  : diagramType === "class-diagram"
+                  : state.diagramType === "class-diagram"
                   ? "Class Diagram"
-                  : diagramType === "activity-diagram"
+                  : state.diagramType === "activity-diagram"
                   ? "Activity Diagram"
                   : "Other Diagram"}
               </span>
@@ -127,14 +132,14 @@ export default function Component() {
         </DropdownMenu>
       </div>
       <div className="grid gap-8">
-        {loading ? (
+        {state.loading ? (
           <div className="inline-flex justify-center items-center h-48">
             <Loader className="animate-spin h-6 w-6 text-primary" />
           </div>
         ) : (
           <>
-            <ERDiagram diagramDefinition={diagramDefinition} />
-            {content && (
+            <ERDiagram diagramDefinition={state.diagramDefinition} />
+            {state.content && (
               <Button
                 variant="outline"
                 onClick={downloadDiagram}
@@ -193,7 +198,7 @@ export default function Component() {
   );
 }
 
-function ChevronDownIcon(props:any) {
+function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -212,7 +217,7 @@ function ChevronDownIcon(props:any) {
   );
 }
 
-function SearchIcon(props:any) {
+function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -232,7 +237,7 @@ function SearchIcon(props:any) {
   );
 }
 
-function XIcon(props:any) {
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

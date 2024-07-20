@@ -9,7 +9,9 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
-from langchain_openai import OpenAI
+from tabulate import tabulate
+
+
 import os
 
 app = Flask(__name__)

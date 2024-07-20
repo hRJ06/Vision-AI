@@ -120,7 +120,7 @@ export default function Component() {
               <CardHeader>
                 <CardTitle>Image Upload</CardTitle>
                 <CardDescription>
-                  Upload an image of * ER diagram to get started
+                  Upload an image of <span className="text-red-500">* ER diagram</span> to get started
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -150,7 +150,7 @@ export default function Component() {
                 )}
               </CardContent>
             </Card>
-            <Card className="flex-none h-[60vh] bg-gray-800 text-white flex flex-col">
+            <Card className="flex-none h-[60vh] bg-gray-900 text-white flex flex-col">
               <CardHeader>
                 <CardTitle>Query</CardTitle>
                 <CardDescription>
@@ -193,7 +193,7 @@ export default function Component() {
                   </Avatar>
                   <div className="max-w-[700px]">
                     <div className="grid gap-1">
-                      <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
+                      <div className="prose text-gray-700 text-muted-foreground bg-gray-200 p-2 rounded-md">
                         <p>{chat.msg}</p>
                       </div>
                     </div>
@@ -204,7 +204,7 @@ export default function Component() {
           </Card>
         </div>
       </main>
-      <div className="border-t bg-background px-4 py-3 md:px-8 lg:px-12">
+      <div className=" bg-background px-4 py-3 md:px-8 lg:px-12">
         <div className="mx-auto max-w-4xl">
           <div className="relative">
             <Textarea

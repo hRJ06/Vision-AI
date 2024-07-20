@@ -11,7 +11,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
 import { ComponentState, DiagramType } from "@/types";
 
@@ -73,6 +79,29 @@ export default function Component() {
     }
   };
 
+  const handleGenerateClick = async (content: string) => {
+    setState((prevState) => ({
+      ...prevState,
+      searchTerm: content,
+      loading: true,
+    }));
+
+    const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${content} and type of diagram is ${state.diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response.text();
+    const cleanedText = response
+      .replace(/```/g, "")
+      .replace(/^mermaid/, "")
+      .trim();
+
+    setState((prevState) => ({
+      ...prevState,
+      diagramDefinition: cleanedText,
+      content: true,
+      loading: false,
+    }));
+  };
+
   return (
     <div className="flex flex-col gap-8 p-6 md:p-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -89,7 +118,7 @@ export default function Component() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 bg-black text-white tracking-wide font-bold">
               <span>
                 {state.diagramType === "er-diagram"
                   ? "ER Diagram"
@@ -104,28 +133,35 @@ export default function Component() {
               <ChevronDownIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48">
+          <DropdownMenuContent className="w-48 bg-black text-white">
             <DropdownMenuItem
               onClick={() => handleDiagramTypeChange("er-diagram")}
+              className="hover:bg-muted"
             >
               ER Diagram
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleDiagramTypeChange("sequence-diagram")}
+              className="hover:bg-muted"
             >
               Sequence Diagram
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleDiagramTypeChange("class-diagram")}
+              className="hover:bg-muted"
             >
               Class Diagram
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleDiagramTypeChange("activity-diagram")}
+              className="hover:bg-muted"
             >
               Activity Diagram
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDiagramTypeChange("other")}>
+            <DropdownMenuItem
+              onClick={() => handleDiagramTypeChange("other")}
+              className="hover:bg-muted"
+            >
               Other Diagram
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -139,25 +175,156 @@ export default function Component() {
         ) : (
           <>
             <ERDiagram diagramDefinition={state.diagramDefinition} />
-            {state.content && (
-              <Button
-                variant="outline"
-                onClick={downloadDiagram}
-                className="inline-flex items-center gap-2 bg-black text-white"
-              >
-                <Download className="h-4 w-4" />
-                Download
-              </Button>
-            )}
           </>
         )}
+        {state.content && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={downloadDiagram}
+              className="inline-flex items-center gap-2 bg-black text-white text-sm px-2 py-2 w-[150px]"
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+          </div>
+        )}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="bg-[#f8f9fa]">
+            <CardContent>
+              <p className="mt-4 text-justify">
+                Design an ER diagram for an e-commerce database, including
+                entities like Products, Categories, Orders, Customers, and
+                Payments
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Design an ER diagram for an e-commerce database, including entities like Products, Categories, Orders, Customers, and Payments"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#f8f9fa]">
+            <CardContent>
+              <p className="mt-4 text-justify">
+                Create a sequence diagram for a user login flow, depicting the
+                interactions between the User, Login Service, Authentication
+                Service, and Database
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Create a sequence diagram for a user login flow, depicting the interactions between the User, Login Service, Authentication Service, and Database"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#f8f9fa]">
+            <CardContent>
+              <p className="mt-4 text-justify">
+                Generate a class diagram for a banking application, including
+                classes like Account, Transaction, Customer, and Loan, along
+                with their attributes and methods
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Generate a class diagram for a banking application, including classes like Account, Transaction, Customer, and Loan, along with their attributes and methods"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#f8f9fa]">
+            <CardContent>
+              <p className="mt-4 text-justify">
+                Diagram the activity flow for a product checkout process,
+                including steps like Add to Cart, Select Shipping, Enter
+                Payment, and Complete Order
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Diagram the activity flow for a product checkout process, including steps like Add to Cart, Select Shipping, Enter Payment, and Complete Order"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#f8f9fa]">
+            <CardContent className="mt-4">
+              <p>
+                Visualize the use cases for a project management tool, such as
+                Create Project, Assign Tasks, Track Progress, and Generate
+                Reports
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Visualize the use cases for a project management tool, such as Create Project, Assign Tasks, Track Progress, and Generate Reports"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-[#f8f9fa]">
+            <CardContent className="mt-4 text-justify">
+              <p>
+                Create an ER diagram for a university course registration
+                system, including entities like Students, Courses, Enrollments,
+                and Professors
+              </p>
+              <div className="flex justify-center">
+                <Button
+                  className="mt-4 bg-black text-white font-bold"
+                  onClick={() =>
+                    handleGenerateClick(
+                      "Create an ER diagram for a university course registration system, including entities like Students, Courses, Enrollments, and Professors"
+                    )
+                  }
+                >
+                  Generate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>About Diagrams</CardTitle>
+              <CardTitle className="text-3xl">About Diagrams</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-2 text-base text-justify">
                 <p>
                   Diagrams are visual representations of complex systems,
                   processes, or relationships. They help to communicate
@@ -169,18 +336,22 @@ export default function Component() {
                   and use case. Some common types include:
                 </p>
                 <ul className="list-disc space-y-1 pl-4">
-                  <li>ER Diagram: Represents the structure of a database</li>
                   <li>
-                    Sequence Diagram: Illustrates the flow of messages between
-                    objects
+                    <span className="font-bold">ER Diagram</span>: Represents
+                    the structure of a database
                   </li>
                   <li>
-                    Class Diagram: Models the structure of a software system
-                    using classes and their relationships
+                    <span className="font-bold">Sequence Diagram</span>:
+                    Illustrates the flow of messages between objects
                   </li>
                   <li>
-                    Activity Diagram: Depicts the flow of activities in a
-                    business process or workflow
+                    <span className="font-bold">Class Diagram</span>: Models the
+                    structure of a software system using classes and their
+                    relationships
+                  </li>
+                  <li>
+                    <span className="font-bold">Activity Diagram</span>: Depicts
+                    the flow of activities in a business process or workflow
                   </li>
                 </ul>
                 <p>

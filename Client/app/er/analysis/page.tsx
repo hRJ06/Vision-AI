@@ -120,7 +120,7 @@ export default function Component() {
               <CardHeader>
                 <CardTitle>Image Upload</CardTitle>
                 <CardDescription>
-                  Upload an image of <span className="text-red-500">* ER diagram</span> to get started
+                  Upload an image of <span className="text-red-500 font-bold">ER diagram</span> to get started
                 </CardDescription>
               </CardHeader>
               <CardContent>

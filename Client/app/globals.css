@@ -67,3 +67,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+* {
+  scroll-behavior: smooth;
+}
+
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  overflow: auto;
+}
+
+.mermaid svg {
+  min-height: 500px !important;
+}

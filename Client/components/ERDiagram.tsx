@@ -12,7 +12,7 @@ const ERDiagram: React.FC<ERDiagramProps> = ({ diagramDefinition }) => {
   }, [diagramDefinition]);
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div className="mermaid-container">
       {diagramDefinition && (
         <div className="mermaid">
           {diagramDefinition}

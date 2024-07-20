@@ -15,28 +15,28 @@ export default function Component() {
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
-            href="#"
+            href="#features"
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
             Features
           </Link>
           <Link
-            href="#"
+            href="/faq"
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
             FAQ
           </Link>
           <Link
-            href="#"
+            href="#about"
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
             About
           </Link>
           <Link
-            href="#"
+            href="/contact"
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}
           >
@@ -61,15 +61,15 @@ export default function Component() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link
-                    href="#"
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    href="/c"
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-bold tracking-wide text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
                     Get Started
                   </Link>
                   <Link
                     href="#"
-                    className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background tracking-wide font-bold px-8 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
                     Learn More
@@ -89,10 +89,7 @@ export default function Component() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">
-                  Key Features
-                </div>
+              <div className="space-y-2" id="features">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
                   Unlock the Power of Your Data
                 </h2>
@@ -164,7 +161,7 @@ export default function Component() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32">
+        <section className="w-full py-12 md:py-24 lg:py-32" id="about">
           <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -177,15 +174,15 @@ export default function Component() {
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end">
               <Link
-                href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                href="#partners"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-base tracking-wide font-bold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
                 View Case Studies
               </Link>
               <Link
-                href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                href="/contact"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-base tracking-wide font-bold transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
                 Contact Sales
@@ -193,7 +190,7 @@ export default function Component() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" id="partners">
           <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -283,14 +280,14 @@ export default function Component() {
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link
-            href="#"
+            href="/terms"
             className="text-xs hover:underline underline-offset-4"
             prefetch={false}
           >
             Terms of Service
           </Link>
           <Link
-            href="#"
+            href="/privacy"
             className="text-xs hover:underline underline-offset-4"
             prefetch={false}
           >

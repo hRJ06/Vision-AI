@@ -112,7 +112,7 @@ export default function Component() {
                         <Card className="flex-none h-40">
                             <CardHeader>
                                 <CardTitle>Image Upload</CardTitle>
-                                <CardDescription>Upload an image to get started</CardDescription>
+                                <CardDescription>Upload an image of * ER diagram to get started</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {

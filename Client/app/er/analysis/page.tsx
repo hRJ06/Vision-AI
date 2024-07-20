@@ -1,10 +1,12 @@
 "use client"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import { headers } from "next/headers";
 
 export default function Component() {
 
@@ -12,8 +14,10 @@ export default function Component() {
     const [copied, setcopied] = useState(false);
     const [responses, setResponses] = useState("");
     const [formattedResponses, setFormattedResponses] = useState<JSX.Element[]>([]);
+    const [imageUrl, setImageURL] = useState<string>("");
 
 
+    //  image to sql query ------>
     const handleImage = async (e: any) => {
         const file = e.target.files[0];
         if (file) {
@@ -28,6 +32,9 @@ export default function Component() {
                         "Content-Type": "multipart/form-data",
                     },
                 })
+                const fetchedImageURL = response?.data?.imageUrl;
+                setImageURL(fetchedImageURL);
+                console.log("image-->", imageUrl)
                 setLoading(false);
                 console.log(response);
                 setResponses(response?.data?.generatedContent);
@@ -36,7 +43,7 @@ export default function Component() {
         }
     }
 
-
+    // modifying the query 
     useEffect(() => {
         if (responses) {
             const formatted = responses
@@ -51,11 +58,51 @@ export default function Component() {
         }
     }, [responses]);
 
-    // Function to handle copy to clipboard
+
     const handleCopy = () => {
         setcopied(true);
         navigator.clipboard.writeText(responses);
     };
+
+
+
+    // chat with respect to image ----->
+    const [userPrompt, setuserPrompt] = useState("");
+
+    const [chats, setchats] = useState([{
+        msg: "Hi there! How can i help You with the image you uploaded?",
+        role: "AI"
+    }]);
+
+
+    const handleImageChat = async (e: any) => {
+        e.preventDefault();
+        // console.log("image", userPrompt);
+        // console.log("url", imageUrl);
+
+        if (userPrompt.trim()) {
+            setchats([...chats, { msg: userPrompt, role: "User" }]);
+
+            try {
+                const response = await axios.post("http://localhost:4000/image/chat",
+                    {
+                        imageUrl: imageUrl,
+                        userPrompt: userPrompt
+                    },
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                        }
+                    }
+                )
+                setchats(prevChats => [...prevChats, { msg: response?.data?.generatedContent, role: "AI" }]);
+            } catch (error) {
+                console.log("Error:", error);
+            }
+
+            setuserPrompt("");
+        }
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -93,7 +140,7 @@ export default function Component() {
                                 <CardTitle>Query</CardTitle>
                                 <CardDescription>This Query is based on the uploaded image</CardDescription>
                             </CardHeader>
-                            <CardContent className="flex-1 max-h-full overflow-y-auto"> 
+                            <CardContent className="flex-1 max-h-full overflow-y-auto">
                                 <div className="grid gap-4 items-center">
                                     <div className="whitespace-pre-line">
                                         {formattedResponses}
@@ -115,22 +162,42 @@ export default function Component() {
                     <Card className="flex-1">
                         <CardHeader>
                             <CardTitle>Image Output</CardTitle>
-                            <CardDescription>This Chat is based on the uploaded image</CardDescription>
+                            <CardDescription>This Chat is based on the Current uploaded image only.</CardDescription>
                         </CardHeader>
-                        <CardContent>
-
+                        <CardContent className="overflow-y-auto max-h-[65vh]">
+                            {chats.map((chat, index) => (
+                                <div
+                                    key={index}
+                                    className={`flex items-start gap-4 mb-3`}
+                                >
+                                    <Avatar className="h-8 w-8 shrink-0 border">
+                                        <AvatarImage src="/placeholder-user.jpg" />
+                                        <AvatarFallback>{chat.role}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="max-w-[700px]">
+                                        <div className="grid gap-1">
+                                            <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
+                                                <p>{chat.msg}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
+
                 </div>
             </main>
             <div className="border-t bg-background px-4 py-3 md:px-8 lg:px-12">
                 <div className="mx-auto max-w-4xl">
                     <div className="relative">
                         <Textarea
-                            placeholder="Message the AI..."
+                            placeholder="Upload Image to start the converstation.."
                             className="min-h-[48px] w-full rounded-2xl resize-none border border-neutral-400 bg-background p-4 pr-16 shadow-sm"
+                            value={userPrompt}
+                            onChange={(e) => setuserPrompt(e.target.value)}
                         />
-                        <Button type="submit" size="icon" className="absolute top-3 right-3 w-8 h-8">
+                        <Button type="submit" size="icon" className="absolute top-3 right-3 w-8 h-8" onClick={(e) => handleImageChat(e)}>
                             <ArrowUpIcon className="w-4 h-4" />
                             <span className="sr-only">Send</span>
                         </Button>

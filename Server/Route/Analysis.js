@@ -12,12 +12,12 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 async function generateContent(imageUrl, userPrompt) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt =
-        `You are an expert in ER diagram analysis or database visualization. Based on the image provided at ${imageUrl}, ${userPrompt}. If the image is not a proper ER diagram, respond with a message indicating that a valid ER diagram image is required.`;
+        `You are an expert in ER diagram analysis or database visualization. Based on the image provided at ${imageUrl}, ${userPrompt}. If the image is not a proper ER diagram, respond with a message indicating that a valid ER diagram image is required. Please add \n as delimeter for new line and corresponding delimter for bold, bullet points and list numbers.`;
     const imageParts = await fetchImage(imageUrl);
     const result = await model.generateContent([prompt, imageParts]);
     const response = await result.response;
     const text = await response.text();
-
+    console.log(text);
     return text;
 }
 

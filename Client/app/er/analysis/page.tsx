@@ -113,130 +113,129 @@ export default function Component() {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <main className="flex-1 grid gap-8 p-4 md:p-8 lg:p-12">
-                <div className="flex gap-4 flex-col lg:flex-row">
-                    <div className="flex flex-col gap-4 lg:w-1/3 w-full">
-                        <Card className="flex-none h-40">
-                            <CardHeader>
-                                <CardTitle>Image Upload</CardTitle>
-                                <CardDescription>
-                                    Upload an image of{" "}
-                                    <span className="text-red-500 font-bold">ER diagram</span> to
-                                    get started
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {!loading ? (
-                                    <div className="grid gap-4 items-center">
-                                        <div className="flex justify-center">
-                                            <label
-                                                htmlFor="image-upload"
-                                                className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
-                                            >
-                                                <UploadIcon className="w-5 h-5 mr-2" />
-                                                Upload Image
-                                            </label>
-                                            <input
-                                                id="image-upload"
-                                                type="file"
-                                                className="sr-only"
-                                                accept="image/*"
-                                                onChange={handleImage}
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-center items-center w-full h-full">
-                                        <Loader className="animate-spin h-6 w-6 text-primary" />
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                        <Card className="flex-none h-[60vh] bg-gray-900 text-white flex flex-col">
-                            <CardHeader>
-                                <CardTitle>Query</CardTitle>
-                                <CardDescription>
-                                    This Query is based on the uploaded image
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex-1 max-h-full overflow-y-auto">
-                                <div className="grid gap-4 items-center">
-                                    <div className="whitespace-pre-line">
-                                        {formattedResponses}
-                                    </div>
-                                </div>
-                            </CardContent>
-                            {responses.length > 0 && (
-                                <div className="flex justify-end p-4">
-                                    <Button
-                                        onClick={handleCopy}
-                                        className="bg-gray-800 text-white hover:bg-gray-700"
+    <main className="flex-1 grid gap-8 p-4 md:p-8 lg:p-12">
+        <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col gap-4 lg:w-1/3 w-full">
+                <Card className="flex-none h-40">
+                    <CardHeader>
+                        <CardTitle>Image Upload</CardTitle>
+                        <CardDescription>
+                            Upload an image of{" "}
+                            <span className="text-red-500 font-bold">ER diagram</span> to
+                            get started
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {!loading ? (
+                            <div className="grid gap-4 items-center">
+                                <div className="flex justify-center">
+                                    <label
+                                        htmlFor="image-upload"
+                                        className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer"
                                     >
-                                        <CopyIcon className="w-4 h-4 mr-2" />
-                                        {copied ? "Copied" : "Copy"}
-                                    </Button>
+                                        <UploadIcon className="w-5 h-5 mr-2" />
+                                        Upload Image
+                                    </label>
+                                    <input
+                                        id="image-upload"
+                                        type="file"
+                                        className="sr-only"
+                                        accept="image/*"
+                                        onChange={handleImage}
+                                    />
                                 </div>
-                            )}
-                        </Card>
-                    </div>
-
-                    <div className="flex flex-col w-2/3">
-                        <Card className="flex-1">
-                            <CardHeader>
-                                <CardTitle>Vision AI</CardTitle>
-                                <CardDescription>
-                                    This Chat is based on the current uploaded image only.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="overflow-y-auto max-h-[65vh]">
-                                {chats.map((chat, index) => (
-                                    <div key={index} className={`flex items-start gap-4 mb-3`}>
-                                        <Avatar className="h-8 w-8 shrink-0 border">
-                                            <AvatarImage
-                                                src={`${chat.role === "User"
-                                                    ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
-                                                    : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
-                                                    }`}
-                                            />
-                                            <AvatarFallback>{chat.role}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="max-w-[700px]">
-                                            <div className="grid gap-1">
-                                                <div className="prose text-gray-700 text-muted-foreground bg-gray-200 p-2 rounded-md">
-                                                    <p>{chat.msg}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
-
-                        <div className="bg-background px-4 py-3 mt-2 md:px-8 lg:px-12">
-                            <div className="relative">
-                                <Textarea
-                                    placeholder="Upload Image to start the conversation.."
-                                    className="min-h-[48px] w-full rounded-2xl resize-none border border-neutral-400 bg-background p-4 pr-16 shadow-sm"
-                                    value={userPrompt}
-                                    onChange={(e) => setuserPrompt(e.target.value)}
-                                />
-                                <Button
-                                    type="submit"
-                                    size="icon"
-                                    className="absolute top-3 right-3 w-8 h-8"
-                                    onClick={(e) => handleImageChat(e)}
-                                >
-                                    <ArrowUpIcon className="w-4 h-4" />
-                                    <span className="sr-only">Send</span>
-                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex justify-center items-center w-full h-full">
+                                <Loader className="animate-spin h-6 w-6 text-primary" />
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+                <Card className="flex-none h-[60vh] bg-gray-900 text-white flex flex-col">
+                    <CardHeader>
+                        <CardTitle>Query</CardTitle>
+                        <CardDescription>
+                            This Query is based on the uploaded image
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 max-h-full overflow-y-auto">
+                        <div className="grid gap-4 items-center">
+                            <div className="whitespace-pre-line">
+                                {formattedResponses}
                             </div>
                         </div>
+                    </CardContent>
+                    {responses.length > 0 && (
+                        <div className="flex justify-end p-4">
+                            <Button
+                                onClick={handleCopy}
+                                className="bg-gray-800 text-white hover:bg-gray-700"
+                            >
+                                <CopyIcon className="w-4 h-4 mr-2" />
+                                {copied ? "Copied" : "Copy"}
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </div>
+
+            <div className="flex flex-col lg:w-2/3 w-full">
+                <Card className="flex-1">
+                    <CardHeader>
+                        <CardTitle>Vision AI</CardTitle>
+                        <CardDescription>
+                            This Chat is based on the current uploaded image only.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="overflow-y-auto max-h-[65vh]">
+                        {chats.map((chat, index) => (
+                            <div key={index} className={`flex items-start gap-4 mb-3`}>
+                                <Avatar className="h-8 w-8 shrink-0 border">
+                                    <AvatarImage
+                                        src={`${chat.role === "User"
+                                            ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
+                                            : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
+                                            }`}
+                                    />
+                                    <AvatarFallback>{chat.role}</AvatarFallback>
+                                </Avatar>
+                                <div className="max-w-[700px]">
+                                    <div className="grid gap-1">
+                                        <div className="prose text-gray-700 text-muted-foreground bg-gray-200 p-2 rounded-md">
+                                            <p>{chat.msg}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <div className="bg-background px-4 py-3 mt-2 md:px-8 lg:px-12">
+                    <div className="relative">
+                        <Textarea
+                            placeholder="Upload Image to start the conversation.."
+                            className="min-h-[48px] w-full rounded-2xl resize-none border border-neutral-400 bg-background p-4 pr-16 shadow-sm"
+                            value={userPrompt}
+                            onChange={(e) => setuserPrompt(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            size="icon"
+                            className="absolute top-3 right-3 w-8 h-8"
+                            onClick={(e) => handleImageChat(e)}
+                        >
+                            <ArrowUpIcon className="w-4 h-4" />
+                            <span className="sr-only">Send</span>
+                        </Button>
                     </div>
-
                 </div>
-            </main>
-
+            </div>
         </div>
+    </main>
+</div>
+
     );
 }
 

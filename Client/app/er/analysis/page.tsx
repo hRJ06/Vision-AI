@@ -114,8 +114,8 @@ export default function Component() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 grid gap-8 p-4 md:p-8 lg:p-12">
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-4 w-1/3">
+        <div className="flex gap-4 flex-col lg:flex-row">
+          <div className="flex flex-col gap-4 lg:w-1/3 w-full">
             <Card className="flex-none h-40">
               <CardHeader>
                 <CardTitle>Image Upload</CardTitle>
@@ -181,9 +181,9 @@ export default function Component() {
           </div>
           <Card className="flex-1">
             <CardHeader>
-              <CardTitle>Image Output</CardTitle>
+              <CardTitle>Vision AI</CardTitle>
               <CardDescription>
-                This Chat is based on the Current uploaded image only.
+                This Chat is based on the current uploaded image only.
               </CardDescription>
             </CardHeader>
             <CardContent className="overflow-y-auto max-h-[65vh]">

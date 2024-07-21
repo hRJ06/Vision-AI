@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import Image from "next/image";
 
 export default function Component() {
   return (
@@ -13,7 +14,7 @@ export default function Component() {
         >
           <span className="sr-only">Vision AI</span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="lg:ml-auto flex gap-4 sm:gap-6 justify-center lg:w-auto w-full">
           <Link
             href="#features"
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -76,8 +77,8 @@ export default function Component() {
                   </Link>
                 </div>
               </div>
-              <img
-                src="./Hero.gif"
+              <Image
+                src="/Hero.gif"
                 width="550"
                 height="550"
                 alt="Hero"
@@ -151,7 +152,7 @@ export default function Component() {
                   </li>
                 </ul>
               </div>
-              <img
+              <Image
                 src="/Feature.gif"
                 width="300"
                 height="800"
@@ -172,7 +173,7 @@ export default function Component() {
                 power of their data. See what our customers have to say.
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end">
+            <div className="flex flex-col gap-2 min-[400px]:flex-row lg:justify-end justify-center">
               <Link
                 href="#partners"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-base tracking-wide font-bold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
@@ -202,7 +203,7 @@ export default function Component() {
               </p>
             </div>
             <div className="divide-y rounded-lg border">
-              <div className="grid w-full grid-cols-3 items-stretch justify-center divide-x md:grid-cols-3">
+              <div className="grid w-full lg:grid-cols-3 grid-cols-1 items-stretch justify-center divide-x md:grid-cols-3">
                 <div className="mx-auto flex w-full items-center justify-center p-4 sm:p-8">
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">

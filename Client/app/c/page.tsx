@@ -19,6 +19,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import Link from 'next/link';
+import { ChevronDown } from 'lucide-react'
 
 export default function Component() {
   const { toast } = useToast();
@@ -39,6 +41,8 @@ export default function Component() {
       message: "Password must be at least 6 characters.",
     }),
   });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const [welcome, setwelcome] = useState<Boolean>(false);
   const [inputText, setInputText] = useState<string>("");
   const [chats, setchats] = useState<ChatMessage[]>([
@@ -47,6 +51,8 @@ export default function Component() {
       role: "AI",
     },
   ]);
+
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,7 +64,7 @@ export default function Component() {
       Password: "",
     },
   });
-  
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = {
       Host: values.Host,
@@ -130,13 +136,37 @@ export default function Component() {
   return (
     <div className="grid min-h-screen w-full grid-cols-[280px_1fr] bg-background text-foreground">
       <div className="flex flex-col border-r bg-muted/40 p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">AI Assistant</h2>
-          <Button variant="ghost" size="icon">
-            <SettingsIcon className="h-5 w-5" />
-            <span className="sr-only">Settings</span>
-          </Button>
-        </div>
+
+      <div className="flex items-center justify-between">
+      <h2 className="text-lg font-semibold">AI Assistant</h2>
+      <div className="relative">
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="px-4 py-2 rounded-md bg-gray-800 text-white hover:bg-gray-700 focus:outline-none flex items-center"
+        >
+          Features
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </button>
+        {dropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded-md shadow-lg">
+            <Link
+              href="/er/generate"
+              className="block px-4 py-2 text-left w-full rounded-md hover:bg-gray-700 hover:bg-opacity-75"
+              onClick={() => setDropdownOpen(false)}
+            >
+              Generate Diagram
+            </Link>
+            <Link
+              href="/er/analysis"
+              className="block px-4 py-2 text-left w-full rounded-md hover:bg-gray-700 hover:bg-opacity-75"
+              onClick={() => setDropdownOpen(false)}
+            >
+              Analyse Diagram
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
 
         {/* DB CONNECT */}
         <div className="mt-4 flex-1 space-y-4 overflow-auto">
@@ -298,7 +328,7 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div key={index} className={`flex items-start gap-4 `}>
                   <Avatar className="h-8 w-8 shrink-0 border">
-                    <AvatarImage src= {`${chat.role==="User"?"https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png":"https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"}`}  />
+                    <AvatarImage src={`${chat.role === "User" ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png" : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"}`} />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">

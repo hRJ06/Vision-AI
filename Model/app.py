@@ -9,6 +9,8 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
+from langchain import OpenAI
+
 
 
 import os
@@ -234,14 +236,16 @@ def upload_csv():
 # CSV manipulation route
 @app.route('/chatCSV', methods=['POST'])
 def manipulate_csv():
-    filename = session.get('uploaded_filename')
-    
+    print("here")
+    filename = 'uploaded_file.csv'
+    print(filename)
+    print("here")
     if not filename:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
     
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    llm = OpenAI(temperature=0, openai_api_key='')
+    llm = OpenAI(temperature=0, openai_api_key='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')
     try:
         print("hello")
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)
@@ -258,4 +262,4 @@ def manipulate_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+    app.run()

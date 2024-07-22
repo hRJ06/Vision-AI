@@ -18,19 +18,19 @@ import os
 app = Flask(__name__)
 # SET UP CORS
 CORS(app, origin='*');
-# CONFIGURE GEMINI 
-genai.configure(api_key="")
-model = genai.GenerativeModel('gemini-pro')
-# SET APP SECRET KEY
-app.secret_key = "Vision"
-# SET GROQ API KEY FOR LANGCHAIN
-os.environ['GROQ_API_KEY'] ='';
-# SET CONFIG FOR CSV BOT
-UPLOAD_FOLDER = 'files'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # LOAD ENV
 load_dotenv()
+
+# CONFIGURE GEMINI 
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-pro')
+# SET APP SECRET KEY
+app.secret_key = os.getenv('SECRET_KEY')
+# SET GROQ API KEY FOR LANGCHAIN
+os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
+# SET CONFIG FOR CSV BOT
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER');
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
@@ -147,6 +147,7 @@ def chat():
             ans = ""
             for item in ai_response:
                 ans += item 
+            ans = ans.replace('\\_','_')
             chat_history.append(AIMessage(content=ans))
         else:
             ai_response = "Database connection not established."

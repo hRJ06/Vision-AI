@@ -138,31 +138,31 @@ export default function Component() {
     e.preventDefault();
     if (inputText.trim()) {
       setchats([...chats, { msg: inputText, role: "User" }]);
-
+      const userPrompt = inputText;
+      setInputText("");
       try {
         const response = await axios.post(
           "http://127.0.0.1:5000/chat",
-          { message: inputText },
+          { message: userPrompt },
           {
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
-        setInputText("");
         const llm_response = response.data.response;
-        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. The prompt is ${llm_response}`;
+        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. The prompt is given by another llm model. So the prompt is ${llm_response}`;
         const result = await model.generateContent(prompt);
         const quickchart_response = await result.response.text();
+        console.log('RESULT', result);  
         const hasLink = containsLink(quickchart_response);
-        console.log('HAS LINK',hasLink);
 
         setchats((prevChats) => [
           ...prevChats,
           {
             msg: response.data.response,
             role: "AI",
-            link: hasLink ? quickchart_response : "",
+            link: hasLink ? quickchart_response : null,
           },
         ]);
       } catch (error) {
@@ -333,7 +333,7 @@ export default function Component() {
                         {chat.role === "AI" ? (
                           <>
                             <p>{formatMessage(chat.msg)}</p>
-                            {chat.link?.length && (
+                            {chat.link && (
                               <Image src={chat.link} alt="chart" width={400} height={400}/>
                             )}
                           </>

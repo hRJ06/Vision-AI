@@ -9,6 +9,8 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
+from langchain import OpenAI
+
 
 
 import os
@@ -17,12 +19,12 @@ app = Flask(__name__)
 # SET UP CORS
 CORS(app, origin='*');
 # CONFIGURE GEMINI 
-genai.configure(api_key="AIzaSyB5v4JcdsO0gLlgPhSkPD6CZYefcWY7aHk")
+genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-pro')
 # SET APP SECRET KEY
 app.secret_key = "Vision"
 # SET GROQ API KEY FOR LANGCHAIN
-os.environ['GROQ_API_KEY'] ='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';
+os.environ['GROQ_API_KEY'] ='';
 # SET CONFIG FOR CSV BOT
 UPLOAD_FOLDER = './files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -234,8 +236,10 @@ def upload_csv():
 # CSV manipulation route
 @app.route('/chatCSV', methods=['POST'])
 def manipulate_csv():
-    filename = session.get('uploaded_filename')
-    
+    print("here")
+    filename = 'uploaded_file.csv'
+    print(filename)
+    print("here")
     if not filename:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
     
@@ -258,4 +262,4 @@ def manipulate_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+    app.run()

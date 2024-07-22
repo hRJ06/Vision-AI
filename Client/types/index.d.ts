@@ -2,8 +2,7 @@ export type DiagramType =
   | "er-diagram"
   | "sequence-diagram"
   | "class-diagram"
-  | "activity-diagram"
-  | "other";
+  | "state-diagram";
 
 export interface ComponentState {
   diagramType: DiagramType;
@@ -15,7 +14,7 @@ export interface ComponentState {
 
 export interface ChatMessage {
   msg: string;
-  role: 'AI' | 'User';
+  role: "AI" | "User";
   link?: string | null;
 }
 

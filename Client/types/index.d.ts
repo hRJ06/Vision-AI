@@ -16,4 +16,5 @@ export interface ComponentState {
 export interface ChatMessage {
   msg: string;
   role: 'AI' | 'User';
+  link?: string
 }

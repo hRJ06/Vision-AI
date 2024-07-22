@@ -9,18 +9,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { ChatMessage } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Link from 'next/link';
-import { ChevronDown } from 'lucide-react'
+import Link from "next/link";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Image from "next/image";
 
 export default function Component() {
   const { toast } = useToast();
@@ -41,7 +41,11 @@ export default function Component() {
       message: "Password must be at least 6 characters.",
     }),
   });
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  /* GEMINI CONFIG */
+  const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
+  const genAI = new GoogleGenerativeAI(`${API_KEY}`);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const [welcome, setwelcome] = useState<Boolean>(false);
   const [inputText, setInputText] = useState<string>("");
@@ -51,8 +55,6 @@ export default function Component() {
       role: "AI",
     },
   ]);
-
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,6 +66,27 @@ export default function Component() {
       Password: "",
     },
   });
+
+  const formatMessage = (message: string) => {
+    return message.split("\n").map((part, index) => {
+      const isList = /^\d+\./.test(part.trim());
+
+      const formattedPart = part
+        .split(/(\*\*.*?\*\*)/g)
+        .map((subPart, subIndex) => {
+          if (subPart.startsWith("**") && subPart.endsWith("**")) {
+            return <b key={subIndex}>{subPart.slice(2, -2)}</b>;
+          }
+          return subPart;
+        });
+
+      return (
+        <div key={index} style={{ marginBottom: isList ? "0.5em" : "0" }}>
+          {formattedPart}
+        </div>
+      );
+    });
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = {
@@ -105,6 +128,12 @@ export default function Component() {
     }
   };
 
+  const containsLink = (text: string) => {
+    const urlPattern =
+      /https?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+/;
+    return urlPattern.test(text);
+  };
+
   const handleSendMessage = async (e: any) => {
     e.preventDefault();
     if (inputText.trim()) {
@@ -120,31 +149,39 @@ export default function Component() {
             },
           }
         );
+        setInputText("");
+        const llm_response = response.data.response;
+        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. The prompt is ${llm_response}`;
+        const result = await model.generateContent(prompt);
+        const quickchart_response = await result.response.text();
+        const hasLink = containsLink(quickchart_response);
+        console.log('HAS LINK',hasLink);
 
         setchats((prevChats) => [
           ...prevChats,
-          { msg: response.data.response, role: "AI" },
+          {
+            msg: response.data.response,
+            role: "AI",
+            link: hasLink ? quickchart_response : "",
+          },
         ]);
       } catch (error) {
         console.error("Error", error);
       }
-
-      setInputText("");
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
       <div className="flex flex-col border-r bg-muted/40 p-4 md:border-r">
-
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">AI Assistant</h2>
+          <h2 className="text-lg font-semibold ml-2">AI Assistant</h2>
         </div>
 
         {/* DB CONNECT */}
         <div className="mt-4 flex-1 space-y-4 overflow-auto">
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-sm font-medium text-muted-foreground ml-2">
               Database Credentials
             </h3>
             <Form {...form}>
@@ -224,32 +261,6 @@ export default function Component() {
               </form>
             </Form>
           </div>
-          <Tabs defaultValue="database">
-            <TabsList className="ml">
-              <TabsTrigger value="csv">CSV</TabsTrigger>
-              <TabsTrigger value="database">Database</TabsTrigger>
-            </TabsList>
-            <TabsContent value="csv">
-              <div className="space-y-4">
-                <Button variant="outline" size="sm">
-                  <FileIcon className="mr-2 h-4 w-4" />
-                  Attach File
-                </Button>
-                <Button variant="outline" size="sm">
-                  <MicIcon className="mr-2 h-4 w-4" />
-                  Send Voice
-                </Button>
-              </div>
-            </TabsContent>
-            <TabsContent value="database">
-              <div className="space-y-4">
-                <Button variant="outline" size="sm">
-                  <MicIcon className="mr-2 h-4 w-4" />
-                  Send Voice
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
 
@@ -257,7 +268,9 @@ export default function Component() {
 
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md">
-          <h1 className="text-xl lg:text-left text-center font-semibold">Vision AI </h1>
+          <h1 className="text-xl lg:text-left text-center font-semibold">
+            Vision AI{" "}
+          </h1>
         </div>
 
         {chats.length < 2 && !welcome && (
@@ -281,7 +294,7 @@ export default function Component() {
                 >
                   Get Started
                 </Button>
-                <Link href='/faq'>
+                <Link href="/faq">
                   <Button
                     variant="outline"
                     className="text-black hover:bg-black hover:text-white font-bold py-3 px-6 text-lg"
@@ -303,7 +316,13 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div key={index} className={`flex items-start gap-4 `}>
                   <Avatar className="h-8 w-8 shrink-0 border">
-                    <AvatarImage src={`${chat.role === "User" ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png" : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"}`} />
+                    <AvatarImage
+                      src={`${
+                        chat.role === "User"
+                          ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
+                          : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
+                      }`}
+                    />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
@@ -311,7 +330,16 @@ export default function Component() {
                     {/* Fixed width for message box */}
                     <div className="grid gap-1">
                       <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
-                        <p>{chat.msg}</p>
+                        {chat.role === "AI" ? (
+                          <>
+                            <p>{formatMessage(chat.msg)}</p>
+                            {chat.link?.length && (
+                              <Image src={chat.link} alt="chart" width={400} height={400}/>
+                            )}
+                          </>
+                        ) : (
+                          chat.msg
+                        )}
                       </div>
                     </div>
                   </div>
@@ -339,18 +367,11 @@ export default function Component() {
                 <SendIcon className="h-4 w-4" />
                 <span className="sr-only">Send</span>
               </Button>
-              <div className="absolute right-12 top-3">
-                <Button variant="ghost" size="icon">
-                  <FileIcon className="h-4 w-4" />
-                  <span className="sr-only">Attach File</span>
-                </Button>
-              </div>
             </div>
           </div>
         )}
       </div>
     </div>
-
   );
 }
 

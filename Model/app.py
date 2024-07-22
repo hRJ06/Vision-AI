@@ -26,7 +26,7 @@ app.secret_key = "Vision"
 # SET GROQ API KEY FOR LANGCHAIN
 os.environ['GROQ_API_KEY'] ='';
 # SET CONFIG FOR CSV BOT
-UPLOAD_FOLDER = './files'
+UPLOAD_FOLDER = 'files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # LOAD ENV

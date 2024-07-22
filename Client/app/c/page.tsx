@@ -139,33 +139,6 @@ export default function Component() {
 
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">AI Assistant</h2>
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="px-4 py-2 rounded-md bg-gray-800 text-white hover:bg-gray-700 focus:outline-none flex items-center"
-            >
-              Features
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </button>
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-gray-900 text-white rounded-md shadow-lg">
-                <Link
-                  href="/er/generate"
-                  className="block px-4 py-2 text-left w-full rounded-md hover:bg-gray-700 hover:bg-opacity-75"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  Generate Diagram
-                </Link>
-                <Link
-                  href="/er/analysis"
-                  className="block px-4 py-2 text-left w-full rounded-md hover:bg-gray-700 hover:bg-opacity-75"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  Analyse Diagram
-                </Link>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* DB CONNECT */}

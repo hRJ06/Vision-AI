@@ -1,12 +1,18 @@
 # Vision-AI
 
+<div align="center">
+  <img src="./Client/public/Feature.gif" alt="Feature" width="600" height="400">
+</div>
+
 ## Description
 
 Organizations often struggle with efficiently accessing and understanding client data stored in internal databases. Traditional methods of data retrieval and analysis can be time-consuming and cumbersome, leading to delays in decision-making and inefficiencies in client management. There is a need for a streamlined and intuitive solution that allows organization members to query and receive timely, accurate insights from the database through a user-friendly interface.
 
 ## Architecture
 
-![Architecture](./Client/public/architecture.png)
+<div align="center">
+  <img src="./Client/public/architecture.png" alt="Architecture" width="600">
+</div>
 
 ## Features
 
@@ -32,7 +38,7 @@ Key Benefits:
 
 ### 3. Database Analysis and Diagram Generation
 
-Vision-AI goes beyond simple querying by offering advanced database analysis features. Users can connect their databases to the system and generate various types of diagrams, such as Entity-Relationship (ER) diagrams, Class diagrams, Sequence diagrams, and UML diagrams. These visual representations help in understanding the structure and relationships within the database, making it easier to identify patterns, design improvements, and ensure efficient database management.
+Vision-AI goes beyond simple querying by offering advanced database analysis features. Users can connect their databases to the system and generate various types of diagrams, such as **Entity-Relationship (ER)** diagrams, **Class** diagrams, **Sequence** diagrams, and **UML** diagrams. These visual representations help in understanding the structure and relationships within the database, making it easier to identify patterns, design improvements, and ensure efficient database management.
 
 Key Benefits:
 - Provides a comprehensive overview of the database structure.
@@ -58,12 +64,18 @@ To use Vision-AI, you will need:
     ```bash
     cd Vision-AI
     ```
-3. Start the server:
+3. Start the servers:
     ```bash
     cd Model
     # Update the .env file with your configuration
     pip install -r requirements.txt
     python app.py
+    ```
+    ```bash
+    cd Server
+    # Update the .env file with your configuration
+    npm install
+    npm run dev
     ```
 4. Start the client:
     ```bash
@@ -77,6 +89,13 @@ To use Vision-AI, you will need:
 1. Open your browser and navigate to `http://localhost:3000`
 2. Connect to your local database with credentials.
 3. Use the chat interface to start querying your database or upload CSV files.
+
+### Tech Stack
+
+- **Next.js**
+- **Flask**
+- **Node.js**
+- **MongoDB**
 
 ## Contributing
 
@@ -95,5 +114,4 @@ We welcome contributions to Vision-AI! Please follow these steps to contribute:
     git push origin feature-branch
     ```
 5. Create a pull request.
-
 

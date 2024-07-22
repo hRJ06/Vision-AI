@@ -18,3 +18,11 @@ export interface ChatMessage {
   role: 'AI' | 'User';
   link?: string | null;
 }
+
+export interface DatabaseCredentials {
+  Host: string;
+  Port: string;
+  Database: string;
+  User: string;
+  Password: string;
+}

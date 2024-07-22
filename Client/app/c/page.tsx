@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { ChatMessage } from "@/types";
+import { ChatMessage, DatabaseCredentials } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState } from "react";
@@ -24,6 +24,8 @@ import Image from "next/image";
 
 export default function Component() {
   const { toast } = useToast();
+  const [databaseCredentials, setDatabaseCredentials] =
+    useState<DatabaseCredentials | null>(null);
   const formSchema = z.object({
     Host: z.string().min(2, {
       message: "Hostname must be at least 2 characters.",
@@ -96,6 +98,7 @@ export default function Component() {
       User: values.User,
       Password: values.Password,
     };
+    setDatabaseCredentials(data);
 
     try {
       const response = await axios.post("http://127.0.0.1:5000/connect", data, {
@@ -136,6 +139,16 @@ export default function Component() {
 
   const handleSendMessage = async (e: any) => {
     e.preventDefault();
+    if (databaseCredentials === null) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please provide database credentials first",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      setInputText("");
+      return;
+    }
     if (inputText.trim()) {
       setchats([...chats, { msg: inputText, role: "User" }]);
       const userPrompt = inputText;
@@ -143,7 +156,7 @@ export default function Component() {
       try {
         const response = await axios.post(
           "http://127.0.0.1:5000/chat",
-          { message: userPrompt },
+          { ...databaseCredentials, message: userPrompt },
           {
             headers: {
               "Content-Type": "application/json",
@@ -154,7 +167,6 @@ export default function Component() {
         const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. The prompt is given by another llm model. So the prompt is ${llm_response}`;
         const result = await model.generateContent(prompt);
         const quickchart_response = await result.response.text();
-        console.log('RESULT', result);  
         const hasLink = containsLink(quickchart_response);
 
         setchats((prevChats) => [
@@ -334,7 +346,12 @@ export default function Component() {
                           <>
                             <p>{formatMessage(chat.msg)}</p>
                             {chat.link && (
-                              <Image src={chat.link} alt="chart" width={400} height={400}/>
+                              <Image
+                                src={chat.link}
+                                alt="chart"
+                                width={400}
+                                height={400}
+                              />
                             )}
                           </>
                         ) : (

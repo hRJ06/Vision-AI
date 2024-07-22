@@ -137,11 +137,16 @@ def connect():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_query = request.json['message']
+    user = request.json['User']
+    password = request.json['Password']
+    host = request.json['Host']
+    port = request.json['Port']
+    database = request.json['Database']
     chat_history = session.get("chat_history", [])
     
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
-        db = init_db('root', 'rootMySQL','localhost', '3306', 'classroom')
+        db = init_db(user, password, host, port, database)
         if db:
             ai_response = get_response(user_query, db, chat_history)
             ans = ""

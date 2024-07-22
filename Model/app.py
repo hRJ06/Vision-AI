@@ -19,12 +19,12 @@ app = Flask(__name__)
 # SET UP CORS
 CORS(app, origin='*');
 # CONFIGURE GEMINI 
-genai.configure(api_key="AIzaSyB5v4JcdsO0gLlgPhSkPD6CZYefcWY7aHk")
+genai.configure(api_key="")
 model = genai.GenerativeModel('gemini-pro')
 # SET APP SECRET KEY
 app.secret_key = "Vision"
 # SET GROQ API KEY FOR LANGCHAIN
-os.environ['GROQ_API_KEY'] ='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';
+os.environ['GROQ_API_KEY'] ='';
 # SET CONFIG FOR CSV BOT
 UPLOAD_FOLDER = './files'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -245,7 +245,7 @@ def manipulate_csv():
     
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    llm = OpenAI(temperature=0, openai_api_key='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')
+    llm = OpenAI(temperature=0, openai_api_key='')
     try:
         print("hello")
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)

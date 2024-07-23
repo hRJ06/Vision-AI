@@ -11,13 +11,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
 import { ComponentState, DiagramType } from "@/types";
 
@@ -126,9 +120,7 @@ export default function Component() {
                   ? "Sequence Diagram"
                   : state.diagramType === "class-diagram"
                   ? "Class Diagram"
-                  : state.diagramType === "activity-diagram"
-                  ? "Activity Diagram"
-                  : "Other Diagram"}
+                  : "State Diagram"}
               </span>
               <ChevronDownIcon className="h-4 w-4" />
             </Button>
@@ -153,16 +145,10 @@ export default function Component() {
               Class Diagram
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handleDiagramTypeChange("activity-diagram")}
+              onClick={() => handleDiagramTypeChange("state-diagram")}
               className="hover:bg-muted"
             >
-              Activity Diagram
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleDiagramTypeChange("other")}
-              className="hover:bg-muted"
-            >
-              Other Diagram
+              State Diagram
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

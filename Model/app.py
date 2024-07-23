@@ -18,19 +18,19 @@ import os
 app = Flask(__name__)
 # SET UP CORS
 CORS(app, origin='*');
-# CONFIGURE GEMINI 
-genai.configure(api_key="AIzaSyB5v4JcdsO0gLlgPhSkPD6CZYefcWY7aHk")
-model = genai.GenerativeModel('gemini-pro')
-# SET APP SECRET KEY
-app.secret_key = "Vision"
-# SET GROQ API KEY FOR LANGCHAIN
-os.environ['GROQ_API_KEY'] ='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';
-# SET CONFIG FOR CSV BOT
-UPLOAD_FOLDER = './files'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # LOAD ENV
 load_dotenv()
+
+# CONFIGURE GEMINI 
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-pro')
+# SET APP SECRET KEY
+app.secret_key = os.getenv('SECRET_KEY')
+# SET GROQ API KEY FOR LANGCHAIN
+os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
+# SET CONFIG FOR CSV BOT
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER');
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
@@ -137,16 +137,22 @@ def connect():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_query = request.json['message']
+    user = request.json['User']
+    password = request.json['Password']
+    host = request.json['Host']
+    port = request.json['Port']
+    database = request.json['Database']
     chat_history = session.get("chat_history", [])
     
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
-        db = init_db('root', 'rootMySQL','localhost', '3306', 'classroom')
+        db = init_db(user, password, host, port, database)
         if db:
             ai_response = get_response(user_query, db, chat_history)
             ans = ""
             for item in ai_response:
                 ans += item 
+            ans = ans.replace('\\_','_')
             chat_history.append(AIMessage(content=ans))
         else:
             ai_response = "Database connection not established."
@@ -245,7 +251,7 @@ def manipulate_csv():
     
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    llm = OpenAI(temperature=0, openai_api_key='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')
+    llm = OpenAI(temperature=0, openai_api_key='')
     try:
         print("hello")
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)

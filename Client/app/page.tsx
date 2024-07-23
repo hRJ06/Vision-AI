@@ -69,11 +69,11 @@ export default function Component() {
                     Get Started
                   </Link>
                   <Link
-                    href="#"
-                    className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background tracking-wide font-bold px-8 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    href="/features"
+                    className="inline-flex h-10 items-center text-blue-600 justify-center rounded-md border border-input bg-background tracking-wide font-extrabold px-8 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
-                    Learn More
+                    Explore Features
                   </Link>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function Component() {
   );
 }
 
-function EyeIcon(props) {
+function EyeIcon(props:React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -320,7 +320,7 @@ function EyeIcon(props) {
   );
 }
 
-function XIcon(props) {
+function XIcon(props:React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

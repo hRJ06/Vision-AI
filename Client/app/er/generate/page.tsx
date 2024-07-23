@@ -20,9 +20,7 @@ const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
 });
 
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(`${API_KEY}`);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 export default function Component() {
   const [state, setState] = useState<ComponentState>({
@@ -94,7 +92,7 @@ export default function Component() {
     const prompt = `Please write me the code in Mermaid.js for ${state.searchTerm} and type of diagram is ${state.diagramType}.Make sure that the diagram is very advanced and appealing. Provide me only the code that should have been start and end and nothing else.`;
     try {
       const response = await axios.post(
-        `http://localhost:4000/image/generate`,
+        `${BASE_URL}//image/generate`,
         {
           prompt: prompt,
         }

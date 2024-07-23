@@ -277,16 +277,14 @@ export default function Component() {
           <Card className="bg-[#f8f9fa]">
             <CardContent className="mt-4">
               <p>
-                Visualize the use cases for a project management tool, such as
-                Create Project, Assign Tasks, Track Progress, and Generate
-                Reports
+              Design an ER diagram for a social media platform including entities: Users, Posts, Comments, Likes, and Friendships, and their relationships.
               </p>
               <div className="flex justify-center">
                 <Button
                   className="mt-4 bg-black text-white font-bold"
                   onClick={() =>
                     handleGenerateClick(
-                      "Visualize the use cases for a project management tool, such as Create Project, Assign Tasks, Track Progress, and Generate Reports"
+                      "Design an ER diagram for a social media platform including entities: Users, Posts, Comments, Likes, and Friendships, and their relationships."
                     )
                   }
                 >
@@ -298,16 +296,14 @@ export default function Component() {
           <Card className="bg-[#f8f9fa]">
             <CardContent className="mt-4 text-justify">
               <p>
-                Create an ER diagram for a university course registration
-                system, including entities like Students, Courses, Enrollments,
-                and Professors
+              Design a class diagram for a library management system, including classes: Library, Book, Member, Staff, Loan, and Reservation, and their relationships.
               </p>
               <div className="flex justify-center">
                 <Button
                   className="mt-4 bg-black text-white font-bold"
                   onClick={() =>
                     handleGenerateClick(
-                      "Create an ER diagram for a university course registration system, including entities like Students, Courses, Enrollments, and Professors"
+                      "Design a class diagram for a library management system, including classes: Library, Book, Member, Staff, Loan, and Reservation, and their relationships."
                     )
                   }
                 >
@@ -326,10 +322,7 @@ export default function Component() {
             <CardContent>
               <div className="space-y-2 text-base text-justify">
                 <p>
-                  Diagrams are visual representations of complex systems,
-                  processes, or relationships. They help to communicate
-                  information in a clear and concise manner, making it easier to
-                  understand and analyze.
+                 Design an ER diagram for a social media platform including entities: Users, Posts, Comments, Likes, and Friendships, and their relationships.
                 </p>
                 <p>
                   There are various types of diagrams, each with its own purpose

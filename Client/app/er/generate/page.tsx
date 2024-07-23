@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
 import { ComponentState, DiagramType } from "@/types";
+import axios from "axios";
 
 const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
@@ -43,19 +44,29 @@ export default function Component() {
   const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setState((prevState) => ({ ...prevState, loading: true }));
-      const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${state.searchTerm} and type of diagram is ${state.diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
-      const result = await model.generateContent(prompt);
-      const response = await result.response.text();
-      const cleanedText = response
-        .replace(/```/g, "")
-        .replace(/^mermaid/, "")
-        .trim();
-      setState((prevState) => ({
-        ...prevState,
-        diagramDefinition: cleanedText,
-        content: true,
-        loading: false,
-      }));
+      const prompt = `Please write me the code in Mermaid.js for ${state.searchTerm} and type of diagram is ${state.diagramType}.Make sure that the diagram is very advanced and appealing. Provide me only the code that should have been start and end and nothing else.`;
+      try {
+        const response = await axios.post(
+          `http://localhost:4000/image/generate`,
+          {
+            prompt: prompt,
+          }
+        );
+        const result = response.data.generatedContent;
+        console.log("RESULT", result);
+        const cleanedText = result
+          .replace(/```/g, "")
+          .replace(/^mermaid/, "")
+          .trim();
+        setState((prevState) => ({
+          ...prevState,
+          diagramDefinition: cleanedText,
+          content: true,
+          loading: false,
+        }));
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -80,20 +91,29 @@ export default function Component() {
       loading: true,
     }));
 
-    const prompt = `You are a Senior Database Analyst. I will give you a prompt about a database. You need to accordingly write me the code in Mermaid.js for version 10.9.1 to generate the same. Make sure that the diagram is very advanced and appealing. The prompt is ${content} and type of diagram is ${state.diagramType}. Provide me only the code that should have been start and end and nothing else. The diagram should also have a title. If any other prompt given not related to your position as Senior Database Analyst please return anything like provide a valid prompt.`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response.text();
-    const cleanedText = response
-      .replace(/```/g, "")
-      .replace(/^mermaid/, "")
-      .trim();
-
-    setState((prevState) => ({
-      ...prevState,
-      diagramDefinition: cleanedText,
-      content: true,
-      loading: false,
-    }));
+    const prompt = `Please write me the code in Mermaid.js for ${state.searchTerm} and type of diagram is ${state.diagramType}.Make sure that the diagram is very advanced and appealing. Provide me only the code that should have been start and end and nothing else.`;
+    try {
+      const response = await axios.post(
+        `http://localhost:4000/image/generate`,
+        {
+          prompt: prompt,
+        }
+      );
+      const result = response.data.generatedContent;
+      console.log("RESULT", result);
+      const cleanedText = result
+        .replace(/```/g, "")
+        .replace(/^mermaid/, "")
+        .trim();
+      setState((prevState) => ({
+        ...prevState,
+        diagramDefinition: cleanedText,
+        content: true,
+        loading: false,
+      }));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

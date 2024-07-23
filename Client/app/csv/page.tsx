@@ -148,7 +148,7 @@ export default function Component() {
               <AvatarFallback>AC</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">Chat CSV</p>
+              <p className="font-medium">Vision AI</p>
             </div>
           </div>
           <DropdownMenu>

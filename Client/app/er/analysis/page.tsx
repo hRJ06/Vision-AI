@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import Link from "next/link";
 
 export default function Component() {
   const [loading, setLoading] = useState<Boolean>(false);
@@ -208,14 +209,15 @@ export default function Component() {
           <div className="flex flex-col lg:w-2/3 w-full">
             <Card className="flex-1">
               <CardHeader>
-                <CardTitle>Vision AI</CardTitle>
+                <Link href="/">
+                <CardTitle>Vision AI</CardTitle></Link>
                 <CardDescription>
                   This Chat is based on the current uploaded image only.
                 </CardDescription>
               </CardHeader>
               <CardContent className="overflow-y-auto max-h-[65vh]">
                 {chats.map((chat, index) => (
-                  <div key={index} className={`flex items-start gap-4 mb-3`}>
+                  <div key={index} className={`flex items-start gap-4 mb-3 ${chat.role === "AI" ?  "":"justify-end"}`}>
                     <Avatar className="h-8 w-8 shrink-0 border">
                       <AvatarImage
                         src={`${
@@ -228,7 +230,7 @@ export default function Component() {
                     </Avatar>
                     <div className="max-w-[700px]">
                       <div className="grid gap-1">
-                        <div className="prose text-gray-700 text-muted-foreground bg-gray-200 p-2 rounded-md">
+                        <div className={`prose text-gray-700 text-muted-foreground bg-${chat.role === "AI" ? "muted":"primary" } ${chat.role === "User" ? "text-primary-foreground" : ""} p-2 rounded-md`}>
                           {typeof chat.msg === "string" ? (
                             formatMessage(chat.msg)
                           ) : (

@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import axios from 'axios';
+import Link from 'next/link';
+
 
 export default function Component() {
   const fileInputRef = useRef(null);
@@ -19,7 +21,7 @@ export default function Component() {
     {
       sender: "Vision",
       text: "Hey, Upload your file to get started !",
-      time: new Date().toLocaleTimeString(),
+     
     },
   ]);
 
@@ -43,12 +45,12 @@ export default function Component() {
           {
             sender: "You",
             text: query,
-            time: new Date().toLocaleTimeString(),
+    
           },
           {
             sender: "Vision",
             text: response.data.response, 
-            time: new Date().toLocaleTimeString(),
+           
           }
         ]);
         setQuery(""); 
@@ -148,7 +150,8 @@ export default function Component() {
               <AvatarFallback>AC</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">Vision AI</p>
+             <Link className="font-medium" href="/" > Vision AI</Link>
+          
             </div>
           </div>
           <DropdownMenu>

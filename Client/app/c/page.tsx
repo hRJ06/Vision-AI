@@ -329,7 +329,7 @@ export default function Component() {
             {/* Adjust height as needed */}
             <div className="flex flex-col gap-4">
               {chats.map((chat, index) => (
-                <div key={index} className={`flex items-start gap-4 `}>
+                <div key={index} className={`flex items-start gap-4 ${chat.role === "AI" ?  "":"justify-end"} `}>
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
                       src={`${chat.role === "User"
@@ -343,7 +343,7 @@ export default function Component() {
                     {" "}
                     {/* Fixed width for message box */}
                     <div className="grid gap-1">
-                      <div className="prose text-muted-foreground bg-gray-200 p-2 rounded-md">
+                      <div className={`prose text-muted-foreground  bg-${chat.role === "AI" ? "muted":"primary" }  p-2 rounded-md ${chat.role === "User" ? "text-primary-foreground" : ""}`}>
                         {chat.role === "AI" ? (
                           <>
                             <p>{formatMessage(chat.msg)}</p>

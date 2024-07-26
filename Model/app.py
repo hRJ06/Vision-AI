@@ -10,26 +10,25 @@ from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
 from langchain import OpenAI
-
-
-
+import json
+import re
 import os
 
 app = Flask(__name__)
-# SET UP CORS
+
 CORS(app, origin='*');
 
-# LOAD ENV
+
 load_dotenv()
 
-# CONFIGURE GEMINI 
+
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-pro')
-# SET APP SECRET KEY
+
 app.secret_key = os.getenv('SECRET_KEY')
-# SET GROQ API KEY FOR LANGCHAIN
+
 os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
-# SET CONFIG FOR CSV BOT
+
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER');
 
 def init_db(user, password, host, port, database):
@@ -107,7 +106,7 @@ def get_response(user_query, db, chat_history):
 
 @app.route('/connect', methods=['POST'])
 def connect():
-    data = request.json  # Get the JSON data from the request body
+    data = request.json  
     print(data);
     if not data:
         return jsonify({"status": "error", "message": "No data provided"}), 400
@@ -161,10 +160,10 @@ def chat():
     
     return jsonify({"response": ""})
 
-# Report route
+
 @app.route('/report', methods=['POST'])
 def report():
-    data = request.json  # Get the JSON data from the request body
+    data = request.json  
     print(data)
     
     if not data:
@@ -180,22 +179,22 @@ def report():
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     try:
-        # Initialize the database connection
+        
         db = init_db(user, password, host, port, database)
         print("Database connected")
         
-        # Define the constant prompt to get table schema and relationships
+        
         prompt_text = "Give me the datatypes of each table field and relationships between the tables in the database."
         
-        # Define a function to get the schema information
+        
         def get_schema_info(_):
             return db.get_table_info()
 
-        # Define the prompt template and model for generating the schema description
+        
         schema_prompt = ChatPromptTemplate.from_template(prompt_text)
         llm = ChatGroq(model="Mixtral-8x7b-32768", temperature=0)
         
-        # Create the chain to generate the schema description
+        
         schema_chain = (
             RunnablePassthrough.assign(schema=get_schema_info)
             | schema_prompt
@@ -203,10 +202,10 @@ def report():
             | StrOutputParser()
         )
         
-        # Get the response from the model
+        
         schema_description = schema_chain.stream({"question": prompt_text, "chat_history": []})
         
-        # Store the response in a variable and return it
+        
         postfix = {"schema_description": schema_description}
         query=f"give me 4 vulnerabilities in the schema descriptions given below of a database {postfix}"
 
@@ -220,8 +219,49 @@ def report():
     except Exception as e:
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
+    
 
-# CSV upload route
+@app.route('/fetch-table', methods=['POST'])
+def fetch_tables():
+    data = request.json
+    user = data.get('User')
+    password = data.get('Password')
+    host = data.get('Host')
+    port = data.get('Port')
+    database = data.get('Database')
+    
+    if not all([user, password, host, port, database]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    try:
+        db = init_db(user, password, host, port, database)
+        print("Database connected")
+        
+        tables_info = db.get_table_info()
+        prompt = f"Convert the following table information into a JSON object. Format is table names, then the column name and datatype. Dont add any space or backslash.The table info is:\n\n{tables_info}"
+
+        response = genai.GenerativeModel('gemini-1.5-flash').generate_content(prompt)
+        
+        response_text = response.text.replace('\n', '').replace('\\', '')
+        # Remove unnecessary delimiters and convert to a Python dictionary
+        cleaned_response = response_text.strip("```pythontables = ")
+        no_spaces = re.sub(r'\s+', '', cleaned_response)
+        replaced_response = no_spaces.replace("'", '""')      
+        final_string = ""
+        for ch in replaced_response:
+            if ch != "\\":
+                final_string += ch
+        return jsonify({"status": "success", "tables_info": final_string}), 200
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+    
+    
+
+
 @app.route('/upload_csv', methods=['POST'])
 def upload_csv():
     if 'file' not in request.files:
@@ -234,12 +274,12 @@ def upload_csv():
     if file:
         filename = 'uploaded_file.csv'
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)  # This will overwrite the file if it already exists
-        session['uploaded_filename'] = filename  # Store the filename in the session
+        file.save(filepath)  
+        session['uploaded_filename'] = filename  
 
         return jsonify({"status": "success", "message": "File uploaded successfully", "filename": filename}), 200
 
-# CSV manipulation route
+
 @app.route('/chatCSV', methods=['POST'])
 def manipulate_csv():
     print("here")

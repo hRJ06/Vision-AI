@@ -52,7 +52,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Component() {
+export function DotsColor() {
   return (
     <Card>
       <CardHeader>

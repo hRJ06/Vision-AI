@@ -1,13 +1,16 @@
 "use client"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { CartesianGrid, XAxis, Area, AreaChart, Line, LineChart } from "recharts"
-import { ChartTooltipContent, ChartTooltip, ChartContainer } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
-
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { Dots } from "./LineChart/Dots"
+import { Linear } from "./LineChart/Linear"
+import { Normal } from "./LineChart/Normal"
+import { Step } from "./LineChart/Step"
 
 const databaseSchema = `{
   "announcements": {
@@ -100,21 +103,25 @@ const databaseSchema = `{
 
 export default function Component() {
 
+
+  const [selectedChart, setSelectedChart] = useState("");
+  const [LinearType, setLinearType] = useState("");
   const schema = JSON.parse(databaseSchema);
   const [selectedTable, setSelectedTable] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [selectedTable2, setSelectedTable2] = useState("");
-  const [selectedColumn2, setSelectedColumn2] = useState("");
+  
 
-  const handleTableChange = (value:any) => {
+
+  const handleTableChange = (value: any) => {
     setSelectedTable(value);
-    setSelectedColumn(""); 
+    setSelectedColumn("");
   };
 
-  const handleTableChange2 = (value:any) => {
-    setSelectedTable2(value);
-    setSelectedColumn2(""); 
-  };
+
+
+
+
+
 
   return (
     <div className="grid min-h-screen w-full grid-cols-[240px_1fr_240px]">
@@ -140,12 +147,13 @@ export default function Component() {
         </div>
         <Button className="mt-4">Connect</Button>
       </div>
+
       <div className="flex flex-col items-center justify-center bg-muted/40 p-4">
         <div className="flex w-full flex-col items-center gap-4">
           <div className="flex w-full items-center justify-between">
             <div className="font-semibold">Select Tables</div>
             <DropdownMenu>
-              
+
               <DropdownMenuContent align="end">
                 {Object.keys(schema).map((table) => (
                   <DropdownMenuItem key={table} onSelect={() => handleTableChange(table)}>
@@ -153,20 +161,14 @@ export default function Component() {
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
-              <DropdownMenuContent align="end">
-                {Object.keys(schema).map((table) => (
-                  <DropdownMenuItem key={table} onSelect={() => handleTableChange2(table)}>
-                    {table}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
           <div className="flex w-full items-center justify-between">
             <div className="grid gap-2">
               <div className="flex items-center gap-2">
-              <Select onValueChange={handleTableChange}>
-                  <SelectTrigger className="w-[180px]">
+                <Select onValueChange={handleTableChange} >
+                  <SelectTrigger className="w-[180px] bg-black text-white">
                     <SelectValue placeholder="Select Table" value={selectedTable} />
                   </SelectTrigger>
                   <SelectContent>
@@ -178,7 +180,23 @@ export default function Component() {
                   </SelectContent>
                 </Select>
                 <Select onValueChange={setSelectedColumn}>
-                  <SelectTrigger className="w-[180px]" disabled={!selectedTable}>
+                  <SelectTrigger className="w-[180px]  bg-black text-white" >
+                    <SelectValue placeholder="Select Column" value={selectedColumn} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedTable &&
+                      Object.keys(schema[selectedTable]).map((column) => (
+                        <SelectItem key={column} value={column}>
+                          {column}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+
+                <Select onValueChange={handleTableChange}>
+                </Select>
+                <Select onValueChange={setSelectedColumn}>
+                  <SelectTrigger className="w-[180px] bg-black text-white" >
                     <SelectValue placeholder="Select Column" value={selectedColumn} />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,38 +209,65 @@ export default function Component() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2">
-              <Select onValueChange={handleTableChange2}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select Table" value={selectedTable2} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(schema).map((table) => (
-                      <SelectItem key={table} value={table}>
-                        {table}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select onValueChange={setSelectedColumn2}>
-                  <SelectTrigger className="w-[180px]" disabled={!selectedTable2}>
-                    <SelectValue placeholder="Select Column" value={selectedColumn2} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedTable2 &&
-                      Object.keys(schema[selectedTable2]).map((column) => (
-                        <SelectItem key={column} value={column}>
-                          {column}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
             </div>
           </div>
         </div>
+
+
+
+
         <div className="mt-4 flex w-full items-center justify-between">
-          <div className="font-semibold">Chart Options</div>
+          <div className="flex gap-x-3">
+            <div className="font-semibold text-2xl">Chart Options</div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
+                  <BarChartIcon className="h-4 w-4 " />
+                  {`${selectedChart} sub charts`}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup >
+                  {selectedChart === "Line" &&
+                    <>
+                      <DropdownMenuRadioItem value="Normal" onClick={() => setLinearType("Normal")}>Normal</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Step" onClick={() => setLinearType("Step")}>Step</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Linear" onClick={() => setLinearType("Linear")}>Linear</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Dots" onClick={() => setLinearType("Dots")}>Dots</DropdownMenuRadioItem>
+                    </>
+                  }
+                  {selectedChart === "Bar" &&
+                    <>
+                      <DropdownMenuRadioItem value="Normal">bar</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Step">bar</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Linear">bar</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Dots">bar</DropdownMenuRadioItem>
+                    </>
+                  }
+
+                  {selectedChart === "Area" &&
+                    <>
+                      <DropdownMenuRadioItem value="Normal">Area</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Step">Area</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Linear">Area</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Dots">Area</DropdownMenuRadioItem>
+                    </>
+                  }
+
+                  {selectedChart === "Pie" &&
+                    <>
+                      <DropdownMenuRadioItem value="Normal">Pie</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Step">Pie</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Linear">Pie</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Dots">Pie</DropdownMenuRadioItem>
+                    </>
+                  }
+
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -240,41 +285,76 @@ export default function Component() {
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
                   <BarChartIcon className="h-4 w-4" />
-                  Chart Type
+                  {`${selectedChart}  charts`}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup value="bar">
-                  <DropdownMenuRadioItem value="bar">Bar</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="line">Line</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="area">Area</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="pie">Pie</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup value={selectedChart}>
+                  <DropdownMenuRadioItem value="bar" onClick={() => setSelectedChart("Bar")}>Bar</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="line" onClick={() => setSelectedChart("Line")}>Line</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="area" onClick={() => setSelectedChart("Area")}>Area</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="pie" onClick={() => setSelectedChart("Pie")}>Pie</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+
           </div>
         </div>
         <div className="mt-8 w-full">
-          <AreachartChart className="w-full aspect-[4/3]" />
+          {selectedChart == "" ? (
+            <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
+              <div>
+                <h1 className="text-5xl font-bold">Welcome to Visualisation</h1>
+                <h2 className="text-3xl font-semibold">Let's get started</h2>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full aspect-w-6 aspect-h-3">  
+              {LinearType == "Normal" && (
+                <div className="w-full h-full">
+                  <Normal />
+                </div>
+              )}
+              {LinearType == "Step" && (
+                <div className="w-full h-full">
+                  <Step />
+                </div>
+              )}
+              {LinearType == "Linear" && (
+                <div className="w-full h-full">
+                  <Linear />
+                </div>
+              )}
+              {LinearType == "Dots" && (
+                <div className="w-full h-full">
+                  <Dots />
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+
+
       </div>
       <div className="flex flex-col border-l bg-background p-4">
-        
+
         <div className="mt-4 font-semibold">Export</div>
         <div className="grid gap-2">
-          <Button variant="outline" size="sm" className="justify-start">
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
             <FileIcon className="h-4 w-4 mr-2" />
             CSV
           </Button>
-          <Button variant="outline" size="sm" className="justify-start">
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
             <FileIcon className="h-4 w-4 mr-2" />
             JSON
           </Button>
-          <Button variant="outline" size="sm" className="justify-start">
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
             <FileIcon className="h-4 w-4 mr-2" />
             Excel
           </Button>
@@ -284,57 +364,57 @@ export default function Component() {
   )
 }
 
-function AreachartChart(props:any) {
-  return (
-    <div {...props}>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-        className="min-h-[300px]"
-      >
-        <AreaChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-          <Area
-            dataKey="desktop"
-            type="natural"
-            fill="var(--color-desktop)"
-            fillOpacity={0.4}
-            stroke="var(--color-desktop)"
-          />
-        </AreaChart>
-      </ChartContainer>
-    </div>
-  )
-}
+// function AreachartChart(props: any) {
+//   return (
+//     <div {...props}>
+//       <ChartContainer
+//         config={{
+//           desktop: {
+//             label: "Desktop",
+//             color: "hsl(var(--chart-1))",
+//           },
+//         }}
+//         className="min-h-[300px]"
+//       >
+//         <AreaChart
+//           accessibilityLayer
+//           data={[
+//             { month: "January", desktop: 186 },
+//             { month: "February", desktop: 305 },
+//             { month: "March", desktop: 237 },
+//             { month: "April", desktop: 73 },
+//             { month: "May", desktop: 209 },
+//             { month: "June", desktop: 214 },
+//           ]}
+//           margin={{
+//             left: 12,
+//             right: 12,
+//           }}
+//         >
+//           <CartesianGrid vertical={false} />
+//           <XAxis
+//             dataKey="month"
+//             tickLine={false}
+//             axisLine={false}
+//             tickMargin={8}
+//             tickFormatter={(value) => value.slice(0, 3)}
+//           />
+//           <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+//           <Area
+//             dataKey="desktop"
+//             type="natural"
+//             fill="var(--color-desktop)"
+//             fillOpacity={0.4}
+//             stroke="var(--color-desktop)"
+//           />
+//         </AreaChart>
+//       </ChartContainer>
+//     </div>
+//   )
+// }
 
 
-function BarChartIcon(props:React.SVGProps<SVGSVGElement>) {
+function BarChartIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -356,7 +436,7 @@ function BarChartIcon(props:React.SVGProps<SVGSVGElement>) {
 }
 
 
-function FileIcon(props:React.SVGProps<SVGSVGElement>) {
+function FileIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -377,7 +457,7 @@ function FileIcon(props:React.SVGProps<SVGSVGElement>) {
 }
 
 
-function LinechartChart(props:any) {
+function LinechartChart(props: any) {
   return (
     <div {...props}>
       <ChartContainer
@@ -420,7 +500,7 @@ function LinechartChart(props:any) {
 }
 
 
-function PaletteIcon(props:React.SVGProps<SVGSVGElement>) {
+function PaletteIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -444,7 +524,7 @@ function PaletteIcon(props:React.SVGProps<SVGSVGElement>) {
 }
 
 
-function PlusIcon(props:React.SVGProps<SVGSVGElement>) {
+function PlusIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -465,7 +545,7 @@ function PlusIcon(props:React.SVGProps<SVGSVGElement>) {
 }
 
 
-function XIcon(props:React.SVGProps<SVGSVGElement>) {
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

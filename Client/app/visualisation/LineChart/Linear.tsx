@@ -33,7 +33,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Component() {
+export function Linear() {
   return (
     <Card>
       <CardHeader>

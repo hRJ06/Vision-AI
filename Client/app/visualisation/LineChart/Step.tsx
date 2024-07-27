@@ -18,12 +18,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
+  { month: 3, desktop: 10 },
+  { month: 8, desktop: 23 },
+  { month: 5, desktop: 11 },
+  { month: 3, desktop: 30 },
+  { month: 1, desktop: 17 },
+  { month: 7, desktop: 2 },
 ]
 
 const chartConfig = {
@@ -33,9 +33,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Component() {
+export function Step() {
   return (
-    <Card>
+    <Card className="bg-black text-white">
       <CardHeader>
         <CardTitle>Line Chart - Step</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
@@ -56,18 +56,18 @@ export function Component() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value.toString().slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent hideLabel className="bg-black text-white"/>}
             />
             <Line
               dataKey="desktop"
               type="step"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={false}
+              stroke="white"
+              strokeWidth={4}
+              dot={true}
             />
           </LineChart>
         </ChartContainer>

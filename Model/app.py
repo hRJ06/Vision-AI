@@ -13,6 +13,7 @@ from langchain import OpenAI
 import json
 import re
 import os
+import requests
 
 app = Flask(__name__)
 
@@ -243,7 +244,7 @@ def fetch_tables():
         response = genai.GenerativeModel('gemini-1.5-flash').generate_content(prompt)
         
         response_text = response.text.replace('\n', '').replace('\\', '')
-        # Remove unnecessary delimiters and convert to a Python dictionary
+        
         cleaned_response = response_text.strip("```pythontables = ")
         no_spaces = re.sub(r'\s+', '', cleaned_response)
         replaced_response = no_spaces.replace("'", '""')      
@@ -257,11 +258,60 @@ def fetch_tables():
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/fetch-table-data', methods=['POST'])
+def fetch_table_data():
+    data = request.json
+    table = data.get('table')
+    first_column = data.get('first_column')
+    second_column = data.get('second_column')
+    user = data.get('User')
+    password = data.get('Password')
+    host = data.get('Host')
+    port = data.get('Port')
+    database = data.get('Database')
+
+    if not all([user, password, host, port, database, table, first_column, second_column]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    try:
+        db = init_db(user, password, host, port, database)
+        print("Database connected")
+        sql_query_first = f"SELECT {first_column} FROM {table};"
+        sql_query_second = f"SELECT {second_column} FROM {table};"
+        first_column_data = db.run(sql_query_first)
+        second_column_data = db.run(sql_query_second)
+        def clean_and_format_data(data):
+            result = ''
+            for row in data:
+                concatenated = ''.join(str(element).strip() for element in row if element is not None)
+                for char in concatenated:
+                    if char == '(':
+                        continue
+                    elif char == ')':
+                        if result and not result.endswith(','):
+                            result += ', '
+                    else:
+                        result += char
+            result = result.rstrip(', ').strip()
+            result = result.replace(',,',',')
+            return result[:-2] + result[-1]
+        first_data = clean_and_format_data(first_column_data)
+        second_data = clean_and_format_data(second_column_data)
+        formatted_first_data = f"{first_data}"
+        formatted_second_data = f"{second_data}"
+        return jsonify({
+            "status": "success",
+            "first_data": formatted_first_data,
+            "second_data": formatted_second_data
+        }), 200
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 
     
-    
-
-
 @app.route('/upload_csv', methods=['POST'])
 def upload_csv():
     if 'file' not in request.files:

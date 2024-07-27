@@ -108,12 +108,12 @@ export default function Component() {
 
   const handleTableChange = (value:any) => {
     setSelectedTable(value);
-    setSelectedColumn(""); // Reset column selection when table changes
+    setSelectedColumn(""); 
   };
 
   const handleTableChange2 = (value:any) => {
     setSelectedTable2(value);
-    setSelectedColumn2(""); // Reset column selection when table changes
+    setSelectedColumn2(""); 
   };
 
   return (

@@ -7,109 +7,124 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
-import { Dots } from "./LineChart/Dots"
-import { Linear } from "./LineChart/Linear"
-import { Normal } from "./LineChart/Normal"
-import { Step } from "./LineChart/Step"
+import { Dots } from "./(LineChart)/Dots"
+import { Linear } from "./(LineChart)/Linear"
+import { Normal } from "./(LineChart)/Normal"
+import { Step } from "./(LineChart)/Step"
+import axios from "axios"
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 
-const databaseSchema = `{
-  "announcements": {
-    "id": "INTEGER",
-    "content": "VARCHAR(255)",
-    "course_id": "INTEGER",
-    "name": "VARCHAR(255)"
-  },
-  "assignments": {
-    "id": "INTEGER",
-    "assignment_name": "VARCHAR(255)",
-    "deadline": "DATETIME(6)",
-    "description": "VARCHAR(255)",
-    "course_id": "INTEGER",
-    "full_marks": "INTEGER"
-  },
-  "course_archived_users": {
-    "course_id": "INTEGER",
-    "archived_user_id": "INTEGER"
-  },
-  "courses": {
-    "id": "INTEGER",
-    "course_name": "VARCHAR(255)",
-    "instructor_id": "INTEGER",
-    "code": "VARCHAR(255)",
-    "meeting_link": "VARCHAR(255)",
-    "cover_photo": "VARCHAR(255)"
-  },
-  "doubt": {
-    "id": "INTEGER",
-    "content": "VARCHAR(255)",
-    "course_id": "INTEGER",
-    "user_id": "INTEGER"
-  },
-  "enrolled_users_courses": {
-    "course_id": "INTEGER",
-    "user_id": "INTEGER"
-  },
-  "files": {
-    "id": "INTEGER",
-    "file_name": "VARCHAR(255)",
-    "file_path": "VARCHAR(255)",
-    "submission_id": "INTEGER",
-    "assignment_id": "INTEGER",
-    "announcement_id": "INTEGER"
-  },
-  "form": {
-    "id": "INTEGER"
-  },
-  "form_item": {
-    "id": "INTEGER",
-    "question": "VARCHAR(255)",
-    "answer": "VARCHAR(255)",
-    "options": "VARBINARY(255)"
-  },
-  "message": {
-    "id": "INTEGER",
-    "chat_id": "INTEGER",
-    "sender_id": "INTEGER",
-    "content": "VARCHAR(10000)",
-    "course_id": "INTEGER",
-    "type": "VARCHAR(255)",
-    "doubt_id": "INTEGER"
-  },
-  "private_chat": {
-    "id": "INTEGER",
-    "assignment_id": "INTEGER",
-    "user_id": "INTEGER"
-  },
-  "submissions": {
-    "id": "INTEGER",
-    "late_status": "BIT(1)",
-    "submission_date_time": "DATETIME(6)",
-    "assignment_id": "INTEGER",
-    "user_id": "INTEGER",
-    "marks": "INTEGER",
-    "comment": "VARCHAR(255)"
-  },
-  "users": {
-    "id": "INTEGER",
-    "email": "VARCHAR(255)",
-    "first_name": "VARCHAR(255)",
-    "last_name": "VARCHAR(255)",
-    "password": "VARCHAR(255)",
-    "role": "ENUM('INSTRUCTOR','STUDENT')",
-    "reset_password_token": "VARCHAR(255)",
-    "reset_password_token_expires": "DATETIME(6)"
-  }
-}`;
+// const databaseSchema = `{
+//   "announcements": {
+//     "id": "INTEGER",
+//     "content": "VARCHAR(255)",
+//     "course_id": "INTEGER",
+//     "name": "VARCHAR(255)"
+//   },
+//   "assignments": {
+//     "id": "INTEGER",
+//     "assignment_name": "VARCHAR(255)",
+//     "deadline": "DATETIME(6)",
+//     "description": "VARCHAR(255)",
+//     "course_id": "INTEGER",
+//     "full_marks": "INTEGER"
+//   },
+//   "course_archived_users": {
+//     "course_id": "INTEGER",
+//     "archived_user_id": "INTEGER"
+//   },
+//   "courses": {
+//     "id": "INTEGER",
+//     "course_name": "VARCHAR(255)",
+//     "instructor_id": "INTEGER",
+//     "code": "VARCHAR(255)",
+//     "meeting_link": "VARCHAR(255)",
+//     "cover_photo": "VARCHAR(255)"
+//   },
+//   "doubt": {
+//     "id": "INTEGER",
+//     "content": "VARCHAR(255)",
+//     "course_id": "INTEGER",
+//     "user_id": "INTEGER"
+//   },
+//   "enrolled_users_courses": {
+//     "course_id": "INTEGER",
+//     "user_id": "INTEGER"
+//   },
+//   "files": {
+//     "id": "INTEGER",
+//     "file_name": "VARCHAR(255)",
+//     "file_path": "VARCHAR(255)",
+//     "submission_id": "INTEGER",
+//     "assignment_id": "INTEGER",
+//     "announcement_id": "INTEGER"
+//   },
+//   "form": {
+//     "id": "INTEGER"
+//   },
+//   "form_item": {
+//     "id": "INTEGER",
+//     "question": "VARCHAR(255)",
+//     "answer": "VARCHAR(255)",
+//     "options": "VARBINARY(255)"
+//   },
+//   "message": {
+//     "id": "INTEGER",
+//     "chat_id": "INTEGER",
+//     "sender_id": "INTEGER",
+//     "content": "VARCHAR(10000)",
+//     "course_id": "INTEGER",
+//     "type": "VARCHAR(255)",
+//     "doubt_id": "INTEGER"
+//   },
+//   "private_chat": {
+//     "id": "INTEGER",
+//     "assignment_id": "INTEGER",
+//     "user_id": "INTEGER"
+//   },
+//   "submissions": {
+//     "id": "INTEGER",
+//     "late_status": "BIT(1)",
+//     "submission_date_time": "DATETIME(6)",
+//     "assignment_id": "INTEGER",
+//     "user_id": "INTEGER",
+//     "marks": "INTEGER",
+//     "comment": "VARCHAR(255)"
+//   },
+//   "users": {
+//     "id": "INTEGER",
+//     "email": "VARCHAR(255)",
+//     "first_name": "VARCHAR(255)",
+//     "last_name": "VARCHAR(255)",
+//     "password": "VARCHAR(255)",
+//     "role": "ENUM('INSTRUCTOR','STUDENT')",
+//     "reset_password_token": "VARCHAR(255)",
+//     "reset_password_token_expires": "DATETIME(6)"
+//   }
+// }`;
 
 export default function Component() {
 
-
+  const { toast } = useToast();
   const [selectedChart, setSelectedChart] = useState("");
   const [LinearType, setLinearType] = useState("");
-  const schema = JSON.parse(databaseSchema);
+
+  const [databaseSchema, setdatabaseSchema] = useState("");
+  let schema = null;
+
   const [selectedTable, setSelectedTable] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
-  
+  const [selectedColumn2, setSelectedColumn2] = useState("");
+
+  const [Host, setHost] = useState("");
+  const [User, setUser] = useState("");
+  const [Password, setPassword] = useState("");
+  const [Port, setPort] = useState("");
+  const [Database, setDatabase] = useState("");
+
+  const [options, setoptions] = useState("Sum");
+  const [data, setdata] = useState([]);
 
 
   const handleTableChange = (value: any) => {
@@ -118,8 +133,105 @@ export default function Component() {
   };
 
 
+  const connectToDB = async () => {
+    const data = {
+      User: User,
+      Password: Password,
+      Host: Host,
+      Port: Port,
+      Database: Database,
+    }
+
+    try {
+      let response = await axios.post("http://127.0.0.1:5000/fetch-table", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data.status === "success") {
+        setdatabaseSchema(response.data.tables_info);
+        schema = JSON.parse(databaseSchema);
+        toast({
+          variant: "success",
+          title: "Connection Successful",
+          description: "The connection was successful.",
+        });
+      } else {
+        toast({
+          title: "Connection Failed",
+          variant: "destructive",
+          description:
+            response.data.message || "There was an error connecting.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+  }
 
 
+  const LineChart = async () => {
+    const data = {
+      table: selectedTable,
+      first_column: selectedColumn,
+      second_column: selectedColumn2,
+      User: User,
+      Password: Password,
+      Host: Host,
+      Port: Port,
+      Database: Database,
+      Type: selectedChart,
+      Option: options
+    };
+
+    try {
+      let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data.status === "success") {
+        const firstData = JSON.parse(response.data.first_data);
+        const secondData = JSON.parse(response.data.second_data);
+
+        const formattedData = firstData.map((item:any, index:any) => ({
+          [selectedColumn]: item,
+          [selectedColumn2]: secondData[index]
+        }));
+        setdata(formattedData);
+
+        toast({
+          variant: "success",
+          title: "Connection Successful",
+          description: "The connection was successful.",
+        });
+      } else {
+        toast({
+          title: "Connection Failed",
+          variant: "destructive",
+          description:
+            response.data.message || "There was an error connecting.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+  }
 
 
 
@@ -129,23 +241,28 @@ export default function Component() {
         <div className="mb-4 font-semibold">Database Credentials</div>
         <div className="grid gap-2">
           <div className="grid gap-1">
+
             <Label htmlFor="host">Host</Label>
-            <Input id="host" placeholder="localhost" />
+            <Input id="host" placeholder="localhost" onChange={(e) => setHost(e.target.value)} value={Host} />
           </div>
           <div className="grid gap-1">
             <Label htmlFor="port">Port</Label>
-            <Input id="port" placeholder="5432" />
+            <Input id="port" placeholder="5432" onChange={(e) => setPort(e.target.value)} value={Port} />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="username">Username</Label>
-            <Input id="username" placeholder="your-username" />
+            <Label htmlFor="username">User</Label>
+            <Input id="username" placeholder="your-username" onChange={(e) => setUser(e.target.value)} value={User} />
+          </div>
+          <div className="grid gap-1">
+            <Label htmlFor="database">Database</Label>
+            <Input id="database" placeholder="your-database" onChange={(e) => setDatabase(e.target.value)} value={Database} />
           </div>
           <div className="grid gap-1">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="your-password" />
+            <Input id="password" type="password" placeholder="your-password" onChange={(e) => setPassword(e.target.value)} value={Password} />
           </div>
         </div>
-        <Button className="mt-4">Connect</Button>
+        <Button className="mt-4" onClick={() => connectToDB()}>Connect</Button>
       </div>
 
       <div className="flex flex-col items-center justify-center bg-muted/40 p-4">
@@ -155,7 +272,7 @@ export default function Component() {
             <DropdownMenu>
 
               <DropdownMenuContent align="end">
-                {Object.keys(schema).map((table) => (
+                {schema && Object.keys(schema).map((table) => (
                   <DropdownMenuItem key={table} onSelect={() => handleTableChange(table)}>
                     {table}
                   </DropdownMenuItem>
@@ -172,7 +289,7 @@ export default function Component() {
                     <SelectValue placeholder="Select Table" value={selectedTable} />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.keys(schema).map((table) => (
+                    {schema && Object.keys(schema).map((table) => (
                       <SelectItem key={table} value={table}>
                         {table}
                       </SelectItem>
@@ -184,7 +301,7 @@ export default function Component() {
                     <SelectValue placeholder="Select Column" value={selectedColumn} />
                   </SelectTrigger>
                   <SelectContent>
-                    {selectedTable &&
+                    {selectedTable && schema &&
                       Object.keys(schema[selectedTable]).map((column) => (
                         <SelectItem key={column} value={column}>
                           {column}
@@ -193,14 +310,12 @@ export default function Component() {
                   </SelectContent>
                 </Select>
 
-                <Select onValueChange={handleTableChange}>
-                </Select>
-                <Select onValueChange={setSelectedColumn}>
+                <Select onValueChange={setSelectedColumn2}>
                   <SelectTrigger className="w-[180px] bg-black text-white" >
-                    <SelectValue placeholder="Select Column" value={selectedColumn} />
+                    <SelectValue placeholder="Select Column" value={selectedColumn2} />
                   </SelectTrigger>
                   <SelectContent>
-                    {selectedTable &&
+                    {selectedTable && schema &&
                       Object.keys(schema[selectedTable]).map((column) => (
                         <SelectItem key={column} value={column}>
                           {column}
@@ -208,6 +323,7 @@ export default function Component() {
                       ))}
                   </SelectContent>
                 </Select>
+                <Button className="bg-black " onClick={() => LineChart()}>Generate</Button>
               </div>
 
             </div>
@@ -314,25 +430,25 @@ export default function Component() {
               </div>
             </div>
           ) : (
-            <div className="w-full aspect-w-6 aspect-h-3">  
+            <div className="w-full aspect-w-6 aspect-h-3">
               {LinearType == "Normal" && (
                 <div className="w-full h-full">
-                  <Normal />
+                  <Normal data={data}/>
                 </div>
               )}
               {LinearType == "Step" && (
                 <div className="w-full h-full">
-                  <Step />
+                  <Step data={data}/>
                 </div>
               )}
               {LinearType == "Linear" && (
                 <div className="w-full h-full">
-                  <Linear />
+                  <Linear data={data}/>
                 </div>
               )}
               {LinearType == "Dots" && (
                 <div className="w-full h-full">
-                  <Dots />
+                  <Dots data={data}/>
                 </div>
               )}
             </div>

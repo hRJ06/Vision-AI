@@ -278,7 +278,7 @@ def fetch_table_data():
     try:
         db = init_db(user, password, host, port, database)
         print("Database connected")
-        if type != "X-Y":
+        if type != "Line":
             option = int(option)
             segment = f"SUM({second_column})" if option != 1 else "COUNT(*)"
             sql_query_first = f"SELECT DISTINCT {first_column} AS {first_column} FROM {table} ORDER BY {first_column} ASC"

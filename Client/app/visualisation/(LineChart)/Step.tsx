@@ -33,7 +33,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Step() {
+export function Step({data}:{data:object[]}) {
   return (
     <Card className="bg-black text-white">
       <CardHeader>
@@ -44,7 +44,7 @@ export function Step() {
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{
               left: 12,
               right: 12,

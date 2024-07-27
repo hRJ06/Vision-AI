@@ -31,7 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function Normal() {
+export function Normal({data}:{data:object[]}) {
   return (
     <Card>
       <CardHeader>
@@ -42,7 +42,7 @@ export function Normal() {
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{
               left: 12,
               right: 12,

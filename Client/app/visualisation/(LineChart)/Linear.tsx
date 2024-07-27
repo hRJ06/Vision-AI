@@ -18,12 +18,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
+  { month: "January", desktop: 186 },
+  { month: "February", desktop: 305 },
+  { month: "March", desktop: 237 },
+  { month: "April", desktop: 73 },
+  { month: "May", desktop: 209 },
+  { month: "June", desktop: 214 },
 ]
 
 const chartConfig = {
@@ -31,24 +31,20 @@ const chartConfig = {
     label: "Desktop",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
-  },
 } satisfies ChartConfig
 
-export function Dots() {
+export function Linear({data}:{data:object[]}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Line Chart - Dots</CardTitle>
+        <CardTitle>Line Chart - Linear</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={data}
             margin={{
               left: 12,
               right: 12,
@@ -68,15 +64,10 @@ export function Dots() {
             />
             <Line
               dataKey="desktop"
-              type="natural"
+              type="linear"
               stroke="var(--color-desktop)"
               strokeWidth={2}
-              dot={{
-                fill: "var(--color-desktop)",
-              }}
-              activeDot={{
-                r: 6,
-              }}
+              dot={false}
             />
           </LineChart>
         </ChartContainer>

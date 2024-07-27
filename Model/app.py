@@ -269,6 +269,8 @@ def fetch_table_data():
     host = data.get('Host')
     port = data.get('Port')
     database = data.get('Database')
+    type = data.get('Type')
+    option = data.get('Option')
 
     if not all([user, password, host, port, database, table, first_column, second_column]):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
@@ -276,10 +278,32 @@ def fetch_table_data():
     try:
         db = init_db(user, password, host, port, database)
         print("Database connected")
-        sql_query_first = f"SELECT {first_column} FROM {table};"
-        sql_query_second = f"SELECT {second_column} FROM {table};"
+        if type != "X-Y":
+            option = int(option)
+            segment = f"SUM({second_column})" if option != 1 else "COUNT(*)"
+            sql_query_first = f"SELECT DISTINCT {first_column} AS {first_column} FROM {table} ORDER BY {first_column} ASC"
+            sql_query_second = f"SELECT {segment} AS {second_column} FROM {table} GROUP BY {first_column} ORDER BY {first_column} ASC"
+        else:
+            sql_query_first = f"SELECT {first_column} FROM {table};"
+            sql_query_second = f"SELECT {second_column} FROM {table};"
+        
         first_column_data = db.run(sql_query_first)
         second_column_data = db.run(sql_query_second)
+        def replace_consecutive_commas(input_string):
+            result = []
+            i = 0
+            length = len(input_string)
+            while i < length:
+                if input_string[i] == ',':            
+                    if i + 1 < length and input_string[i + 1] == ',':
+                        while i + 1 < length and input_string[i + 1] == ',':
+                            i += 1
+                    result.append(',')
+                else:
+                    result.append(input_string[i])
+                i += 1
+            return ''.join(result)
+    
         def clean_and_format_data(data):
             result = ''
             for row in data:
@@ -293,7 +317,10 @@ def fetch_table_data():
                     else:
                         result += char
             result = result.rstrip(', ').strip()
+            result = result.replace(' ', '')
             result = result.replace(',,',',')
+            result = replace_consecutive_commas(result)
+            result = result.replace('Decimal', '')
             return result[:-2] + result[-1]
         first_data = clean_and_format_data(first_column_data)
         second_data = clean_and_format_data(second_column_data)

@@ -10,34 +10,61 @@ from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
 from langchain import OpenAI
-import json
 import re
 import os
-import requests
 from flask_pymongo import PyMongo
+from datetime import datetime
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/vision"
-db = PyMongo(app).db
+
 
 CORS(app, origin='*')
 
 
 load_dotenv()
 
-
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-pro')
-sessionId=""
+
+os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
+
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
+mongo = PyMongo(app).db
+
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER');
+
 app.secret_key = os.getenv('SECRET_KEY')
 
-#os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
-
-#app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
+if 'Logs' not in mongo.list_collection_names():
+    mongo.create_collection('Logs')
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
     return SQLDatabase.from_uri(db_uri)
+
+def parse_user_agent(user_agent):
+    """
+    A basic function to parse the User-Agent string.
+    This can be replaced with a more sophisticated parser if needed.
+    """
+    if not user_agent:
+        return "Unknown device"
+
+    if "Windows" in user_agent:
+        os = "Windows"
+    elif "Macintosh" in user_agent:
+        os = "Mac OS"
+    elif "Linux" in user_agent:
+        os = "Linux"
+    else:
+        os = "Other"
+
+    if "Mobile" in user_agent:
+        device = "Mobile"
+    else:
+        device = "Desktop"
+
+    return f"{os} - {device}"
 
 def get_sql_chain(db):
     template = """
@@ -109,6 +136,7 @@ def get_response(user_query, db, chat_history):
     return chain.stream({"question": user_query, "chat_history": chat_history})
 
 
+
 @app.route('/connect', methods=['POST'])
 def connect():
     data = request.json  
@@ -127,15 +155,7 @@ def connect():
     
 
     try:
-        dbEntry = db.reports.insert_one({"User": user,"Host": host,"Port": port,"Database": database,"queries": [] })
-        sessionId=dbEntry.inserted_id
-        connection = init_db(user, password, host, port, database)
-        session['db'] = {
-            'user': user,
-            'host': host,
-            'port': port,
-            'database': database
-        }
+        init_db(user, password, host, port, database)
         return jsonify({"status": "success"})
     except Exception as e:
         print("Not Done")
@@ -152,6 +172,15 @@ def chat():
     database = request.json['Database']
     chat_history = session.get("chat_history", [])
     
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+    
+    user_agent = request.headers.get('User-Agent')
+    
+    device_info = parse_user_agent(user_agent)
+
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
         db = init_db(user, password, host, port, database)
@@ -161,10 +190,25 @@ def chat():
             for item in ai_response:
                 ans += item 
             ans = ans.replace('\\_','_')
+            print('ANS', ans)
             chat_history.append(AIMessage(content=ans))
+            
+            collection = mongo['Logs']
+            document = {
+                "device": device_info,
+                "user_ip": user_ip,
+                "user": user,
+                "host": host,
+                "port": port,
+                "database": database,
+                "query": user_query,
+                "response": ans,
+                "createdAt": datetime.utcnow()
+            }
+            collection.insert_one(document)
         else:
-            ai_response = "Database connection not established."
-            chat_history.append(AIMessage(content=ans))
+            response = "Database connection not established."
+            chat_history.append(AIMessage(content=response))
         return jsonify({"response": ans})
     
     return jsonify({"response": ""})

@@ -12,7 +12,6 @@ import google.generativeai as genai
 from langchain import OpenAI
 import re
 import os
-import io
 from flask_pymongo import PyMongo
 from datetime import datetime
 from fpdf import FPDF
@@ -157,8 +156,9 @@ def connect():
     
 
     try:
-        init_db(user, password, host, port, database)
-        return jsonify({"status": "success"})
+        db = init_db(user, password, host, port, database)
+        schema_description = db.get_table_info()
+        return jsonify({"status": "success", "schema_description": schema_description})
     except Exception as e:
         print("Not Done")
         
@@ -214,77 +214,6 @@ def chat():
         return jsonify({"response": ans})
     
     return jsonify({"response": ""})
-
-
-@app.route('/report', methods=['POST'])
-def report():
-    data = request.json  
-    print(data)
-    
-    if not data:
-        return jsonify({"status": "error", "message": "No data provided"}), 400
-
-    user = data.get('User')
-    password = data.get('Password')
-    host = data.get('Host')
-    port = data.get('Port')
-    database = data.get('Database')
-
-    if not all([user, password, host, port, database]):
-        return jsonify({"status": "error", "message": "Missing required fields"}), 400
-
-    try:
-        db = init_db(user, password, host, port, database)
-        schema_description = db.get_table_info()
-
-        prompts = [
-            f"Provide 6 vulnerabilities of the schema tables present in the schema {schema_description}. Please only give response not further question",
-            f"Provide the normal form of the schema data annotation {schema_description}. Please only give response not further question",
-            f"Provide the tables along with the data types in a list format like 1.2.3 The schema is {schema_description}. Please only give response not further question"
-        ]
-
-        responses = []
-        for i, prompt in enumerate(prompts, start=1):
-            query = f"{prompt}"
-            result = model.generate_content(query)
-            response_text = result.text
-            print(response_text)
-            responses.append({"title": f"Prompt {i}: {prompt}", "response": response_text})
-            
-        pdf = FPDF()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-
-        for item in responses:
-            pdf.set_text_color(0, 0, 0)
-            pdf.set_font("Arial", 'B', 16)
-            pdf.cell(200, 10, txt=item['title'], ln=True)
-            pdf.set_font("Arial", size=12)
-            pdf.set_text_color(50, 50, 50)
-            
-            lines = item['response'].split('\n')
-            for line in lines:
-                if line.startswith("**") and line.endswith("**"):
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.multi_cell(0, 10, txt=line[2:-2])
-                    pdf.set_font("Arial", size=12)
-                elif line[0].isdigit() and line[1] == '.' and line[2].isdigit() and line[3] == '.':
-                    pdf.multi_cell(0, 10, txt=line, align='L')
-                else:
-                    pdf.multi_cell(0, 10, txt=line)
-
-            pdf.ln(10)
-
-        pdf_buffer = io.BytesIO()
-        pdf.output(pdf_buffer)
-        pdf_buffer.seek(0)
-
-        return send_file(pdf_buffer, as_attachment=True, download_name='report.pdf', mimetype='application/pdf')
-    
-    except Exception as e:
-        print("Error:", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
     
 @app.route('/fetch-table', methods=['POST'])
 def fetch_tables():

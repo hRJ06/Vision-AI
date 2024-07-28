@@ -22,13 +22,15 @@ import {
 
 export function Donut({ Data }: { Data: object[] }) {
   console.log("Data", Data);
-  const data = [
-    { marks: "chrome", visitors: 123 },
-    { macdbrks: "safari", visitors: 456 },
-    { marhdks: "firefox", visitors: 234 },
-    { mardmcks: "edge", visitors: 345 },
-    { marjfks: "other", visitors: 200 }
-  ];
+  // const data = [
+  //   { marks: 10, user: 2 },
+  //   { marks: 12, user: 1 },
+  //   { marks: 17, user: 5 },
+  //   { marks: 10, user: 6 },
+  //   { marks: 13, user: 8 },
+  // ];
+
+  const data = Data || [];
   
   const generateChartConfig = (data) => {
     // Collect unique keys excluding 'visitors'
@@ -69,11 +71,11 @@ export function Donut({ Data }: { Data: object[] }) {
   const chartConfig = generateChartConfig(data);
   
   // Map the data and add the fill color based on chartConfig
-  const mappedData = data.map((item) => {
+  const mappedData = data.map((item, index) => {
     const keys = Object.keys(item);
     const key = keys.find(k => k !== 'visitors'); // Find the key that's not 'visitors'
     return {
-      [key]: item[key],
+      [`${key}_${index}`]: item[key], // Concatenate index with key
       visitors: item.visitors,
       fill: chartConfig[key] ? chartConfig[key].color : 'black' // Assign color from chartConfig
     };

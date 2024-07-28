@@ -14,10 +14,13 @@ import json
 import re
 import os
 import requests
+from flask_pymongo import PyMongo
 
 app = Flask(__name__)
+app.config["MONGO_URI"] = "mongodb://localhost:27017/vision"
+db = PyMongo(app).db
 
-CORS(app, origin='*');
+CORS(app, origin='*')
 
 
 load_dotenv()
@@ -25,12 +28,12 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-pro')
-
+sessionId=""
 app.secret_key = os.getenv('SECRET_KEY')
 
-os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
+#os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
 
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER');
+#app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER')
 
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
@@ -105,10 +108,11 @@ def get_response(user_query, db, chat_history):
     )
     return chain.stream({"question": user_query, "chat_history": chat_history})
 
+
 @app.route('/connect', methods=['POST'])
 def connect():
     data = request.json  
-    print(data);
+    print(data)
     if not data:
         return jsonify({"status": "error", "message": "No data provided"}), 400
 
@@ -120,9 +124,12 @@ def connect():
 
     if not all([user, password, host, port, database]):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
+    
 
     try:
-        db = init_db(user, password, host, port, database)
+        dbEntry = db.reports.insert_one({"User": user,"Host": host,"Port": port,"Database": database,"queries": [] })
+        sessionId=dbEntry.inserted_id
+        connection = init_db(user, password, host, port, database)
         session['db'] = {
             'user': user,
             'host': host,
@@ -131,7 +138,8 @@ def connect():
         }
         return jsonify({"status": "success"})
     except Exception as e:
-        print("Not Done");
+        print("Not Done")
+        
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/chat', methods=['POST'])
@@ -385,4 +393,4 @@ def manipulate_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)

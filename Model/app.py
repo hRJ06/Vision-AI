@@ -6,14 +6,16 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from flask_cors import CORS
 from langchain_groq import ChatGroq
-from flask import Flask, request, session, jsonify
+from flask import Flask, request, session, jsonify, send_file
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
 from langchain import OpenAI
 import re
 import os
+import io
 from flask_pymongo import PyMongo
 from datetime import datetime
+from fpdf import FPDF
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ CORS(app, origin='*')
 load_dotenv()
 
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY');
 
@@ -232,48 +234,58 @@ def report():
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     try:
-        
         db = init_db(user, password, host, port, database)
-        print("Database connected")
-        
-        
-        prompt_text = "Give me the datatypes of each table field and relationships between the tables in the database."
-        
-        
-        def get_schema_info(_):
-            return db.get_table_info()
+        schema_description = db.get_table_info()
 
-        
-        schema_prompt = ChatPromptTemplate.from_template(prompt_text)
-        llm = ChatGroq(model="Mixtral-8x7b-32768", temperature=0)
-        
-        
-        schema_chain = (
-            RunnablePassthrough.assign(schema=get_schema_info)
-            | schema_prompt
-            | llm.bind(stop=["\nSQL Result:"])
-            | StrOutputParser()
-        )
-        
-        
-        schema_description = schema_chain.stream({"question": prompt_text, "chat_history": []})
-        
-        
-        postfix = {"schema_description": schema_description}
-        query=f"give me 4 vulnerabilities in the schema descriptions given below of a database {postfix}"
+        prompts = [
+            f"Provide 6 vulnerabilities of the schema tables present in the schema {schema_description}. Please only give response not further question",
+            f"Provide the normal form of the schema data annotation {schema_description}. Please only give response not further question",
+            f"Provide the tables along with the data types in a list format like 1.2.3 The schema is {schema_description}. Please only give response not further question"
+        ]
 
-        result = model.generate_content(query)
+        responses = []
+        for i, prompt in enumerate(prompts, start=1):
+            query = f"{prompt}"
+            result = model.generate_content(query)
+            response_text = result.text
+            print(response_text)
+            responses.append({"title": f"Prompt {i}: {prompt}", "response": response_text})
+            
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
 
+        for item in responses:
+            pdf.set_text_color(0, 0, 0)
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(200, 10, txt=item['title'], ln=True)
+            pdf.set_font("Arial", size=12)
+            pdf.set_text_color(50, 50, 50)
+            
+            lines = item['response'].split('\n')
+            for line in lines:
+                if line.startswith("**") and line.endswith("**"):
+                    pdf.set_font("Arial", 'B', 12)
+                    pdf.multi_cell(0, 10, txt=line[2:-2])
+                    pdf.set_font("Arial", size=12)
+                elif line[0].isdigit() and line[1] == '.' and line[2].isdigit() and line[3] == '.':
+                    pdf.multi_cell(0, 10, txt=line, align='L')
+                else:
+                    pdf.multi_cell(0, 10, txt=line)
 
-        response = result.text
+            pdf.ln(10)
 
-        return jsonify(response)
+        pdf_buffer = io.BytesIO()
+        pdf.output(pdf_buffer)
+        pdf_buffer.seek(0)
+
+        return send_file(pdf_buffer, as_attachment=True, download_name='report.pdf', mimetype='application/pdf')
     
     except Exception as e:
         print("Error:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
     
-
 @app.route('/fetch-table', methods=['POST'])
 def fetch_tables():
     data = request.json

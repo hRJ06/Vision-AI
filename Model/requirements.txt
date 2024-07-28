@@ -11,3 +11,4 @@ SQLAlchemy==1.4.46
 requests==2.31.0
 openai==0.28.0
 Flask-PyMongo==2.3.0
+fpdf==1.7.2

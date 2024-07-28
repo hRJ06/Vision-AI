@@ -69,15 +69,85 @@ export default function Component() {
     },
   });
 
-  const formatMessage = (message: string) => {
-    return message.split("\n").map((part, index) => {
+  const formatMessage = (message) => {
+    const lines = message.split("\n");
+    let isTable = false;
+    const tableData = [];
+
+    lines.forEach((line) => {
+      const columns = line
+        .split("|")
+        .map((col) => col.trim())
+        .filter(Boolean);
+      if (columns.length > 1) {
+        isTable = true;
+        tableData.push(columns);
+      }
+    });
+
+    if (isTable && tableData.length > 1) {
+      tableData.splice(1, 1);
+      const headers = tableData[0];
+      const rows = tableData.slice(1);
+
+      return (
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", margin: "1em 0" }}
+        >
+          <thead>
+            <tr>
+              {headers.map((header, index) => (
+                <th
+                  key={index}
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    textAlign: "left",
+                    backgroundColor: "#f2f2f2",
+                    borderBottom: "2px solid black",
+                  }}
+                >
+                  {header.charAt(0).toUpperCase() + header.slice(1)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td
+                    key={cellIndex}
+                    style={{
+                      border: "1px solid #ddd",
+                      padding: "8px",
+                    }}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    // Otherwise, process as regular text
+    return lines.map((part, index) => {
       const isList = /^\d+\./.test(part.trim());
 
       const formattedPart = part
-        .split(/(\*\*.*?\*\*)/g)
+        .split(/(\*\*.*?\*\*|mailto:[^\s]+)/g)
         .map((subPart, subIndex) => {
           if (subPart.startsWith("**") && subPart.endsWith("**")) {
             return <b key={subIndex}>{subPart.slice(2, -2)}</b>;
+          } else if (subPart.startsWith("mailto:")) {
+            return (
+              <a key={subIndex} href={subPart} style={{ color: "blue" }}>
+                {subPart}
+              </a>
+            );
           }
           return subPart;
         });
@@ -164,7 +234,7 @@ export default function Component() {
           }
         );
         const llm_response = response.data.response;
-        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. The prompt is given by another llm model. So the prompt is ${llm_response}`;
+        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. Do not add any parameter for colors. The prompt is given by another llm model. So the prompt is ${llm_response}`;
         const result = await model.generateContent(prompt);
         const quickchart_response = await result.response.text();
         const hasLink = containsLink(quickchart_response);
@@ -329,13 +399,19 @@ export default function Component() {
             {/* Adjust height as needed */}
             <div className="flex flex-col gap-4">
               {chats.map((chat, index) => (
-                <div key={index} className={`flex items-start gap-4 ${chat.role === "AI" ?  "":"justify-end"} `}>
+                <div
+                  key={index}
+                  className={`flex items-start gap-4 ${
+                    chat.role === "AI" ? "" : "justify-end"
+                  } `}
+                >
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
-                      src={`${chat.role === "User"
+                      src={`${
+                        chat.role === "User"
                           ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
                           : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
-                        }`}
+                      }`}
                     />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
@@ -343,7 +419,13 @@ export default function Component() {
                     {" "}
                     {/* Fixed width for message box */}
                     <div className="grid gap-1">
-                      <div className={`prose text-muted-foreground  bg-${chat.role === "AI" ? "muted":"primary" }  p-2 rounded-md ${chat.role === "User" ? "text-primary-foreground" : ""}`}>
+                      <div
+                        className={`prose text-muted-foreground  bg-${
+                          chat.role === "AI" ? "muted" : "primary"
+                        }  p-2 rounded-md ${
+                          chat.role === "User" ? "text-primary-foreground" : ""
+                        }`}
+                      >
                         {chat.role === "AI" ? (
                           <>
                             <p>{formatMessage(chat.msg)}</p>
@@ -391,7 +473,6 @@ export default function Component() {
         )}
       </div>
     </div>
-
   );
 }
 

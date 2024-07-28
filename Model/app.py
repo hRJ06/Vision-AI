@@ -158,7 +158,20 @@ def connect():
     try:
         db = init_db(user, password, host, port, database)
         schema_description = db.get_table_info()
-        return jsonify({"status": "success", "schema_description": schema_description})
+        prompt = f"Convert the following table information into a JSON object. Format is table names, then the column name and datatype. Dont add any space or backslash.The table info is:\n\n{schema_description}"
+
+        response = genai.GenerativeModel('gemini-1.5-flash').generate_content(prompt)
+        
+        response_text = response.text.replace('\n', '').replace('\\', '')
+        
+        cleaned_response = response_text.strip("```pythontables = ")
+        no_spaces = re.sub(r'\s+', '', cleaned_response)
+        replaced_response = no_spaces.replace("'", '""')      
+        final_string = ""
+        for ch in replaced_response:
+            if ch != "\\":
+                final_string += ch
+        return jsonify({"status": "success", "schema_description": final_string})
     except Exception as e:
         print("Not Done")
         

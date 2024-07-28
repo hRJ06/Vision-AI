@@ -15,12 +15,19 @@ import { useToast } from "@/components/ui/use-toast";
 import { ChatMessage, DatabaseCredentials } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { DownloadIcon, EllipsisVertical } from "lucide-react";
 
 export default function Component() {
   const { toast } = useToast();
@@ -160,6 +167,23 @@ export default function Component() {
     });
   };
 
+  const download = async () => {
+    console.log('HI')
+    try {
+      const response = await axios.post(" https://f987-103-161-223-11.ngrok-free.app/report", databaseCredentials, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Report.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = {
       Host: values.Host,
@@ -352,10 +376,26 @@ export default function Component() {
       {/* WELCOME CHAT */}
 
       <div className="flex flex-col">
-        <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md">
+        <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
           <h1 className="text-xl lg:text-left text-center font-semibold">
             Vision AI{" "}
           </h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <EllipsisVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <DownloadIcon
+                  className="w-4 h-4 mr-2"
+                  onClick={download}
+                />
+                Download Report
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {chats.length < 2 && !welcome && (

@@ -9,11 +9,11 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'quickchart.io',
+        protocol: "https",
+        hostname: "quickchart.io",
       },
-    ]
-  }
+    ],
+  },
 };
 
 export default nextConfig;

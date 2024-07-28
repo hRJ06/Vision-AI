@@ -3,15 +3,18 @@ import dotenv from "dotenv";
 import express from "express";
 import { uploadImageToCloudinary } from "../utils/ImageUpload.js";
 import OpenAI from "openai";
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
 
 const router = express.Router();
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 async function generateContent(imageUrl, userPrompt) {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const prompt = `You are an expert in ER diagram analysis or database visualization. Based on the image provided at ${imageUrl}, ${userPrompt}. If the image is not a proper ER diagram, respond with a message indicating that a valid ER diagram image is required. Please add \n as delimeter for new line and corresponding delimter for bold, bullet points and list numbers.`;
   const imageParts = await fetchImage(imageUrl);
   const result = await model.generateContent([prompt, imageParts]);
@@ -72,7 +75,7 @@ router.post("/image-analysis", async (req, res) => {
 router.post("/chat", async (req, res) => {
   try {
     const { imageUrl, userPrompt } = req.body;
-    const modifiedPrompt = `${userPrompt}. Please consider this as a valid ER design.`
+    const modifiedPrompt = `${userPrompt}. Please consider this as a valid ER design.`;
     const generatedContent = await generateContent(imageUrl, modifiedPrompt);
     return res.status(200).json({
       message: "Chat response successful",
@@ -85,6 +88,97 @@ router.post("/chat", async (req, res) => {
       message: "Error generating content",
       success: false,
     });
+  }
+});
+
+router.post("/report", async (req, res) => {
+  const data = req.body;
+
+  if (!data) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "No data provided" });
+  }
+
+  const {
+    User: user,
+    Password: password,
+    Host: host,
+    Port: port,
+    Database: database,
+    schemaDescription: schemaDescription,
+  } = data;
+
+  if (!user || !password || !host || !port || !database) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "Missing required fields" });
+  }
+
+  try {
+    const prompts = [
+      `Provide 6 vulnerabilities of the schema. The schema is ${schemaDescription}. Please only give response in 6 points with proper Markdown formatting, and don't ask further questions. Just provide the response.`,
+      `Provide the normal form of the schema. The schema is ${schemaDescription}. Please only give the normal form, nothing else, with proper Markdown formatting, and don't ask further questions. Just provide the response.`,
+      `Provide 6 Scope of Improvements of the schema. The schema is ${schemaDescription}. Please only give response in 6 points with proper Markdown formatting, and don't ask further questions. Just provide the response.`,
+    ];
+    const responses = [];
+
+    for (let i = 0; i < prompts.length; i++) {
+      const completion = await openai.chat.completions.create({
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: prompts[i] },
+        ],
+        model: "gpt-4o-mini",
+      });
+      responses.push(completion.choices[0].message.content);
+    }
+
+    const doc = new PDFDocument({ size: "A4", margin: 50 });
+
+    // Set headers for file download
+    res.setHeader("Content-Disposition", 'attachment; filename="report.pdf"');
+    res.setHeader("Content-Type", "application/pdf");
+
+    doc.pipe(res);
+
+    // Title and header
+    doc
+      .fontSize(18)
+      .font("Helvetica-Bold")
+      .text("Vision AI Report", { align: "center" })
+      .moveDown(2);
+
+    responses.forEach((item) => {
+      let parts = item.split(/\*\*(.*?)\*\*/);
+      let isBold = false;
+
+      parts.forEach((part, index) => {
+        if (index % 2 === 0) {
+          // Regular text
+          if (part.trim().startsWith("- ") || part.trim().startsWith("1. ")) {
+            // Adjust formatting for lists
+            const lines = part.split("\n").filter((line) => line.trim() !== "");
+            lines.forEach((line, idx) => {
+              if (idx > 0) doc.moveDown(0.5); // Move down slightly between list items
+              doc.fontSize(12).font("Helvetica").text(line, { align: "left" });
+            });
+          } else {
+            doc.fontSize(12).font("Helvetica").text(part, { align: "left" });
+          }
+        } else {
+          // Bold text
+          doc.fontSize(12).font("Helvetica-Bold").text(part, { align: "left" });
+        }
+      });
+
+      doc.moveDown();
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ status: "error", message: error.message });
   }
 });
 

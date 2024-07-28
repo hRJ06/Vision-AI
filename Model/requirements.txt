@@ -10,4 +10,4 @@ mysql-connector-python==8.4.0
 SQLAlchemy==1.4.46
 requests==2.31.0
 openai==0.28.0
-Flask-PyMongo
+Flask-PyMongo==2.3.0

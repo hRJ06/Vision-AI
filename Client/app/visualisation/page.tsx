@@ -11,9 +11,19 @@ import { Dots } from "./(LineChart)/Dots"
 import { Linear } from "./(LineChart)/Linear"
 import { Normal } from "./(LineChart)/Normal"
 import { Step } from "./(LineChart)/Step"
+import { CustomDots } from "./(LineChart)/CustomDots"
+import { LabelLine } from "./(LineChart)/LabelLine"
 import axios from "axios"
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { Donut } from "./(PieChart)/Donut"
+import { DonutText } from "./(PieChart)/DonutText"
+import { DonutActive } from "./(PieChart)/DonutActive"
+import { LabelPie } from "./(PieChart)/LabelPie"
+import { Labellist } from "./(PieChart)/LabelList"
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import { DotsColor } from "./(LineChart)/DotsColor"
+
 
 // const databaseSchema = `{
 //   "announcements": {
@@ -106,12 +116,21 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function Component() {
 
+
   const { toast } = useToast();
+
+  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
   const [selectedChart, setSelectedChart] = useState("");
   const [LinearType, setLinearType] = useState("");
+  const [BarType, setBarType] = useState("");
+  const [AreaType, setAreaType] = useState("");
+  const [PieType, setPieType] = useState("");
 
   const [databaseSchema, setdatabaseSchema] = useState("");
-  let schema = null;
+  const [schema, setschema] = useState(null);
+
 
   const [selectedTable, setSelectedTable] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
@@ -123,14 +142,28 @@ export default function Component() {
   const [Port, setPort] = useState("");
   const [Database, setDatabase] = useState("");
 
-  const [options, setoptions] = useState("Sum");
-  const [data, setdata] = useState([]);
+  // 0 means sum 1 means count
+  const [options, setoptions] = useState("0");
+  const [Data, setdata] = useState([]);
 
 
   const handleTableChange = (value: any) => {
+    console.log("Table-->", value);
     setSelectedTable(value);
     setSelectedColumn("");
+    setSelectedColumn2("");
   };
+
+
+
+  const JSONFORMATTER = async (response: any) => {
+    const tableInfo = response?.data?.tables_info;
+
+    const prompt = `I will provide a json message please correct it in the proper format and return me just the final json  output and nothing else, the message is ${tableInfo}`;
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  }
+
 
 
   const connectToDB = async () => {
@@ -143,15 +176,26 @@ export default function Component() {
     }
 
     try {
-      let response = await axios.post("http://127.0.0.1:5000/fetch-table", data, {
+      let response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/fetch-table", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
+      // console.log(response);
       if (response.data.status === "success") {
-        setdatabaseSchema(response.data.tables_info);
-        schema = JSON.parse(databaseSchema);
+
+        let value = await JSONFORMATTER(response);
+
+        value = value.slice(7, -3);
+        console.log("Value", value);
+        setdatabaseSchema(value);
+        const Finalschema = JSON.parse(databaseSchema);
+        setschema(Finalschema)
+
+        console.log("schema2", Finalschema);
+        console.log("schema", schema);
+
         toast({
           variant: "success",
           title: "Connection Successful",
@@ -177,7 +221,7 @@ export default function Component() {
   }
 
 
-  const LineChart = async () => {
+  const Chart = async () => {
     const data = {
       table: selectedTable,
       first_column: selectedColumn,
@@ -191,26 +235,41 @@ export default function Component() {
       Option: options
     };
 
+    // console.log("data", data);
     try {
-      let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
+      let response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/fetch-table-data", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      if (response.data.status === "success") {
-        const firstData = JSON.parse(response.data.first_data);
-        const secondData = JSON.parse(response.data.second_data);
+      const firstData = JSON.parse(response.data.first_data);
+      const secondData = JSON.parse(response.data.second_data);
 
-        const formattedData = firstData.map((item:any, index:any) => ({
-          [selectedColumn]: item,
-          [selectedColumn2]: secondData[index]
+      const convertAndFilterData = (data: any) => {
+        return data.map((item: any) => item === "None" ? 0 : item).filter((item: any) => item !== "None");
+      };
+
+      const convertedFirstData = convertAndFilterData(firstData);
+      const convertedSecondData = convertAndFilterData(secondData);
+      console.log("convertedFirstData", convertedFirstData);
+      console.log("convertedSecondData", convertedSecondData);
+      console.log("response", response);
+      if (response.data.status === "success") {
+
+        const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
+        const formattedData = Array.from({ length: minLength }, (_, index) => ({
+          [selectedColumn]: convertedFirstData[index],
+          [selectedColumn2]: convertedSecondData[index]
         }));
-        setdata(formattedData);
+
+        // console.log("response2", formattedData);
+        const FinalData = formattedData;
+        setdata(FinalData);
 
         toast({
           variant: "success",
-          title: "Connection Successful",
+          title: "Generated Successful",
           description: "The connection was successful.",
         });
       } else {
@@ -233,7 +292,8 @@ export default function Component() {
     }
   }
 
-
+  // console.log("first Schema:", schema);
+  // console.log("data", Data);
 
   return (
     <div className="grid min-h-screen w-full grid-cols-[240px_1fr_240px]">
@@ -266,11 +326,117 @@ export default function Component() {
       </div>
 
       <div className="flex flex-col items-center justify-center bg-muted/40 p-4">
-        <div className="flex w-full flex-col items-center gap-4">
-          <div className="flex w-full items-center justify-between">
-            <div className="font-semibold">Select Tables</div>
-            <DropdownMenu>
+        {/* chart */}
+        <div className="mt-8 w-[1000px]">
+          <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
+            {selectedChart == "" ? (
+              <div>
+                <h1 className="text-5xl font-bold">Welcome to Visualisation</h1>
+                <h2 className="text-3xl font-semibold">Let's get started</h2>
+              </div>
+            ) : (
+              <>
+                {
+                  selectedChart == "Line" &&
+                  <div className="w-full aspect-w-6 aspect-h-3">
 
+                    {LinearType == "Normal" && (
+                      <div className="w-full h-full">
+                        <Normal Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "Step" && (
+                      <div className="w-full h-full">
+                        <Step Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "Linear" && (
+                      <div className="w-full h-full">
+                        <Linear Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "Dots" && (
+                      <div className="w-full h-full">
+                        <Dots Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "DotsColor" && (
+                      <div className="w-full h-full">
+                        <DotsColor Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "Label" && (
+                      <div className="w-full h-full">
+                        <LabelLine Data={Data} />
+                      </div>
+                    )}
+                    {LinearType == "CustomDots" && (
+                      <div className="w-full h-full">
+                        <CustomDots Data={Data} />
+                      </div>
+                    )}
+                  </div>
+                }
+
+                {
+                  selectedChart == "Pie" &&
+                  <div className="w-full aspect-w-6 aspect-h-3">
+                    {PieType == "Donut" && (
+                      <div className="w-full h-full">
+                        <Donut Data={Data}/>
+                      </div>
+                    )}
+                    {PieType == "DonutText" && (
+                      <div className="w-full h-full">
+                        <DonutText Data={Data}/>
+                      </div>
+                    )}
+                    {PieType == "DonutActive" && (
+                      <div className="w-full h-full">
+                        <DonutActive Data={Data}/>
+                      </div>
+                    )}
+                    {PieType == "Label" && (
+                      <div className="w-full h-full">
+                        <LabelPie Data={Data}/>
+                      </div>
+                    )}
+                    {PieType == "LabelList" && (
+                      <div className="w-full h-full">
+                        <Labellist Data={Data}/>
+                      </div>
+                    )}
+                  </div>
+                }
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+
+      <div className="flex flex-col border-l bg-background p-4">
+
+        <div className="mt-4 font-semibold text-xl">Export</div>
+        <div className="grid gap-2">
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
+            <FileIcon className="h-4 w-4 mr-2" />
+            CSV
+          </Button>
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
+            <FileIcon className="h-4 w-4 mr-2" />
+            JSON
+          </Button>
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
+            <FileIcon className="h-4 w-4 mr-2" />
+            Excel
+          </Button>
+        </div>
+
+        <div className="mt-4">
+          <div className="font-semibold text-xl">Select Tables</div>
+          <div className="mt-2">
+            <DropdownMenu>
               <DropdownMenuContent align="end">
                 {schema && Object.keys(schema).map((table) => (
                   <DropdownMenuItem key={table} onSelect={() => handleTableChange(table)}>
@@ -278,69 +444,147 @@ export default function Component() {
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
-
             </DropdownMenu>
           </div>
-          <div className="flex w-full items-center justify-between">
-            <div className="grid gap-2">
-              <div className="flex items-center gap-2">
-                <Select onValueChange={handleTableChange} >
-                  <SelectTrigger className="w-[180px] bg-black text-white">
-                    <SelectValue placeholder="Select Table" value={selectedTable} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {schema && Object.keys(schema).map((table) => (
-                      <SelectItem key={table} value={table}>
-                        {table}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select onValueChange={setSelectedColumn}>
-                  <SelectTrigger className="w-[180px]  bg-black text-white" >
-                    <SelectValue placeholder="Select Column" value={selectedColumn} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedTable && schema &&
-                      Object.keys(schema[selectedTable]).map((column) => (
-                        <SelectItem key={column} value={column}>
-                          {column}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
 
-                <Select onValueChange={setSelectedColumn2}>
-                  <SelectTrigger className="w-[180px] bg-black text-white" >
-                    <SelectValue placeholder="Select Column" value={selectedColumn2} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedTable && schema &&
-                      Object.keys(schema[selectedTable]).map((column) => (
-                        <SelectItem key={column} value={column}>
-                          {column}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <Button className="bg-black " onClick={() => LineChart()}>Generate</Button>
-              </div>
-
-            </div>
+          <div className="mt-2">
+            <Select onValueChange={handleTableChange}>
+              <SelectTrigger className="w-[180px] bg-black text-white">
+                <SelectValue placeholder="Select Table" value={selectedTable} />
+              </SelectTrigger>
+              <SelectContent>
+                {schema && Object.keys(schema).map((table) => (
+                  <SelectItem key={table} value={table}>
+                    {table}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <div className="mt-2">
+            <Select onValueChange={setSelectedColumn}>
+              <SelectTrigger className="w-[180px] bg-black text-white">
+                <SelectValue placeholder="Select Column" value={selectedColumn} />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedTable && schema && schema[selectedTable] &&
+                  Object.keys(schema[selectedTable]).map((column) => (
+                    <SelectItem key={column} value={column}>
+                      {column}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="mt-2">
+            <Select onValueChange={setSelectedColumn2}>
+              <SelectTrigger className="w-[180px] bg-black text-white">
+                <SelectValue placeholder="Select Column" value={selectedColumn2} />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedTable && schema && schema[selectedTable] &&
+                  Object.keys(schema[selectedTable]).map((column) => (
+                    <SelectItem key={column} value={column}>
+                      {column}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+
         </div>
 
 
+        <div className="mt-4">
+          <div className="font-semibold text-xl">Chart Options</div>
 
-
-        <div className="mt-4 flex w-full items-center justify-between">
+          {/* count and sum */}
           <div className="flex gap-x-3">
-            <div className="font-semibold text-2xl">Chart Options</div>
+            <div className="mt-2">
+              {
+                selectedChart == "Bar"  &&
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
+                      {options === '0' ? 'Sum' : 'Count'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={options} onValueChange={setoptions}>
+                      <DropdownMenuRadioItem value="0">Sum</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="1">Count</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
+              {
+                selectedChart == "Pie"  &&
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
+                      {options === '0' ? 'Sum' : 'Count'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={options} onValueChange={setoptions}>
+                      <DropdownMenuRadioItem value="0">Sum</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="1">Count</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
+            </div>
+            <div className="mt-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-x-2">
+                    <PaletteIcon className="h-4 w-4" />
+                    Color Gradient
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup value="default">
+                    <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="rainbow">Rainbow</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="pastel">Pastel</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="neon">Neon</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+
+          <div className="flex gap-x-3">
+          <div className="mt-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
+                  <BarChartIcon className="h-4 w-4" />
+                  {
+                    selectedChart == "" ? "Charts": selectedChart
+                  }
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup value={selectedChart}>
+                  <DropdownMenuRadioItem value="bar" onClick={() => setSelectedChart("Bar")}>Bar</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="line" onClick={() => setSelectedChart("Line")}>Line</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="area" onClick={() => setSelectedChart("Area")}>Area</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="pie" onClick={() => setSelectedChart("Pie")}>Pie</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+
+          <div className="mt-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
                   <BarChartIcon className="h-4 w-4 " />
-                  {`${selectedChart} sub charts`}
+                  {LinearType == "" ? "Types": LinearType}
+                  {PieType == "" ? "Types": PieType}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -351,6 +595,9 @@ export default function Component() {
                       <DropdownMenuRadioItem value="Step" onClick={() => setLinearType("Step")}>Step</DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="Linear" onClick={() => setLinearType("Linear")}>Linear</DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="Dots" onClick={() => setLinearType("Dots")}>Dots</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="DotsColor" onClick={() => setLinearType("DotsColor")}>DotsColor</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="Label" onClick={() => setLinearType("Label")}>Label</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="CustomDots" onClick={() => setLinearType("CustomDots")}>CustomDots</DropdownMenuRadioItem>
                     </>
                   }
                   {selectedChart === "Bar" &&
@@ -373,161 +620,33 @@ export default function Component() {
 
                   {selectedChart === "Pie" &&
                     <>
-                      <DropdownMenuRadioItem value="Normal">Pie</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Step">Pie</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Linear">Pie</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Dots">Pie</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem onClick={() => setPieType("Donut")} value="Donut">Donut</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem onClick={() => setPieType("DonutText")} value="DonutText">DonutText</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem onClick={() => setPieType("DonutActive")} value="DonutActive">DonutActive</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem onClick={() => setPieType("Label")} value="Label">Label</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem onClick={() => setPieType("LabelList")} value="LabelList">LabelList</DropdownMenuRadioItem>
                     </>
                   }
 
                 </DropdownMenuRadioGroup>
+
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <PaletteIcon className="h-4 w-4" />
-                  Color Gradient
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup value="default">
-                  <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="rainbow">Rainbow</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="pastel">Pastel</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="neon">Neon</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
-                  <BarChartIcon className="h-4 w-4" />
-                  {`${selectedChart}  charts`}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup value={selectedChart}>
-                  <DropdownMenuRadioItem value="bar" onClick={() => setSelectedChart("Bar")}>Bar</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="line" onClick={() => setSelectedChart("Line")}>Line</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="area" onClick={() => setSelectedChart("Area")}>Area</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="pie" onClick={() => setSelectedChart("Pie")}>Pie</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
           </div>
-        </div>
-        <div className="mt-8 w-full">
-          {selectedChart == "" ? (
-            <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
-              <div>
-                <h1 className="text-5xl font-bold">Welcome to Visualisation</h1>
-                <h2 className="text-3xl font-semibold">Let's get started</h2>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full aspect-w-6 aspect-h-3">
-              {LinearType == "Normal" && (
-                <div className="w-full h-full">
-                  <Normal data={data}/>
-                </div>
-              )}
-              {LinearType == "Step" && (
-                <div className="w-full h-full">
-                  <Step data={data}/>
-                </div>
-              )}
-              {LinearType == "Linear" && (
-                <div className="w-full h-full">
-                  <Linear data={data}/>
-                </div>
-              )}
-              {LinearType == "Dots" && (
-                <div className="w-full h-full">
-                  <Dots data={data}/>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
 
-
-
-      </div>
-      <div className="flex flex-col border-l bg-background p-4">
-
-        <div className="mt-4 font-semibold">Export</div>
-        <div className="grid gap-2">
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
-            <FileIcon className="h-4 w-4 mr-2" />
-            CSV
-          </Button>
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
-            <FileIcon className="h-4 w-4 mr-2" />
-            JSON
-          </Button>
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
-            <FileIcon className="h-4 w-4 mr-2" />
-            Excel
-          </Button>
+          <div className="mt-2 text-center ">
+            <Button className="bg-black w-full" onClick={Chart}>Generate</Button>
+          </div>
         </div>
       </div>
     </div>
+
+
   )
 }
 
-// function AreachartChart(props: any) {
-//   return (
-//     <div {...props}>
-//       <ChartContainer
-//         config={{
-//           desktop: {
-//             label: "Desktop",
-//             color: "hsl(var(--chart-1))",
-//           },
-//         }}
-//         className="min-h-[300px]"
-//       >
-//         <AreaChart
-//           accessibilityLayer
-//           data={[
-//             { month: "January", desktop: 186 },
-//             { month: "February", desktop: 305 },
-//             { month: "March", desktop: 237 },
-//             { month: "April", desktop: 73 },
-//             { month: "May", desktop: 209 },
-//             { month: "June", desktop: 214 },
-//           ]}
-//           margin={{
-//             left: 12,
-//             right: 12,
-//           }}
-//         >
-//           <CartesianGrid vertical={false} />
-//           <XAxis
-//             dataKey="month"
-//             tickLine={false}
-//             axisLine={false}
-//             tickMargin={8}
-//             tickFormatter={(value) => value.slice(0, 3)}
-//           />
-//           <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-//           <Area
-//             dataKey="desktop"
-//             type="natural"
-//             fill="var(--color-desktop)"
-//             fillOpacity={0.4}
-//             stroke="var(--color-desktop)"
-//           />
-//         </AreaChart>
-//       </ChartContainer>
-//     </div>
-//   )
-// }
+
 
 
 function BarChartIcon(props: React.SVGProps<SVGSVGElement>) {

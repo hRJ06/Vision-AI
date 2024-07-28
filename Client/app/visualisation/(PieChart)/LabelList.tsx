@@ -1,7 +1,7 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
-import { CartesianGrid, Dot, Line, LineChart } from "recharts"
+import { LabelList, Pie, PieChart } from "recharts"
 
 import {
   Card,
@@ -28,7 +28,6 @@ const chartData = [
 const chartConfig = {
   visitors: {
     label: "Visitors",
-    color: "hsl(var(--chart-2))",
   },
   chrome: {
     label: "Chrome",
@@ -52,7 +51,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function DotsColor({Data}:{Data:object[]}) {
+export function Labellist({Data}:{Data:object[]}) {
   const data = Data;
 
   if (data.length > 0) {
@@ -69,58 +68,37 @@ export function DotsColor({Data}:{Data:object[]}) {
       visitors: item[keys[1]] 
     };
   });
-
   return (
-    <Card className="bg-gray-900 text-white">
-      <CardHeader>
-        <CardTitle>Line Chart - Dots Colors</CardTitle>
+    <Card className="flex flex-col bg-gray-900 text-white">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Pie Chart - Label List</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={mappedData}
-            margin={{
-              top: 24,
-              left: 24,
-              right: 24,
-            }}
-          >
-            <CartesianGrid vertical={false} />
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[250px]"
+        >
+          <PieChart>
             <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  nameKey="visitors"
-                  hideLabel
-                />
-              }
+              content={<ChartTooltipContent nameKey="visitors" hideLabel />}
             />
-            <Line
-              dataKey="visitors"
-              type="natural"
-              stroke="#7987A1"
-              strokeWidth={2}
-              dot={({ payload, ...props }) => {
-                return (
-                  <Dot
-                    key={payload.browser}
-                    r={5}
-                    cx={props.cx}
-                    cy={props.cy}
-                    fill={payload.fill}
-                    stroke={payload.fill}
-                  />
-                )
-              }}
-            />
-          </LineChart>
+            <Pie data={mappedData} dataKey="visitors">
+              <LabelList
+                dataKey="browser"
+                className="fill-background"
+                stroke="none"
+                fontSize={12}
+                formatter={(value: keyof typeof chartConfig) =>
+                  chartConfig[value]?.label
+                }
+              />
+            </Pie>
+          </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">

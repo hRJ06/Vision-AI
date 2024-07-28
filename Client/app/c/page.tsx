@@ -213,7 +213,7 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
+      const response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -267,7 +267,7 @@ export default function Component() {
       setInputText("");
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/chat",
+          "https://f987-103-161-223-11.ngrok-free.app/chat",
           { ...databaseCredentials, message: userPrompt },
           {
             headers: {

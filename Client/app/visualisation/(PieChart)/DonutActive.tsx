@@ -1,7 +1,8 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
-import { CartesianGrid, LabelList, Line, LineChart } from "recharts"
+import { Label, Pie, PieChart, Sector } from "recharts"
+import { PieSectorDataItem } from "recharts/types/polar/Pie"
 
 import {
   Card,
@@ -28,7 +29,6 @@ const chartData = [
 const chartConfig = {
   visitors: {
     label: "Visitors",
-    color: "hsl(var(--chart-2))",
   },
   chrome: {
     label: "Chrome",
@@ -52,63 +52,58 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function CustomLabel() {
+export function DonutActive({Data}:{Data:object[]}) {
+  const data = Data;
+
+  if (data.length > 0) {
+    const keys = Object.keys(data[0]);
+    if (keys.length > 1) {
+      chartConfig.visitors.label = keys[1]; 
+    }
+  }
+
+  const mappedData = data.map((item:any) => {
+    const keys = Object.keys(item);
+    return {
+      [keys[0]]: item[keys[0]], 
+      visitors: item[keys[1]] 
+    };
+  });
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Line Chart - Custom Label</CardTitle>
+    <Card className="flex flex-col bg-gray-900 text-white">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Pie Chart - Donut Active</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              top: 24,
-              left: 24,
-              right: 24,
-            }}
-          >
-            <CartesianGrid vertical={false} />
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[250px]"
+        >
+          <PieChart>
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  nameKey="visitors"
-                  hideLabel
-                />
-              }
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Line
+            <Pie
+              data={mappedData}
               dataKey="visitors"
-              type="natural"
-              stroke="var(--color-visitors)"
-              strokeWidth={2}
-              dot={{
-                fill: "var(--color-visitors)",
-              }}
-              activeDot={{
-                r: 6,
-              }}
-            >
-              <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={12}
-                dataKey="browser"
-                formatter={(value: keyof typeof chartConfig) =>
-                  chartConfig[value]?.label
-                }
-              />
-            </Line>
-          </LineChart>
+              nameKey="browser"
+              innerRadius={60}
+              strokeWidth={5}
+              activeIndex={0}
+              activeShape={({
+                outerRadius = 0,
+                ...props
+              }: PieSectorDataItem) => (
+                <Sector {...props} outerRadius={outerRadius + 10} />
+              )}
+            />
+          </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">

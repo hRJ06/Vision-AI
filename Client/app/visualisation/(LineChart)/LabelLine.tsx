@@ -18,12 +18,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
+  { month: "January", desktop: 186,  },
+  { month: "February", desktop: 305, },
+  { month: "March", desktop: 237, },
+  { month: "April", desktop: 73,  },
+  { month: "May", desktop: 209,  },
+  { month: "June", desktop: 214},
 ]
 
 const chartConfig = {
@@ -37,9 +37,25 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Label() {
+export function LabelLine({Data}:{Data:object[]}) {
+
+  const data = Data;
+
+  if (data.length > 0) {
+    const keys = Object.keys(data[0]);
+    if (keys.length > 1) {
+      chartConfig.desktop.label = keys[1]; 
+    }
+  }
+  const mappedData = data.map((item:any) => {
+    const keys = Object.keys(item);
+    return {
+      [keys[0]]: item[keys[0]], 
+      desktop: item[keys[1]] 
+    };
+  });
   return (
-    <Card>
+    <Card className="bg-gray-900 text-white">
       <CardHeader>
         <CardTitle>Line Chart - Label</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
@@ -48,7 +64,7 @@ export function Label() {
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={mappedData}
             margin={{
               top: 20,
               left: 12,
@@ -70,10 +86,10 @@ export function Label() {
             <Line
               dataKey="desktop"
               type="natural"
-              stroke="var(--color-desktop)"
+              stroke="#7987A1"
               strokeWidth={2}
               dot={{
-                fill: "var(--color-desktop)",
+                fill: "#303640",
               }}
               activeDot={{
                 r: 6,

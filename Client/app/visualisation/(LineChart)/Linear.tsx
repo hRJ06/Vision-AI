@@ -33,9 +33,27 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Linear({data}:{data:object[]}) {
+export function Linear({Data}:{Data:object[]}) {
+
+  const data = Data;
+
+  if (data.length > 0) {
+    const keys = Object.keys(data[0]);
+    if (keys.length > 1) {
+      chartConfig.desktop.label = keys[1]; 
+    }
+  }
+
+  const mappedData = data.map((item:any) => {
+    const keys = Object.keys(item);
+    return {
+      [keys[0]]: item[keys[0]], 
+      desktop: item[keys[1]] 
+    };
+  });
+
   return (
-    <Card>
+    <Card className="bg-gray-900 text-white">
       <CardHeader>
         <CardTitle>Line Chart - Linear</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
@@ -44,7 +62,7 @@ export function Linear({data}:{data:object[]}) {
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={data}
+            data={mappedData}
             margin={{
               left: 12,
               right: 12,
@@ -65,7 +83,7 @@ export function Linear({data}:{data:object[]}) {
             <Line
               dataKey="desktop"
               type="linear"
-              stroke="var(--color-desktop)"
+              stroke="#7987A1"
               strokeWidth={2}
               dot={false}
             />

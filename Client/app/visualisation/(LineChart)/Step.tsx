@@ -17,25 +17,41 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-const chartData = [
-  { month: 3, desktop: 10 },
-  { month: 8, desktop: 23 },
-  { month: 5, desktop: 11 },
-  { month: 3, desktop: 30 },
-  { month: 1, desktop: 17 },
-  { month: 7, desktop: 2 },
-]
+import { any } from "zod"
+
+
+
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label:"ssfsf",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
 
-export function Step({data}:{data:object[]}) {
+export function Step({Data}:{Data:object[]}) {
+
+  const data = Data;
+
+  if (data.length > 0) {
+    const keys = Object.keys(data[0]);
+    if (keys.length > 1) {
+      chartConfig.desktop.label = keys[1]; 
+    }
+  }
+
+  const mappedData = data.map((item:any) => {
+    const keys = Object.keys(item);
+    return {
+      [keys[0]]: item[keys[0]], 
+      desktop: item[keys[1]] 
+    };
+  });
+
+
+
   return (
-    <Card className="bg-black text-white">
+    <Card className="bg-gray-900 text-white">
       <CardHeader>
         <CardTitle>Line Chart - Step</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
@@ -44,7 +60,7 @@ export function Step({data}:{data:object[]}) {
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={data}
+            data={mappedData}
             margin={{
               left: 12,
               right: 12,
@@ -60,12 +76,12 @@ export function Step({data}:{data:object[]}) {
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel className="bg-black text-white"/>}
+              content={<ChartTooltipContent hideLabel />}
             />
             <Line
               dataKey="desktop"
               type="step"
-              stroke="white"
+              stroke="#7987A1"
               strokeWidth={4}
               dot={true}
             />

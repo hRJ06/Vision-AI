@@ -15,7 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ChatMessage, DatabaseCredentials } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
@@ -27,7 +27,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { DownloadIcon, EllipsisVertical } from "lucide-react";
+import { DownloadIcon, EllipsisVertical, Download } from "lucide-react";
 
 export default function Component() {
   const { toast } = useToast();
@@ -167,12 +167,30 @@ export default function Component() {
     });
   };
 
-  const download = async () => {
-    console.log('HI')
+  const handleDownload = useCallback(async (url) => {
     try {
-      const response = await axios.post(" https://f987-103-161-223-11.ngrok-free.app/report", databaseCredentials, {
-        responseType: "blob",
-      });
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Image.png"; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading the image:", error);
+    }
+  }, []);
+
+  const download = async () => {
+    try {
+      const response = await axios.post(
+        " https://f987-103-161-223-11.ngrok-free.app/report",
+        databaseCredentials,
+        {
+          responseType: "blob",
+        }
+      );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -388,10 +406,7 @@ export default function Component() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
-                <DownloadIcon
-                  className="w-4 h-4 mr-2"
-                  onClick={download}
-                />
+                <DownloadIcon className="w-4 h-4 mr-2" onClick={download} />
                 Download Report
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -435,8 +450,6 @@ export default function Component() {
         {/* Chats */}
         {welcome && (
           <div className="flex-1 overflow-auto p-4 max-h-[calc(100vh-10rem)]">
-            {" "}
-            {/* Adjust height as needed */}
             <div className="flex flex-col gap-4">
               {chats.map((chat, index) => (
                 <div
@@ -456,8 +469,6 @@ export default function Component() {
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
-                    {" "}
-                    {/* Fixed width for message box */}
                     <div className="grid gap-1">
                       <div
                         className={`prose text-muted-foreground  bg-${
@@ -470,12 +481,20 @@ export default function Component() {
                           <>
                             <p>{formatMessage(chat.msg)}</p>
                             {chat.link && (
-                              <Image
-                                src={chat.link}
-                                alt="chart"
-                                width={400}
-                                height={400}
-                              />
+                              <div className="relative">
+                                <Image
+                                  src={chat.link}
+                                  alt="chart"
+                                  width={400}
+                                  height={400}
+                                />
+                                <button
+                                  onClick={() => handleDownload(chat.link)}
+                                  className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-lg"
+                                >
+                                  <Download size={16} />
+                                </button>
+                              </div>
                             )}
                           </>
                         ) : (

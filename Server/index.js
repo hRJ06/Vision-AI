@@ -10,27 +10,26 @@ dotenv.config();
 const app = express();
 
 app.use(
-    cors({
-        origin: "*",
-        credentials: true,
-    })
+  cors({
+    origin: "*",
+    credentials: true,
+  })
 );
 
 app.use(
-    fileUpload({
-        useTempFiles: true,
-        tempFileDir: "/tmp/"
-    })
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
 );
 
 app.use(express.json());
 
 cloudinaryConnect();
 
-
 app.use("/image", imageAnalysis);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log(`Server is listening at ${PORT}`);
+  console.log(`Server is listening at ${PORT}`);
 });

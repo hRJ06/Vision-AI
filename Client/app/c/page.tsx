@@ -1,4 +1,6 @@
+
 "use client";
+export const fetchCache = 'force-no-store';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +35,7 @@ export default function Component() {
   const { toast } = useToast();
   const [databaseCredentials, setDatabaseCredentials] =
     useState<DatabaseCredentials | null>(null);
+  const [schemaInfo, setSchemaInfo] = useState<string>("");
   const formSchema = z.object({
     Host: z.string().min(2, {
       message: "Hostname must be at least 2 characters.",
@@ -167,6 +170,7 @@ export default function Component() {
     });
   };
 
+<<<<<<< Updated upstream
   const handleDownload = useCallback(async (url) => {
     try {
       const response = await fetch(url);
@@ -191,6 +195,19 @@ export default function Component() {
           responseType: "blob",
         }
       );
+=======
+  const downloadHandler = async () => {
+    console.log('HI')
+    const details={...databaseCredentials,schemaDescription:schemaInfo}
+    try {
+      const response = await axios.post("http://localhost:4000/image/report", details,{
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        responseType: "blob",
+      });
+>>>>>>> Stashed changes
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -213,12 +230,13 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
+      const response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.status === "success") {
+        setSchemaInfo(response.data.schema_description)
         toast({
           variant: "success",
           title: "Connection Successful",
@@ -405,9 +423,20 @@ export default function Component() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+<<<<<<< Updated upstream
               <DropdownMenuItem>
                 <DownloadIcon className="w-4 h-4 mr-2" onClick={download} />
+=======
+              <DropdownMenuItem onClick={downloadHandler}>
+                 <DownloadIcon
+                  className="w-4 h-4 mr-2"
+                  
+                  />
+>>>>>>> Stashed changes
                 Download Report
+                
+                
+               
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

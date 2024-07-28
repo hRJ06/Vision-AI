@@ -170,7 +170,6 @@ export default function Component() {
     });
   };
 
-<<<<<<< Updated upstream
   const handleDownload = useCallback(async (url) => {
     try {
       const response = await fetch(url);
@@ -195,7 +194,6 @@ export default function Component() {
           responseType: "blob",
         }
       );
-=======
   const downloadHandler = async () => {
     console.log('HI')
     const details={...databaseCredentials,schemaDescription:schemaInfo}
@@ -207,7 +205,6 @@ export default function Component() {
 
         responseType: "blob",
       });
->>>>>>> Stashed changes
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;

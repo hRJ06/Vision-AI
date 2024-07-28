@@ -188,12 +188,18 @@ export default function Component() {
   const download = async () => {
     try {
       const response = await axios.post(
-        " https://f987-103-161-223-11.ngrok-free.app/report",
+        "https://f987-103-161-223-11.ngrok-free.app/report",
         databaseCredentials,
         {
           responseType: "blob",
         }
       );
+      // Add logic to handle the response here
+    } catch (error) {
+      console.error("Error downloading report:", error);
+    }
+  };
+
   const downloadHandler = async () => {
     console.log('HI')
     const details={...databaseCredentials,schemaDescription:schemaInfo}
@@ -216,6 +222,7 @@ export default function Component() {
       console.error(error);
     }
   };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const data = {
       Host: values.Host,
@@ -420,20 +427,9 @@ export default function Component() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-<<<<<<< Updated upstream
-              <DropdownMenuItem>
-                <DownloadIcon className="w-4 h-4 mr-2" onClick={download} />
-=======
               <DropdownMenuItem onClick={downloadHandler}>
-                 <DownloadIcon
-                  className="w-4 h-4 mr-2"
-                  
-                  />
->>>>>>> Stashed changes
-                Download Report
-                
-                
-               
+                 <DownloadIcon className="w-4 h-4 mr-2"/>
+                  Download Report                
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

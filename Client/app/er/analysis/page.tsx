@@ -61,15 +61,85 @@ export default function Component() {
       reader.readAsDataURL(file);
     }
   };
-  const formatMessage = (message: string) => {
-    return message.split("\n").map((part, index) => {
+  const formatMessage = (message) => {
+    const lines = message.split("\n");
+    let isTable = false;
+    const tableData = [];
+
+    lines.forEach((line) => {
+      const columns = line
+        .split("|")
+        .map((col) => col.trim())
+        .filter(Boolean);
+      if (columns.length > 1) {
+        isTable = true;
+        tableData.push(columns);
+      }
+    });
+
+    if (isTable && tableData.length > 1) {
+      tableData.splice(1, 1);
+      const headers = tableData[0];
+      const rows = tableData.slice(1);
+
+      return (
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", margin: "1em 0" }}
+        >
+          <thead>
+            <tr>
+              {headers.map((header, index) => (
+                <th
+                  key={index}
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    textAlign: "left",
+                    backgroundColor: "#f2f2f2",
+                    borderBottom: "2px solid black",
+                  }}
+                >
+                  {header.charAt(0).toUpperCase() + header.slice(1)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td
+                    key={cellIndex}
+                    style={{
+                      border: "1px solid #ddd",
+                      padding: "8px",
+                    }}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    // Otherwise, process as regular text
+    return lines.map((part, index) => {
       const isList = /^\d+\./.test(part.trim());
 
       const formattedPart = part
-        .split(/(\*\*.*?\*\*)/g)
+        .split(/(\*\*.*?\*\*|mailto:[^\s]+)/g)
         .map((subPart, subIndex) => {
           if (subPart.startsWith("**") && subPart.endsWith("**")) {
             return <b key={subIndex}>{subPart.slice(2, -2)}</b>;
+          } else if (subPart.startsWith("mailto:")) {
+            return (
+              <a key={subIndex} href={subPart} style={{ color: "blue" }}>
+                {subPart}
+              </a>
+            );
           }
           return subPart;
         });
@@ -228,7 +298,15 @@ export default function Component() {
                     </Avatar>
                     <div className="max-w-[700px]">
                       <div className="grid gap-1">
-                        <div className="prose text-black text-muted-foreground bg-gray-400 p-2 rounded-md">
+                        <div
+                          className={`prose text-muted-foreground  bg-${
+                            chat.role === "AI" ? "muted" : "primary"
+                          }  p-2 rounded-md ${
+                            chat.role === "User"
+                              ? "text-primary-foreground"
+                              : ""
+                          }`}
+                        >
                           {typeof chat.msg === "string" ? (
                             formatMessage(chat.msg)
                           ) : (

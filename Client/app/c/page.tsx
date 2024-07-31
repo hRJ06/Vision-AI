@@ -188,7 +188,7 @@ export default function Component() {
   const download = async () => {
     try {
       const response = await axios.post(
-        "https://f987-103-161-223-11.ngrok-free.app/report",
+        "http://127.0.0.1:5000/report",
         databaseCredentials,
         {
           responseType: "blob",
@@ -234,7 +234,7 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/connect", data, {
+      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -289,7 +289,7 @@ export default function Component() {
       setInputText("");
       try {
         const response = await axios.post(
-          "https://f987-103-161-223-11.ngrok-free.app/chat",
+          "http://127.0.0.1:5000/chat",
           { ...databaseCredentials, message: userPrompt },
           {
             headers: {

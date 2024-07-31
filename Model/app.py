@@ -173,8 +173,6 @@ def connect():
                 final_string += ch
         return jsonify({"status": "success", "schema_description": final_string})
     except Exception as e:
-        print("Not Done")
-        
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/chat', methods=['POST'])
@@ -261,7 +259,7 @@ def fetch_tables():
         return jsonify({"status": "success", "tables_info": final_string}), 200
 
     except Exception as e:
-        print("Error:", str(e))
+        print("Error - ", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/fetch-table-data', methods=['POST'])
@@ -339,7 +337,7 @@ def fetch_table_data():
         }), 200
 
     except Exception as e:
-        print("Error:", str(e))
+        print("Error - ", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -355,7 +353,7 @@ def upload_csv():
         return jsonify({"status": "error", "message": "No selected file"}), 400
     
     if file:
-        filename = 'uploaded_file.csv'
+        filename = 'Uploaded_File.csv'
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)  
         session['uploaded_filename'] = filename  
@@ -365,10 +363,7 @@ def upload_csv():
 
 @app.route('/chatCSV', methods=['POST'])
 def manipulate_csv():
-    print("here")
     filename = 'uploaded_file.csv'
-    print(filename)
-    print("here")
     if not filename:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
     
@@ -376,7 +371,6 @@ def manipulate_csv():
 
     llm = OpenAI(temperature=0, openai_api_key='')
     try:
-        print("hello")
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)
         
         prompt = request.json.get('prompt')
@@ -387,7 +381,7 @@ def manipulate_csv():
             return jsonify({"status": "error", "message": "No prompt provided"}), 400
 
     except Exception as e:
-        print("Error:", str(e))
+        print("Error - ", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
     
 if __name__ == '__main__':

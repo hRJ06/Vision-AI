@@ -24,96 +24,6 @@ import { Labellist } from "./(PieChart)/LabelList"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { DotsColor } from "./(LineChart)/DotsColor"
 
-
-// const databaseSchema = `{
-//   "announcements": {
-//     "id": "INTEGER",
-//     "content": "VARCHAR(255)",
-//     "course_id": "INTEGER",
-//     "name": "VARCHAR(255)"
-//   },
-//   "assignments": {
-//     "id": "INTEGER",
-//     "assignment_name": "VARCHAR(255)",
-//     "deadline": "DATETIME(6)",
-//     "description": "VARCHAR(255)",
-//     "course_id": "INTEGER",
-//     "full_marks": "INTEGER"
-//   },
-//   "course_archived_users": {
-//     "course_id": "INTEGER",
-//     "archived_user_id": "INTEGER"
-//   },
-//   "courses": {
-//     "id": "INTEGER",
-//     "course_name": "VARCHAR(255)",
-//     "instructor_id": "INTEGER",
-//     "code": "VARCHAR(255)",
-//     "meeting_link": "VARCHAR(255)",
-//     "cover_photo": "VARCHAR(255)"
-//   },
-//   "doubt": {
-//     "id": "INTEGER",
-//     "content": "VARCHAR(255)",
-//     "course_id": "INTEGER",
-//     "user_id": "INTEGER"
-//   },
-//   "enrolled_users_courses": {
-//     "course_id": "INTEGER",
-//     "user_id": "INTEGER"
-//   },
-//   "files": {
-//     "id": "INTEGER",
-//     "file_name": "VARCHAR(255)",
-//     "file_path": "VARCHAR(255)",
-//     "submission_id": "INTEGER",
-//     "assignment_id": "INTEGER",
-//     "announcement_id": "INTEGER"
-//   },
-//   "form": {
-//     "id": "INTEGER"
-//   },
-//   "form_item": {
-//     "id": "INTEGER",
-//     "question": "VARCHAR(255)",
-//     "answer": "VARCHAR(255)",
-//     "options": "VARBINARY(255)"
-//   },
-//   "message": {
-//     "id": "INTEGER",
-//     "chat_id": "INTEGER",
-//     "sender_id": "INTEGER",
-//     "content": "VARCHAR(10000)",
-//     "course_id": "INTEGER",
-//     "type": "VARCHAR(255)",
-//     "doubt_id": "INTEGER"
-//   },
-//   "private_chat": {
-//     "id": "INTEGER",
-//     "assignment_id": "INTEGER",
-//     "user_id": "INTEGER"
-//   },
-//   "submissions": {
-//     "id": "INTEGER",
-//     "late_status": "BIT(1)",
-//     "submission_date_time": "DATETIME(6)",
-//     "assignment_id": "INTEGER",
-//     "user_id": "INTEGER",
-//     "marks": "INTEGER",
-//     "comment": "VARCHAR(255)"
-//   },
-//   "users": {
-//     "id": "INTEGER",
-//     "email": "VARCHAR(255)",
-//     "first_name": "VARCHAR(255)",
-//     "last_name": "VARCHAR(255)",
-//     "password": "VARCHAR(255)",
-//     "role": "ENUM('INSTRUCTOR','STUDENT')",
-//     "reset_password_token": "VARCHAR(255)",
-//     "reset_password_token_expires": "DATETIME(6)"
-//   }
-// }`;
-
 export default function Component() {
 
 
@@ -176,13 +86,13 @@ export default function Component() {
     }
 
     try {
-      let response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/fetch-table", data, {
+      let response = await axios.post("http://127.0.0.1:5000/fetch-table", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      // console.log(response);
+
       if (response.data.status === "success") {
 
         let value = await JSONFORMATTER(response);
@@ -237,7 +147,7 @@ export default function Component() {
 
     // console.log("data", data);
     try {
-      let response = await axios.post("https://f987-103-161-223-11.ngrok-free.app/fetch-table-data", data, {
+      let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
         headers: {
           "Content-Type": "application/json",
         },

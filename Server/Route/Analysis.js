@@ -135,39 +135,29 @@ router.post("/report", async (req, res) => {
     }
 
     const doc = new PDFDocument({ size: "A4", margin: 50 });
-
-    // Set headers for file download
     res.setHeader("Content-Disposition", 'attachment; filename="report.pdf"');
     res.setHeader("Content-Type", "application/pdf");
-
     doc.pipe(res);
-
-    // Title and header
     doc
       .fontSize(18)
       .font("Helvetica-Bold")
       .text("Vision AI Report", { align: "center" })
       .moveDown(2);
-
     responses.forEach((item) => {
       let parts = item.split(/\*\*(.*?)\*\*/);
       let isBold = false;
-
       parts.forEach((part, index) => {
-        if (index % 2 === 0) {
-          // Regular text
+        if (!(index % 2)) {
           if (part.trim().startsWith("- ") || part.trim().startsWith("1. ")) {
-            // Adjust formatting for lists
             const lines = part.split("\n").filter((line) => line.trim() !== "");
             lines.forEach((line, idx) => {
-              if (idx > 0) doc.moveDown(0.5); // Move down slightly between list items
+              if (idx > 0) doc.moveDown(0.5);
               doc.fontSize(12).font("Helvetica").text(line, { align: "left" });
             });
           } else {
             doc.fontSize(12).font("Helvetica").text(part, { align: "left" });
           }
         } else {
-          // Bold text
           doc.fontSize(12).font("Helvetica-Bold").text(part, { align: "left" });
         }
       });

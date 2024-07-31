@@ -25,3 +25,9 @@ export interface DatabaseCredentials {
   User: string;
   Password: string;
 }
+
+export interface Message {
+  sender: string;
+  text: string;
+  time?: string;
+}

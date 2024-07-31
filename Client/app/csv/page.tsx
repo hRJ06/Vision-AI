@@ -14,16 +14,12 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import Link from "next/link";
-
-interface Message {
-  sender: string;
-  text: string;
-  time?: string;
-}
+import { Message } from "@/types";
 
 export default function Component() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [fileName, setFileName] = useState<string>("");
+  const [uploadedFile, setUploadedFile] = useState<string>("");
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [query, setQuery] = useState<string>("");
@@ -39,7 +35,7 @@ export default function Component() {
   };
 
   const handleQuery = async () => {
-    const data = { prompt: query };
+    const data = { prompt: query, file: uploadedFile };
     try {
       const response = await axios.post("http://127.0.0.1:5000/chat_csv", data);
       if (response) {
@@ -80,6 +76,7 @@ export default function Component() {
         );
 
         if (response) {
+          setUploadedFile(response?.data?.file);
           toast({
             variant: "success",
             title: "File Uploaded Successfully",

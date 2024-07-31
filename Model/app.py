@@ -13,14 +13,15 @@ from langchain import OpenAI
 import re
 import os
 from flask_pymongo import PyMongo
-from datetime import datetime
-from fpdf import FPDF
+from datetime import datetime, timedelta
+import random
+import schedule
+import time
+import threading
 
 app = Flask(__name__)
 
-
 CORS(app, origin="*")
-
 
 load_dotenv()
 
@@ -29,13 +30,14 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
+TIME_DELTA = timedelta(hours=2)
+
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app).db
 
-app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
-
 app.secret_key = os.getenv("SECRET_KEY")
 
+app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
 if "Logs" not in mongo.list_collection_names():
     mongo.create_collection("Logs")
 
@@ -68,6 +70,10 @@ def parse_user_agent(user_agent):
         device = "Desktop"
 
     return f"{os} - {device}"
+
+
+def generator():
+    return random.randint(10000000, 99999999)
 
 
 def get_sql_chain(db):
@@ -363,30 +369,34 @@ def upload_csv():
         return jsonify({"status": "error", "message": "No file part"}), 400
 
     file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"status": "error", "message": "No selected file"}), 400
-
     if file:
-        filename = "Uploaded_File.csv"
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        filename = f"{file.filename}_{generator()}_{timestamp}"
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
-        session["uploaded_filename"] = filename
 
         return (
             jsonify(
                 {
                     "status": "success",
                     "message": "File uploaded successfully",
-                    "filename": filename,
+                    "file": filename,
                 }
             ),
             200,
+        )
+    else:
+        return (
+            jsonify({"status": "false", "message": "Please provide a file"}),
+            500,
         )
 
 
 @app.route("/chat_csv", methods=["POST"])
 def manipulate_csv():
-    filename = "Uploaded_File.csv"
+    data = request.json
+    prompt = data.get("prompt")
+    filename = data.get("file")
     if not filename:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
 
@@ -395,8 +405,6 @@ def manipulate_csv():
     llm = OpenAI(temperature=0, openai_api_key="")
     try:
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)
-
-        prompt = request.json.get("prompt")
         if prompt:
             response = agent.run(prompt)
             return jsonify({"status": "success", "response": response}), 200
@@ -408,5 +416,25 @@ def manipulate_csv():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+def delete_old_files():
+    now = datetime.now()
+    for filename in os.listdir(app.config["UPLOAD_FOLDER"]):
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
+        if now - file_mtime > TIME_DELTA:
+            os.remove(filepath)
+            print(f"Deleted {filename}")
+
+
+def schedule_tasks():
+    schedule.every(1).hour.do(delete_old_files)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
 if __name__ == "__main__":
+
+    threading.Thread(target=schedule_tasks, daemon=True).start()
+
     app.run(host="0.0.0.0", port=5000, debug=True)

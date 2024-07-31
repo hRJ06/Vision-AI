@@ -18,79 +18,71 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
+// const data = [
+//   { marks: 10, id: 2 },
+//   { marks: 12, id: 1 },
+//   { marks: 17, id: 5 },
+//   { marks: 10, id: 6 },
+//   { marks: 13, id: 8 },
+// ];
+
+function getRandomRgb() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+const input = {
+  "marks": "[3,5]",
+  "id": "['15','10']",
+  "status": "success"
+};
+
+function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
+  const keys = Object.keys(input);
+  const dataArray: Array<Record<string, any>> = [];
+
+  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
+  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
+
+
+  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
+
+  for (let i = 0; i < maxLength; i++) {
+    const obj: Record<string, any> = {};
+    arrayKeys.forEach((key, index) => {
+      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
+      // Convert values in the second column to numbers
+      if (index === 1 && value !== null) {
+        value = Number(value);
+      }
+      obj[key] = value;
+    });
+    dataArray.push(obj);
+  }
+
+  return dataArray;
+}
+
+
+const chartConfig = {
+
+} satisfies ChartConfig
 
 
 export function Donut({ Data }: { Data: object[] }) {
-  console.log("Data", Data);
-  // const data = [
-  //   { marks: 10, user: 2 },
-  //   { marks: 12, user: 1 },
-  //   { marks: 17, user: 5 },
-  //   { marks: 10, user: 6 },
-  //   { marks: 13, user: 8 },
-  // ];
+  const data = convertToDataArray(input)
+ 
+  const keys = Object.keys(data[0]);
 
-  const data = Data || [];
-  
-  const generateChartConfig = (data) => {
-    // Collect unique keys excluding 'visitors'
-    const uniqueKeys = data.reduce((acc, item) => {
-      Object.keys(item).forEach(key => {
-        if (key !== 'visitors' && !acc.includes(key)) {
-          acc.push(key);
-        }
-      });
-      return acc;
-    }, []);
-    
-    // Generate a color for each unique key
-    const getColor = (index) => `hsl(var(--chart-${index + 1}))`;
-  
-    // Build chartConfig with colors and labels
-    const chartConfig = uniqueKeys.reduce((config, key, index) => {
-      config[key] = {
-        label: capitalizeFirstLetter(key),
-        color: getColor(index),
-      };
-      return config;
-    }, {});
-  
-    // Add the fixed 'visitors' entry
-    chartConfig.visitors = {
-      label: "Visitors",
-    };
-  
-    return chartConfig;
-  };
-  
-  const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
-  
-  // Generate chartConfig from the data
-  const chartConfig = generateChartConfig(data);
-  
-  // Map the data and add the fill color based on chartConfig
-  const mappedData = data.map((item, index) => {
-    const keys = Object.keys(item);
-    const key = keys.find(k => k !== 'visitors'); // Find the key that's not 'visitors'
-    return {
-      [`${key}_${index}`]: item[key], // Concatenate index with key
-      visitors: item.visitors,
-      fill: chartConfig[key] ? chartConfig[key].color : 'black' // Assign color from chartConfig
-    };
-  });
-  
-  // Update chartConfig.visitors.label if 'visitors' key is present in data
-  if (data.length > 0) {
-    const keys = Object.keys(data[0]);
-    if (keys.length > 1) {
-      chartConfig.visitors.label = keys[1];
-    }
-  }
-  
-  console.log("Config", chartConfig);
-  console.log("Mapped Data", mappedData);
+  const sc = keys[1];
+  const fc = keys[0];
+
+
+  data.forEach((item:any)=>{
+    item.fill = getRandomRgb();
+  })
 
   return (
     <Card className="flex flex-col bg-gray-900 text-white">
@@ -109,9 +101,9 @@ export function Donut({ Data }: { Data: object[] }) {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={mappedData}
-              dataKey="visitors"
-              nameKey="browser"
+              data={data}
+              dataKey={fc}
+              nameKey={sc}
               innerRadius={60}
             />
           </PieChart>

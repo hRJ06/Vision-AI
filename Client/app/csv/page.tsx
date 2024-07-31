@@ -41,7 +41,7 @@ export default function Component() {
   const handleQuery = async () => {
     const data = { prompt: query };
     try {
-      const response = await axios.post("http://127.0.0.1:5000/chatCSV", data);
+      const response = await axios.post("http://127.0.0.1:5000/chat_csv", data);
       if (response) {
         setMessages((prevMessages) => [
           ...prevMessages,

@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioG
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 import { Dots } from "./(LineChart)/Dots"
 import { Linear } from "./(LineChart)/Linear"
@@ -67,13 +67,46 @@ export default function Component() {
 
 
   const JSONFORMATTER = async (response: any) => {
-    const tableInfo = response?.data?.tables_info;
+    // const tableInfo = response?.data?.tables_info;
 
-    const prompt = `I will provide a json message please correct it in the proper format and return me just the final json  output and nothing else, the message is ${tableInfo}`;
+
+    const prompt = `I will provide a json message please correct it in the proper format and return me just the final json  output and nothing else, the message is ${response}`;
     const result = await model.generateContent(prompt);
     return result.response.text();
   }
 
+
+  // testing for parsing ------>
+  // const test = {
+  //   status: "success",
+  //   tables_info: "{\"announcements\":{\"id\":\"INTEGER\",\"content\":\"VARCHAR(255)\",\"course_id\":\"INTEGER\",\"name\":\"VARCHAR(255)\"},\"assignments\":{\"id\":\"INTEGER\",\"assignment_name\":\"VARCHAR(255)\",\"deadline\":\"DATETIME(6)\",\"description\":\"VARCHAR(255)\",\"course_id\":\"INTEGER\",\"full_marks\":\"INTEGER\"},\"course_archived_users\":{\"course_id\":\"INTEGER\",\"archived_user_id\":\"INTEGER\"},\"courses\":{\"id\":\"INTEGER\",\"course_name\":\"VARCHAR(255)\",\"instructor_id\":\"INTEGER\",\"code\":\"VARCHAR(255)\",\"meeting_link\":\"VARCHAR(255)\",\"cover_photo\":\"VARCHAR(255)\"},\"doubt\":{\"id\":\"INTEGER\",\"content\":\"VARCHAR(255)\",\"course_id\":\"INTEGER\",\"user_id\":\"INTEGER\"},\"enrolled_users_courses\":{\"course_id\":\"INTEGER\",\"user_id\":\"INTEGER\"},\"files\":{\"id\":\"INTEGER\",\"file_name\":\"VARCHAR(255)\",\"file_path\":\"VARCHAR(255)\",\"submission_id\":\"INTEGER\",\"assignment_id\":\"INTEGER\",\"announcement_id\":\"INTEGER\"},\"form\":{\"id\":\"INTEGER\"},\"form_item\":{\"id\":\"INTEGER\",\"question\":\"VARCHAR(255)\",\"answer\":\"VARCHAR(255)\",\"options\":\"VARBINARY(255)\"},\"message\":{\"id\":\"INTEGER\",\"chat_id\":\"INTEGER\",\"sender_id\":\"INTEGER\",\"content\":\"VARCHAR(10000)\",\"course_id\":\"INTEGER\",\"type\":\"VARCHAR(255)\",\"doubt_id\":\"INTEGER\"},\"private_chat\":{\"id\":\"INTEGER\",\"assignment_id\":\"INTEGER\",\"user_id\":\"INTEGER\"},\"submissions\":{\"id\":\"INTEGER\",\"late_status\":\"BIT(1)\",\"submission_date_time\":\"DATETIME(6)\",\"assignment_id\":\"INTEGER\",\"user_id\":\"INTEGER\",\"marks\":\"INTEGER\",\"comment\":\"VARCHAR(255)\"},\"users\":{\"id\":\"INTEGER\",\"email\":\"VARCHAR(255)\",\"first_name\":\"VARCHAR(255)\",\"last_name\":\"VARCHAR(255)\",\"password\":\"VARCHAR(255)\",\"role\":\"ENUM(\"\"INSTRUCTOR\"\",\"\"STUDENT\"\")\",\"reset_password_token\":\"VARCHAR(255)\",\"reset_password_token_expires\":\"DATETIME(6)\"}}"
+  // }
+
+  // const funtion =async()=>{
+  //   try {
+  //     let result = await JSONFORMATTER(test.tables_info);
+  //     result = result.slice(7, -3);
+  //     console.log('RE', result);
+  //     const Finalschema = JSON.parse(result);
+  //     console.log("schema2", Finalschema);
+  //     toast({
+  //       variant: "success",
+  //       title: "Connection Successful",
+  //       description: "The connection was successful.",
+  //     });
+  //   } catch (error:any) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Error",
+  //       description: error.message || "An unexpected error occurred.",
+  //       action: <ToastAction altText="Try again">Try again</ToastAction>,
+  //     });
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   funtion();
+  // }, []);
 
 
   const connectToDB = async () => {
@@ -92,10 +125,10 @@ export default function Component() {
         },
       });
 
+      // console.log(response);
+      if (response) {
 
-      if (response.data.status === "success") {
-
-        let value = await JSONFORMATTER(response);
+        let value = await JSONFORMATTER(response?.data?.tables_info);
 
         value = value.slice(7, -3);
         console.log("Value", value);
@@ -293,27 +326,27 @@ export default function Component() {
                   <div className="w-full aspect-w-6 aspect-h-3">
                     {PieType == "Donut" && (
                       <div className="w-full h-full">
-                        <Donut Data={Data}/>
+                        <Donut Data={Data} />
                       </div>
                     )}
                     {PieType == "DonutText" && (
                       <div className="w-full h-full">
-                        <DonutText Data={Data}/>
+                        <DonutText Data={Data} />
                       </div>
                     )}
                     {PieType == "DonutActive" && (
                       <div className="w-full h-full">
-                        <DonutActive Data={Data}/>
+                        <DonutActive Data={Data} />
                       </div>
                     )}
                     {PieType == "Label" && (
                       <div className="w-full h-full">
-                        <LabelPie Data={Data}/>
+                        <LabelPie Data={Data} />
                       </div>
                     )}
                     {PieType == "LabelList" && (
                       <div className="w-full h-full">
-                        <Labellist Data={Data}/>
+                        <Labellist Data={Data} />
                       </div>
                     )}
                   </div>
@@ -412,7 +445,7 @@ export default function Component() {
           <div className="flex gap-x-3">
             <div className="mt-2">
               {
-                selectedChart == "Bar"  &&
+                selectedChart == "Bar" &&
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
@@ -428,7 +461,7 @@ export default function Component() {
                 </DropdownMenu>
               }
               {
-                selectedChart == "Pie"  &&
+                selectedChart == "Pie" &&
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
@@ -466,83 +499,83 @@ export default function Component() {
 
 
           <div className="flex gap-x-3">
-          <div className="mt-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
-                  <BarChartIcon className="h-4 w-4" />
-                  {
-                    selectedChart == "" ? "Charts": selectedChart
-                  }
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup value={selectedChart}>
-                  <DropdownMenuRadioItem value="bar" onClick={() => setSelectedChart("Bar")}>Bar</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="line" onClick={() => setSelectedChart("Line")}>Line</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="area" onClick={() => setSelectedChart("Area")}>Area</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="pie" onClick={() => setSelectedChart("Pie")}>Pie</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+            <div className="mt-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
+                    <BarChartIcon className="h-4 w-4" />
+                    {
+                      selectedChart == "" ? "Charts" : selectedChart
+                    }
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup value={selectedChart}>
+                    <DropdownMenuRadioItem value="bar" onClick={() => setSelectedChart("Bar")}>Bar</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="line" onClick={() => setSelectedChart("Line")}>Line</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="area" onClick={() => setSelectedChart("Area")}>Area</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="pie" onClick={() => setSelectedChart("Pie")}>Pie</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
 
-          <div className="mt-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
-                  <BarChartIcon className="h-4 w-4 " />
-                  {LinearType == "" ? "Types": LinearType}
-                  {PieType == "" ? "Types": PieType}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup >
-                  {selectedChart === "Line" &&
-                    <>
-                      <DropdownMenuRadioItem value="Normal" onClick={() => setLinearType("Normal")}>Normal</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Step" onClick={() => setLinearType("Step")}>Step</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Linear" onClick={() => setLinearType("Linear")}>Linear</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Dots" onClick={() => setLinearType("Dots")}>Dots</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="DotsColor" onClick={() => setLinearType("DotsColor")}>DotsColor</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Label" onClick={() => setLinearType("Label")}>Label</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="CustomDots" onClick={() => setLinearType("CustomDots")}>CustomDots</DropdownMenuRadioItem>
-                    </>
-                  }
-                  {selectedChart === "Bar" &&
-                    <>
-                      <DropdownMenuRadioItem value="Normal">bar</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Step">bar</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Linear">bar</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Dots">bar</DropdownMenuRadioItem>
-                    </>
-                  }
+            <div className="mt-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
+                    <BarChartIcon className="h-4 w-4 " />
+                    {LinearType == "" ? "Types" : LinearType}
+                    {PieType == "" ? "Types" : PieType}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup >
+                    {selectedChart === "Line" &&
+                      <>
+                        <DropdownMenuRadioItem value="Normal" onClick={() => setLinearType("Normal")}>Normal</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Step" onClick={() => setLinearType("Step")}>Step</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Linear" onClick={() => setLinearType("Linear")}>Linear</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Dots" onClick={() => setLinearType("Dots")}>Dots</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="DotsColor" onClick={() => setLinearType("DotsColor")}>DotsColor</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Label" onClick={() => setLinearType("Label")}>Label</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="CustomDots" onClick={() => setLinearType("CustomDots")}>CustomDots</DropdownMenuRadioItem>
+                      </>
+                    }
+                    {selectedChart === "Bar" &&
+                      <>
+                        <DropdownMenuRadioItem value="Normal">bar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Step">bar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Linear">bar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Dots">bar</DropdownMenuRadioItem>
+                      </>
+                    }
 
-                  {selectedChart === "Area" &&
-                    <>
-                      <DropdownMenuRadioItem value="Normal">Area</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Step">Area</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Linear">Area</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Dots">Area</DropdownMenuRadioItem>
-                    </>
-                  }
+                    {selectedChart === "Area" &&
+                      <>
+                        <DropdownMenuRadioItem value="Normal">Area</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Step">Area</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Linear">Area</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="Dots">Area</DropdownMenuRadioItem>
+                      </>
+                    }
 
-                  {selectedChart === "Pie" &&
-                    <>
-                      <DropdownMenuRadioItem onClick={() => setPieType("Donut")} value="Donut">Donut</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem onClick={() => setPieType("DonutText")} value="DonutText">DonutText</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem onClick={() => setPieType("DonutActive")} value="DonutActive">DonutActive</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem onClick={() => setPieType("Label")} value="Label">Label</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem onClick={() => setPieType("LabelList")} value="LabelList">LabelList</DropdownMenuRadioItem>
-                    </>
-                  }
+                    {selectedChart === "Pie" &&
+                      <>
+                        <DropdownMenuRadioItem onClick={() => setPieType("Donut")} value="Donut">Donut</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setPieType("DonutText")} value="DonutText">DonutText</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setPieType("DonutActive")} value="DonutActive">DonutActive</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setPieType("Label")} value="Label">Label</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setPieType("LabelList")} value="LabelList">LabelList</DropdownMenuRadioItem>
+                      </>
+                    }
 
-                </DropdownMenuRadioGroup>
+                  </DropdownMenuRadioGroup>
 
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <div className="mt-2 text-center ">

@@ -1,10 +1,51 @@
+"use client";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { AwardIcon, DatabaseIcon } from "lucide-react";
+import { useState } from "react";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
+import { sendEmail } from "@/lib/actions/mail.action";
 
 export default function Component() {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const emailHandler = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please provide all fields.",
+      });
+      return;
+    }
+    const response = await sendEmail(formData);
+    if (response) {
+      toast({
+        variant: "success",
+        title: "Connection Successful",
+        description: "Thank You for connecting with us.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please try again.",
+      });
+    }
+  };
   return (
     <div className="flex flex-col min-h-dvh">
       <section className="w-full py-12 md:py-24 lg:py-32 border-b">
@@ -63,7 +104,12 @@ export default function Component() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Enter your name" />
+                  <Input
+                    id="name"
+                    placeholder="Enter your name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -71,6 +117,8 @@ export default function Component() {
                     id="email"
                     type="email"
                     placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -80,9 +128,11 @@ export default function Component() {
                   id="message"
                   placeholder="Enter your message"
                   className="min-h-[150px]"
+                  value={formData.message}
+                  onChange={handleChange}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" onClick={emailHandler}>
                 Send Message
               </Button>
             </form>

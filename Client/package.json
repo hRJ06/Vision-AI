@@ -35,6 +35,7 @@
     "react-mermaid2": "^0.1.4",
     "react-router-dom": "^6.25.1",
     "recharts": "^2.12.7",
+    "resend": "^3.5.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"

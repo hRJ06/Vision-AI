@@ -351,8 +351,8 @@ def fetch_table_data():
             jsonify(
                 {
                     "status": "success",
-                    "first_data": formatted_first_data,
-                    "second_data": formatted_second_data,
+                    first_column: formatted_first_data,
+                    second_column: formatted_second_data,
                 }
             ),
             200,

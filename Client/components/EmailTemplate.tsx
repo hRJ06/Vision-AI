@@ -56,7 +56,6 @@ export const EmailTemplate = ({ name, message }: Mail) => {
                 decision-making. We're excited to see how you'll leverage our
                 platform to serve your clients better.
               </Text>
-              </Text>
               <Button style={button} href="https://vision-ai-app.vercel.app">
                 Unlock Clear Insights With Us
               </Button>

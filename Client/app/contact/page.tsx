@@ -4,24 +4,33 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { AwardIcon, DatabaseIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { sendEmail } from "@/lib/actions/mail.action";
 
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 export default function Component() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     message: "",
   });
-  const handleChange = (e) => {
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
 
-  const emailHandler = async (e) => {
+  const emailHandler = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       toast({
@@ -31,14 +40,18 @@ export default function Component() {
       });
       return;
     }
-    const response = await sendEmail(formData);
-    if (response) {
-      toast({
-        variant: "success",
-        title: "Connection Successful",
-        description: "Thank You for connecting with us.",
-      });
-    } else {
+    try {
+      const response = await sendEmail(formData);
+      if (response) {
+        toast({
+          variant: "success",
+          title: "Connection Successful",
+          description: "Thank You for connecting with us.",
+        });
+      } else {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -46,6 +59,7 @@ export default function Component() {
       });
     }
   };
+
   return (
     <div className="flex flex-col min-h-dvh">
       <section className="w-full py-12 md:py-24 lg:py-32 border-b">
@@ -100,7 +114,7 @@ export default function Component() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
               Get in Touch
             </h2>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={emailHandler}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
@@ -132,7 +146,7 @@ export default function Component() {
                   onChange={handleChange}
                 />
               </div>
-              <Button type="submit" className="w-full" onClick={emailHandler}>
+              <Button type="submit" className="w-full">
                 Send Message
               </Button>
             </form>
@@ -191,7 +205,7 @@ export default function Component() {
   );
 }
 
-function MailIcon(props) {
+function MailIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -211,7 +225,7 @@ function MailIcon(props) {
   );
 }
 
-function MapPinIcon(props) {
+function MapPinIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -231,7 +245,7 @@ function MapPinIcon(props) {
   );
 }
 
-function PhoneIcon(props) {
+function PhoneIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -250,7 +264,7 @@ function PhoneIcon(props) {
   );
 }
 
-function XIcon(props) {
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

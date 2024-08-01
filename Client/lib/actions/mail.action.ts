@@ -3,13 +3,13 @@ import { EmailTemplate } from "@/components/EmailTemplate";
 import { Mail } from "@/types";
 import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
-export const sendEmail = async ({ name, email }: Mail) => {
+export const sendEmail = async ({ name, email, message }: Mail) => {
   try {
     const { data, error } = await resend.emails.send({
       from: "noreply@vision.ai <noreply@vision-ai.in>",
-      to: email,
+      to: email!,
       subject: "Thank You For Choosing Vision AI",
-      react: EmailTemplate({ firstName: name }),
+      react: EmailTemplate({ name, message }),
     });
     if (error) {
       console.error(error);

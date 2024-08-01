@@ -194,7 +194,6 @@ export default function Component() {
           responseType: "blob",
         }
       );
-      // Add logic to handle the response here
     } catch (error) {
       console.error("Error downloading report:", error);
     }

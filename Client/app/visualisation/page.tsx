@@ -179,60 +179,60 @@ export default function Component() {
     };
 
     // console.log("data", data);
-    try {
-      let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    // try {
+    //   let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
 
-      const firstData = JSON.parse(response.data.first_data);
-      const secondData = JSON.parse(response.data.second_data);
+    //   const firstData = JSON.parse(response.data.first_data);
+    //   const secondData = JSON.parse(response.data.second_data);
 
-      const convertAndFilterData = (data: any) => {
-        return data.map((item: any) => item === "None" ? 0 : item).filter((item: any) => item !== "None");
-      };
+    //   const convertAndFilterData = (data: any) => {
+    //     return data.map((item: any) => item === "None" ? 0 : item).filter((item: any) => item !== "None");
+    //   };
 
-      const convertedFirstData = convertAndFilterData(firstData);
-      const convertedSecondData = convertAndFilterData(secondData);
-      console.log("convertedFirstData", convertedFirstData);
-      console.log("convertedSecondData", convertedSecondData);
-      console.log("response", response);
-      if (response.data.status === "success") {
+    //   const convertedFirstData = convertAndFilterData(firstData);
+    //   const convertedSecondData = convertAndFilterData(secondData);
+    //   console.log("convertedFirstData", convertedFirstData);
+    //   console.log("convertedSecondData", convertedSecondData);
+    //   console.log("response", response);
+    //   if (response.data.status === "success") {
 
-        const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
-        const formattedData = Array.from({ length: minLength }, (_, index) => ({
-          [selectedColumn]: convertedFirstData[index],
-          [selectedColumn2]: convertedSecondData[index]
-        }));
+    //     const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
+    //     const formattedData = Array.from({ length: minLength }, (_, index) => ({
+    //       [selectedColumn]: convertedFirstData[index],
+    //       [selectedColumn2]: convertedSecondData[index]
+    //     }));
 
-        // console.log("response2", formattedData);
-        const FinalData = formattedData;
-        setdata(FinalData);
+    //     // console.log("response2", formattedData);
+    //     const FinalData = formattedData;
+    //     setdata(FinalData);
 
-        toast({
-          variant: "success",
-          title: "Generated Successful",
-          description: "The connection was successful.",
-        });
-      } else {
-        toast({
-          title: "Connection Failed",
-          variant: "destructive",
-          description:
-            response.data.message || "There was an error connecting.",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
-        });
-      }
+    //     toast({
+    //       variant: "success",
+    //       title: "Generated Successful",
+    //       description: "The connection was successful.",
+    //     });
+    //   } else {
+    //     toast({
+    //       title: "Connection Failed",
+    //       variant: "destructive",
+    //       description:
+    //         response.data.message || "There was an error connecting.",
+    //       action: <ToastAction altText="Try again">Try again</ToastAction>,
+    //     });
+    //   }
 
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "An unexpected error occurred.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    }
+    // } catch (error: any) {
+    //   toast({
+    //     variant: "destructive",
+    //     title: "Error",
+    //     description: error.message || "An unexpected error occurred.",
+    //     action: <ToastAction altText="Try again">Try again</ToastAction>,
+    //   });
+    // }
   }
 
   // console.log("first Schema:", schema);

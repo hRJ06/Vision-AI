@@ -19,64 +19,64 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-]
+function getRandomRgb() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+const input = {
+  "marks": "[3,5]",
+  "id": "[15,10]",
+  "status": "success"
+};
+
+function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
+  const keys = Object.keys(input);
+  const dataArray: Array<Record<string, any>> = [];
+
+  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
+  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
 
 
+  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
 
+  for (let i = 0; i < maxLength; i++) {
+    const obj: Record<string, any> = {};
+    arrayKeys.forEach((key, index) => {
+      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
+      // Convert values in the second column to numbers
+      if (index === 1 && value !== null) {
+        value = Number(value);
+      }
+      obj[key] = value;
+    });
+    dataArray.push(obj);
+  }
+
+  return dataArray;
+}
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
+
 } satisfies ChartConfig
 
 
 
 export function DonutText({ Data }: { Data: object[] }) {
+  const data = convertToDataArray(input)
+  const keys = Object.keys(data[0]);
 
-  const data = Data;
+  const sc = keys[1];
+  const fc = keys[0];
+  console.log(sc, fc);
 
-  if (data.length > 0) {
-    const keys = Object.keys(data[0]);
-    if (keys.length > 1) {
-      chartConfig.visitors.label = keys[1];
-    }
-  }
 
-  const mappedData = data.map((item: any) => {
-    const keys = Object.keys(item);
-    return {
-      [keys[0]]: item[keys[0]],
-      visitors: item[keys[1]]
-    };
-  });
+  data.forEach((item:any)=>{
+    item.fill = getRandomRgb();
+  })
 
-  const totalVisitors = mappedData.reduce((acc, curr) => acc + curr.visitors, 0);
+  const totalVisitors = data.reduce((acc, curr:any) => acc + curr[sc], 0);
   const secondValueKey = data.length > 0 && data[0] != null ? Object.keys(data[0])[1] : "visitors";
  
 
@@ -97,9 +97,9 @@ export function DonutText({ Data }: { Data: object[] }) {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              data={data}
+              dataKey={fc}
+              nameKey={sc}
               innerRadius={60}
               strokeWidth={5}
             >
@@ -125,7 +125,7 @@ export function DonutText({ Data }: { Data: object[] }) {
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
+                          className="fill-muted-foreground text-2xl uppercase"
                         >
                           {secondValueKey}
                         </tspan>

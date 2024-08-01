@@ -17,57 +17,63 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
-]
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig
+function getRandomRgb() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 
-export function Labellist({Data}:{Data:object[]}) {
-  const data = Data;
+const input = {
+  "marks": "[3,5]",
+  "id": "['15','10']",
+  "status": "success"
+};
 
-  if (data.length > 0) {
-    const keys = Object.keys(data[0]);
-    if (keys.length > 1) {
-      chartConfig.visitors.label = keys[1]; 
-    }
+function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
+  const keys = Object.keys(input);
+  const dataArray: Array<Record<string, any>> = [];
+
+  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
+  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
+
+
+  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
+
+  for (let i = 0; i < maxLength; i++) {
+    const obj: Record<string, any> = {};
+    arrayKeys.forEach((key, index) => {
+      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
+      // Convert values in the second column to numbers
+      if (index === 1 && value !== null) {
+        value = Number(value);
+      }
+      obj[key] = value;
+    });
+    dataArray.push(obj);
   }
 
-  const mappedData = data.map((item:any) => {
-    const keys = Object.keys(item);
-    return {
-      [keys[0]]: item[keys[0]], 
-      visitors: item[keys[1]] 
-    };
-  });
+  return dataArray;
+}
+
+
+const chartConfig = {
+
+} satisfies ChartConfig
+
+
+export function Labellist({Data}:{Data:object[]}) {
+  const data = convertToDataArray(input)
+  const keys = Object.keys(data[0]);
+
+  const sc = keys[1];
+  const fc = keys[0];
+
+
+  data.forEach((item:any)=>{
+    item.fill = getRandomRgb();
+  })
   return (
     <Card className="flex flex-col bg-gray-900 text-white">
       <CardHeader className="items-center pb-0">
@@ -81,9 +87,9 @@ export function Labellist({Data}:{Data:object[]}) {
         >
           <PieChart>
             <ChartTooltip
-              content={<ChartTooltipContent nameKey="visitors" hideLabel />}
+              content={<ChartTooltipContent nameKey={sc} hideLabel />}
             />
-            <Pie data={mappedData} dataKey="visitors">
+            <Pie data={data} dataKey={fc}>
               <LabelList
                 dataKey="browser"
                 className="fill-background"

@@ -37,3 +37,9 @@ export interface Mail {
   email?: string;
   message: string;
 }
+
+export interface FormData {
+  name: string;
+  email: string;
+  message: string;
+}

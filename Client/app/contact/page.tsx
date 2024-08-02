@@ -5,15 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { AwardIcon, DatabaseIcon } from "lucide-react";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { sendEmail } from "@/lib/actions/mail.action";
+import { FormData } from "@/types";
 
-interface FormData {
-  name: string;
-  email: string;
-  message: string;
-}
+
 
 export default function Component() {
   const { toast } = useToast();

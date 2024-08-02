@@ -1,19 +1,33 @@
+"use client";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useToast } from "@/components/ui/use-toast";
+import { FormEvent } from "react";
 
 export default function Component() {
+  const { toast } = useToast();
+
+  const bookingHandler = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    toast({
+      variant: "success",
+      title: "Booking Successful",
+      description: "Thank you for connecting with us.",
+    });
+  };
+
   return (
-    <div className="flex flex-col min-h-[100dvh] w-full">
+    <div className="flex flex-col min-h-[100vh] w-full">
       <section className="w-full pt-12 md:pt-24 lg:pt-32">
         <div className="container space-y-10 xl:space-y-16">
           <div className="grid gap-4 px-4 md:grid-cols-2 md:gap-16">
             <div>
               <Image
                 src="/Demo.gif"
-                width="550"
-                height="550"
+                width={550}
+                height={550}
                 alt="Book"
                 className="mx-auto aspect-square overflow-hidden rounded-xl object-cover"
               />
@@ -27,7 +41,7 @@ export default function Component() {
                 your business. Book a demo with one of our experts today.
               </p>
               <Link
-                href="#"
+                href="#book"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
@@ -82,15 +96,15 @@ export default function Component() {
             </div>
             <Image
               src="/KeyFeatures.gif"
-              width="550"
-              height="310"
+              width={550}
+              height={310}
               alt="Features"
               className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
             />
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" id="book">
         <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
           <div className="space-y-3">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -102,11 +116,12 @@ export default function Component() {
             </p>
           </div>
           <div className="mx-auto w-full max-w-sm space-y-2">
-            <form className="flex gap-2">
+            <form className="flex gap-2" onSubmit={bookingHandler}>
               <Input
                 type="email"
                 placeholder="Enter your email"
                 className="max-w-lg flex-1"
+                required
               />
               <Button type="submit">Book a Demo</Button>
             </form>
@@ -128,7 +143,7 @@ export default function Component() {
   );
 }
 
-function CheckIcon(props) {
+function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

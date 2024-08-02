@@ -15,6 +15,7 @@ import os
 from flask_pymongo import PyMongo
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+from cryptography.fernet import Fernet  
 import random
 import schedule
 import time
@@ -39,9 +40,18 @@ mongo = PyMongo(app).db
 app.secret_key = os.getenv("SECRET_KEY")
 
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
+
+key = Fernet.generate_key()
+cipher_suite = Fernet(key)
+
 if "Logs" not in mongo.list_collection_names():
     mongo.create_collection("Logs")
 
+def encrypt_data(data):
+    return cipher_suite.encrypt(data.encode()).decode()
+
+def decrypt_data(encrypted_data):
+    return cipher_suite.decrypt(encrypted_data.encode()).decode()
 
 def parse_db_uri(db_uri):
     parsed_uri = urlparse(db_uri)
@@ -196,7 +206,7 @@ def connect():
         for ch in replaced_response:
             if ch != "\\":
                 final_string += ch
-
+        db_uri = encrypt_data(db_uri)
         return jsonify(
             {"status": "success", "schema_description": final_string, "db": db_uri}
         )
@@ -221,7 +231,7 @@ def chat():
 
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
-        db = SQLDatabase.from_uri(db_uri)
+        db = SQLDatabase.from_uri(decrypt_data(db_uri))
         if db:
             ai_response = get_response(user_query, db, chat_history)
             ans = ""

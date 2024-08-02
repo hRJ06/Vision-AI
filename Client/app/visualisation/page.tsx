@@ -23,6 +23,13 @@ import { LabelPie } from "./(PieChart)/LabelPie"
 import { Labellist } from "./(PieChart)/LabelList"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { DotsColor } from "./(LineChart)/DotsColor"
+import { NormalBar } from "./(BarChart)/NormalBar"
+import { LabelBar } from "./(BarChart)/LabelBar"
+import { CustomLabel } from "./(BarChart)/CustomLabel"
+import { Mixed } from "./(BarChart)/Mixed"
+import { Active } from "./(BarChart)/Active"
+import { Negative } from "./(BarChart)/Negative"
+import { Horizontal } from "./(BarChart)/Horizontal"
 
 export default function Component() {
 
@@ -351,6 +358,47 @@ export default function Component() {
                     )}
                   </div>
                 }
+
+                {
+                  selectedChart == "Bar" &&
+                  <div className="w-full aspect-w-6 aspect-h-3">
+                    {BarType == "NormalBar" && (
+                      <div className="w-full h-full">
+                        <NormalBar Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "LabelBar" && (
+                      <div className="w-full h-full">
+                        <LabelBar Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "CustomLabel" && (
+                      <div className="w-full h-full">
+                        <CustomLabel Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "Mixed" && (
+                      <div className="w-full h-full">
+                        <Mixed Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "Active" && (
+                      <div className="w-full h-full">
+                        <Active Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "Negative" && (
+                      <div className="w-full h-full">
+                        <Negative Data={Data} />
+                      </div>
+                    )}
+                    {BarType == "Horizontal" && (
+                      <div className="w-full h-full">
+                        <Horizontal Data={Data} />
+                      </div>
+                    )}
+                  </div>
+                }
               </>
             )}
           </div>
@@ -527,7 +575,8 @@ export default function Component() {
                   <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
                     <BarChartIcon className="h-4 w-4 " />
                     {LinearType == "" ? "Types" : LinearType}
-                    {PieType == "" ? "Types" : PieType}
+                   
+
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -545,10 +594,13 @@ export default function Component() {
                     }
                     {selectedChart === "Bar" &&
                       <>
-                        <DropdownMenuRadioItem value="Normal">bar</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Step">bar</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Linear">bar</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Dots">bar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("NormalBar")} value="NormalBar">NormalBar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("Negative")} value="Negative">Negative</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("Mixed")} value="Mixed">Mixed</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("LabelBar")} value="LabelBar">LabelBar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("Horizontal")} value="Horizontal">Horizontal</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("CustomLabel")} value="CustomLabel">CustomLabel</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={()=>setBarType("Active")} value="Active">Active</DropdownMenuRadioItem>
                       </>
                     }
 

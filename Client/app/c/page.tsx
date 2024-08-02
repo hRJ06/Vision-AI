@@ -1,6 +1,5 @@
-
 "use client";
-export const fetchCache = 'force-no-store';
+export const fetchCache = "force-no-store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ChatMessage, DatabaseCredentials } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { ChangeEvent, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
@@ -30,6 +29,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { DownloadIcon, EllipsisVertical, Download } from "lucide-react";
+import Cookies from "js-cookie";
 
 export default function Component() {
   const { toast } = useToast();
@@ -176,7 +176,7 @@ export default function Component() {
       const blob = await response.blob();
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Image.png"; 
+      link.download = "Image.png";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -185,31 +185,21 @@ export default function Component() {
     }
   }, []);
 
-  const download = async () => {
+  const downloadHandler = async () => {
+    console.log("HI");
+    const details = { ...databaseCredentials, schemaDescription: schemaInfo };
     try {
       const response = await axios.post(
-        "http://127.0.0.1:5000/report",
-        databaseCredentials,
+        "http://localhost:4000/image/report",
+        details,
         {
+          headers: {
+            "Content-Type": "application/json",
+          },
+
           responseType: "blob",
         }
       );
-    } catch (error) {
-      console.error("Error downloading report:", error);
-    }
-  };
-
-  const downloadHandler = async () => {
-    console.log('HI')
-    const details={...databaseCredentials,schemaDescription:schemaInfo}
-    try {
-      const response = await axios.post("http://localhost:4000/image/report", details,{
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        responseType: "blob",
-      });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -239,7 +229,10 @@ export default function Component() {
         },
       });
       if (response.data.status === "success") {
-        setSchemaInfo(response.data.schema_description)
+        const schema_description = response.data.schema_description;
+        const db = response.data.db;
+        setSchemaInfo(schema_description);
+        Cookies.set("db", db, { secure: true, sameSite: "strict" });
         toast({
           variant: "success",
           title: "Connection Successful",
@@ -272,7 +265,8 @@ export default function Component() {
 
   const handleSendMessage = async (e: any) => {
     e.preventDefault();
-    if (databaseCredentials === null) {
+    const db_uri = Cookies.get("db");
+    if (db_uri === null) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -289,7 +283,7 @@ export default function Component() {
       try {
         const response = await axios.post(
           "http://127.0.0.1:5000/chat",
-          { ...databaseCredentials, message: userPrompt },
+          { message: userPrompt, db: db_uri },
           {
             headers: {
               "Content-Type": "application/json",
@@ -427,8 +421,8 @@ export default function Component() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={downloadHandler}>
-                 <DownloadIcon className="w-4 h-4 mr-2"/>
-                  Download Report                
+                <DownloadIcon className="w-4 h-4 mr-2" />
+                Download Report
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -6,7 +6,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from flask_cors import CORS
 from langchain_groq import ChatGroq
-from flask import Flask, request, session, jsonify, send_file
+from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
 from langchain import OpenAI
@@ -14,6 +14,7 @@ import re
 import os
 from flask_pymongo import PyMongo
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 import random
 import schedule
 import time
@@ -42,9 +43,26 @@ if "Logs" not in mongo.list_collection_names():
     mongo.create_collection("Logs")
 
 
+def parse_db_uri(db_uri):
+    parsed_uri = urlparse(db_uri)
+    user = parsed_uri.username
+    password = parsed_uri.password
+    host = parsed_uri.hostname
+    port = parsed_uri.port
+    database = parsed_uri.path.lstrip("/")
+
+    return {
+        "user": user,
+        "password": password,
+        "host": host,
+        "port": port,
+        "database": database,
+    }
+
+
 def init_db(user, password, host, port, database):
     db_uri = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
-    return SQLDatabase.from_uri(db_uri)
+    return db_uri
 
 
 def parse_user_agent(user_agent):
@@ -150,7 +168,6 @@ def get_response(user_query, db, chat_history):
 @app.route("/connect", methods=["POST"])
 def connect():
     data = request.json
-    print(data)
     if not data:
         return jsonify({"status": "error", "message": "No data provided"}), 400
 
@@ -164,8 +181,8 @@ def connect():
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     try:
-        db = init_db(user, password, host, port, database)
-        schema_description = db.get_table_info()
+        db_uri = init_db(user, password, host, port, database)
+        schema_description = SQLDatabase.from_uri(db_uri).get_table_info()
         prompt = f"Convert the following table information into a JSON object. Format is table names, then the column name and datatype. Dont add any space or backslash.The table info is:\n\n{schema_description}"
 
         response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
@@ -179,7 +196,10 @@ def connect():
         for ch in replaced_response:
             if ch != "\\":
                 final_string += ch
-        return jsonify({"status": "success", "schema_description": final_string})
+
+        return jsonify(
+            {"status": "success", "schema_description": final_string, "db": db_uri}
+        )
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -187,11 +207,7 @@ def connect():
 @app.route("/chat", methods=["POST"])
 def chat():
     user_query = request.json["message"]
-    user = request.json["User"]
-    password = request.json["Password"]
-    host = request.json["Host"]
-    port = request.json["Port"]
-    database = request.json["Database"]
+    db_uri = request.json["db"]
     chat_history = session.get("chat_history", [])
 
     if request.headers.getlist("X-Forwarded-For"):
@@ -205,7 +221,7 @@ def chat():
 
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
-        db = init_db(user, password, host, port, database)
+        db = SQLDatabase.from_uri(db_uri)
         if db:
             ai_response = get_response(user_query, db, chat_history)
             ans = ""
@@ -214,15 +230,15 @@ def chat():
             ans = ans.replace("\\_", "_")
             print("ANS", ans)
             chat_history.append(AIMessage(content=ans))
-
+            db = parse_db_uri(db_uri)
             collection = mongo["Logs"]
             document = {
                 "device": device_info,
                 "user_ip": user_ip,
-                "user": user,
-                "host": host,
-                "port": port,
-                "database": database,
+                "user": db.get("user"),
+                "host": db.get("host"),
+                "port": db.get("port"),
+                "database": db.get("database"),
                 "query": user_query,
                 "response": ans,
                 "createdAt": datetime.utcnow(),

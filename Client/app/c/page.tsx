@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DownloadIcon, EllipsisVertical, Download } from "lucide-react";
 import Cookies from "js-cookie";
+import { cache, checkKey } from "@/lib/actions/redis.action";
 
 export default function Component() {
   const { toast } = useToast();
@@ -281,29 +282,36 @@ export default function Component() {
       const userPrompt = inputText;
       setInputText("");
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:5000/chat",
-          { message: userPrompt, db: db_uri },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const llm_response = response.data.response;
-        const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. Do not add any parameter for colors. The prompt is given by another llm model. So the prompt is ${llm_response}`;
-        const result = await model.generateContent(prompt);
-        const quickchart_response = await result.response.text();
-        const hasLink = containsLink(quickchart_response);
+        const cached_response = await checkKey(db_uri, userPrompt);
+        console.log('RESPONSE', cached_response);
+        let newChat = null;
+        if (cached_response === "FALSE") {
+          const response = await axios.post(
+            "http://127.0.0.1:5000/chat",
+            { message: userPrompt, db: db_uri },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const llm_response = response.data.response;
+          const prompt = `You are senior data analyst. I will give you a prompt which will basically be the response of a sql query. If you feel that it can be represented in any kind of chart like bar, pie(for textual data) and many more, you need to return me a quickchart link for it using the data from my prompt and just send me the link nothing else. If suppose the prompt does not have enough data to generate a graph then just return me not possible. Do not add any parameter for colors. The prompt is given by another llm model. So the prompt is ${llm_response}`;
+          const result = await model.generateContent(prompt);
+          const quickchart_response = await result.response.text();
+          const hasLink = containsLink(quickchart_response);
 
-        setchats((prevChats) => [
-          ...prevChats,
-          {
+          newChat = {
             msg: response.data.response,
             role: "AI",
             link: hasLink ? quickchart_response : null,
-          },
-        ]);
+          };
+          await cache(db_uri, userPrompt, newChat);
+        } else {
+          newChat = cached_response;
+        }
+
+        setchats((prevChats) => [...prevChats, newChat]);
       } catch (error) {
         console.error("Error", error);
       }

@@ -23,10 +23,14 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
     "@react-email/components": "0.0.22",
+    "@upstash/redis": "^1.34.0",
     "axios": "^1.7.2",
     "class-variance-authority": "^0.7.0",
+    "client": "file:",
     "clsx": "^2.1.1",
+    "ioredis": "^5.4.1",
     "js-cookie": "^3.0.5",
+    "lottie-react": "^2.4.0",
     "lucide-react": "^0.408.0",
     "mermaid": "^10.9.1",
     "next": "14.2.5",
@@ -44,6 +48,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

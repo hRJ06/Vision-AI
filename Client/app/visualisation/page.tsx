@@ -30,6 +30,10 @@ import { Mixed } from "./(BarChart)/Mixed"
 import { Active } from "./(BarChart)/Active"
 import { Negative } from "./(BarChart)/Negative"
 import { Horizontal } from "./(BarChart)/Horizontal"
+import { DotsArea } from "./(AreaChart)/DotsArea"
+import { GridFilled } from "./(AreaChart)/GridFilled"
+import { GridCircle } from "./(AreaChart)/GridCircle"
+import { GridCircleFilled } from "./(AreaChart)/GridCircleFilled"
 
 export default function Component() {
 
@@ -399,6 +403,33 @@ export default function Component() {
                     )}
                   </div>
                 }
+
+                {
+                  selectedChart == "Area" &&
+                  <div className="w-full aspect-w-6 aspect-h-3">
+
+                    {AreaType == "Dots" && (
+                      <div className="w-full h-full">
+                        <DotsArea Data={Data} />
+                      </div>
+                    )}
+                    {AreaType == "GridFilled" && (
+                      <div className="w-full h-full">
+                        <GridFilled Data={Data} />
+                      </div>
+                    )}
+                    {AreaType == "GridCircle" && (
+                      <div className="w-full h-full">
+                        <GridCircle Data={Data} />
+                      </div>
+                    )}
+                    {AreaType == "GridCircleFilled" && (
+                      <div className="w-full h-full">
+                        <GridCircleFilled Data={Data} />
+                      </div>
+                    )}
+                  </div>
+                }
               </>
             )}
           </div>
@@ -575,8 +606,6 @@ export default function Component() {
                   <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
                     <BarChartIcon className="h-4 w-4 " />
                     {LinearType == "" ? "Types" : LinearType}
-                   
-
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -594,22 +623,22 @@ export default function Component() {
                     }
                     {selectedChart === "Bar" &&
                       <>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("NormalBar")} value="NormalBar">NormalBar</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("Negative")} value="Negative">Negative</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("Mixed")} value="Mixed">Mixed</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("LabelBar")} value="LabelBar">LabelBar</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("Horizontal")} value="Horizontal">Horizontal</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("CustomLabel")} value="CustomLabel">CustomLabel</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem onClick={()=>setBarType("Active")} value="Active">Active</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("NormalBar")} value="NormalBar">NormalBar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("Negative")} value="Negative">Negative</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("Mixed")} value="Mixed">Mixed</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("LabelBar")} value="LabelBar">LabelBar</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("Horizontal")} value="Horizontal">Horizontal</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("CustomLabel")} value="CustomLabel">CustomLabel</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setBarType("Active")} value="Active">Active</DropdownMenuRadioItem>
                       </>
                     }
 
                     {selectedChart === "Area" &&
                       <>
-                        <DropdownMenuRadioItem value="Normal">Area</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Step">Area</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Linear">Area</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="Dots">Area</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setAreaType("Dots")} value="Dots">Dots</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setAreaType("GridFilled")} value="GridFilled">GridFilled</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setAreaType("GridCircle")} value="GridCircle">GridCircle</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem onClick={() => setAreaType("GridCircleFilled")} value="GridCircleFilled">GridCircleFilled</DropdownMenuRadioItem>
                       </>
                     }
 

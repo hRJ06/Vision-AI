@@ -1,7 +1,7 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
-import { LabelList, Pie, PieChart } from "recharts"
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
 
 import {
   Card,
@@ -18,21 +18,20 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-function getDistinctGrayShades(count: number): string[] {
-  const step = Math.floor(255 / count);
-  const shades = [];
-  for (let i = 0; i < count; i++) {
-    const grayValue = Math.floor((255 / (count - 1)) * i);
-    shades.push(`rgb(${grayValue}, ${grayValue}, ${grayValue})`);
-  }
-  return shades;
+
+function getRandomRgb() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 const input = {
-  "marks": "[3,5]",
-  "id": "['15','10']",
+  "marks": "[3,5,7,8,9]",
+  "id": "['15','10','13','11','19']",
   "status": "success"
 };
+
 
 function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
   const keys = Object.keys(input);
@@ -59,69 +58,57 @@ function convertToDataArray(input: Record<string, string>): Array<Record<string,
   return dataArray;
 }
 
-function generateChartConfig(input: Record<string, string>): ChartConfig {
-  const keys = Object.keys(input);
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
-  const chartConfig: ChartConfig = {};
+const chartConfig = {
 
-  arrayKeys.forEach(key => {
-    chartConfig[key] = { label: key.charAt(0).toUpperCase() + key.slice(1) };
-  });
+} satisfies ChartConfig
 
-  return chartConfig;
-}
-
-const chartConfig = generateChartConfig(input);
-
-export function Labellist({ Data }: { Data: object[] }) {
+export function GridFilled({ Data }: { Data: object[] }) {
   const data = convertToDataArray(input);
   const keys = Object.keys(data[0]);
 
   const sc = keys[1];
   const fc = keys[0];
 
-  const shades = getDistinctGrayShades(data.length);
-
-  data.forEach((item: any, index: number) => {
-    item.fill = shades[index % shades.length];
+  data.forEach(item => {
+    item.fill = getRandomRgb();
   });
 
   return (
-    <Card className="flex flex-col bg-gray-900 text-white">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Label List</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+    <Card>
+      <CardHeader className="items-center pb-4">
+        <CardTitle>Radar Chart - Grid Filled</CardTitle>
+        <CardDescription>
+          Showing total visitors for the last 6 months
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
+      <CardContent className="pb-0">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square max-h-[250px]"
         >
-          <PieChart>
+          <RadarChart data={data}>
             <ChartTooltip
-              content={<ChartTooltipContent nameKey={sc} hideLabel />}
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Pie data={data} dataKey={sc} nameKey={fc} outerRadius={100}>
-              <LabelList
+            <PolarGrid className="fill-[--color-desktop] opacity-20" />
+            <PolarAngleAxis dataKey={fc} />
+            <Radar
                 dataKey={sc}
-                position="outside"
-                fill="#fff"
-                stroke="none"
-                fontSize={12}
-                formatter={(value: any) => `${chartConfig[fc]?.label}: ${value}`}
+                fill="var(--color-desktop)"
+                fillOpacity={0.5}
               />
-            </Pie>
-          </PieChart>
+          </RadarChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+        <div className="flex items-center gap-2 leading-none text-muted-foreground">
+          January - June 2024
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

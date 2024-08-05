@@ -43,3 +43,6 @@ export interface FormData {
   email: string;
   message: string;
 }
+
+/* GEMINI CONFIG */
+export type CachedResponse = string | JsonObject;

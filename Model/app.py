@@ -275,10 +275,8 @@ def fetch_tables():
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     try:
-        db = init_db(user, password, host, port, database)
-        print("Database connected")
-
-        tables_info = db.get_table_info()
+        db_uri = init_db(user, password, host, port, database)
+        tables_info =  SQLDatabase.from_uri(db_uri).get_table_info()
         prompt = f"Convert the following table information into a JSON object. Format is table names, then the column name and datatype. Dont add any space or backslash.The table info is:\n\n{tables_info}"
 
         response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
@@ -292,7 +290,7 @@ def fetch_tables():
         for ch in replaced_response:
             if ch != "\\":
                 final_string += ch
-        return jsonify({"status": "success", "tables_info": final_string}), 200
+        return jsonify({"status": "success", "tables_info": final_string, "db": encrypt_data(db_uri)}), 200
 
     except Exception as e:
         print("Error - ", str(e))
@@ -305,21 +303,17 @@ def fetch_table_data():
     table = data.get("table")
     first_column = data.get("first_column")
     second_column = data.get("second_column")
-    user = data.get("User")
-    password = data.get("Password")
-    host = data.get("Host")
-    port = data.get("Port")
-    database = data.get("Database")
+    db_uri = data.get("db")
     type = data.get("Type")
     option = data.get("Option")
 
     if not all(
-        [user, password, host, port, database, table, first_column, second_column]
+        [table, first_column, second_column]
     ):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     try:
-        db = init_db(user, password, host, port, database)
+        db = SQLDatabase.from_uri(decrypt_data(db_uri))
         print("Database connected")
         if type != "Line":
             option = int(option)
@@ -385,7 +379,7 @@ def fetch_table_data():
         )
 
     except Exception as e:
-        print("Error - ", str(e))
+        print("Error - ", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 

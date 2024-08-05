@@ -11,7 +11,7 @@ Organizations often struggle with efficiently accessing and understanding client
 ## Architecture
 
 <div align="center">
-  <img src="./Client/public/architecture.png" alt="Architecture" width="600">
+  <img src="./Client/public/Architecture.png" alt="Architecture" width="600">
 </div>
 
 ## Features

@@ -95,7 +95,7 @@ export default function Component() {
               </ul>
             </div>
             <Image
-              src="/KeyFeatures.gif"
+              src="/KeyFeature.gif"
               width={550}
               height={310}
               alt="Features"

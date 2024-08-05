@@ -3,7 +3,6 @@
 import { useState, ChangeEvent, KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -15,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
 import { ComponentState, DiagramType } from "@/types";
 import axios from "axios";
+import { diagramTypeLabels, ENTER_KEY_PRESS_SET, generate_mermaid_code_prompt } from "@/lib/utils";
 
 const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
@@ -32,26 +32,26 @@ export default function Component() {
   });
 
   const handleDiagramTypeChange = (type: DiagramType) => {
-    setState((prevState) => ({ ...prevState, diagramType: type }));
+    setState((prev) => ({ ...prev, diagramType: type }));
   };
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setState((prevState) => ({ ...prevState, searchTerm: e.target.value }));
+    setState((prev) => ({ ...prev, searchTerm: e.target.value }));
   };
 
+  /* HANDLER FUNCTION TO GENERATE DB DIAGRAM THROUGH USER DEFINED PROMPT */
   const handleKeyPress = async (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      setState((prevState) => ({ ...prevState, loading: true }));
-      const prompt = `Please write me the code in Mermaid.js for ${state.searchTerm} and type of diagram is ${state.diagramType}.Make sure that the diagram is very advanced and appealing. Provide me only the code that should have been start and end and nothing else.`;
+    if (ENTER_KEY_PRESS_SET.has(e.key)) {
+      setState((prev) => ({ ...prev, loading: true }));
+      const prompt = generate_mermaid_code_prompt(
+        state.searchTerm,
+        state.diagramType
+      );
       try {
-        const response = await axios.post(
-          `${BASE_URL}/image/generate`,
-          {
-            prompt: prompt,
-          }
-        );
+        const response = await axios.post(`${BASE_URL}/image/generate`, {
+          prompt: prompt,
+        });
         const result = response.data.generatedContent;
-        console.log("RESULT", result);
         const cleanedText = result
           .replace(/```/g, "")
           .replace(/^mermaid/, "")
@@ -68,6 +68,7 @@ export default function Component() {
     }
   };
 
+  /* HANDLER FUNCTION TO DOWNLOAD DB DIAGRAM */
   const downloadDiagram = () => {
     const svgElement = document.querySelector(".mermaid svg") as SVGElement;
     if (svgElement) {
@@ -82,6 +83,7 @@ export default function Component() {
     }
   };
 
+  /* HANDLER FUNCTION TO GENERATE DB DIAGRAM THROUGH PREDEFINED PROMPT */
   const handleGenerateClick = async (content: string) => {
     setState((prevState) => ({
       ...prevState,
@@ -89,22 +91,21 @@ export default function Component() {
       loading: true,
     }));
 
-    const prompt = `Please write me the code in Mermaid.js for ${state.searchTerm} and type of diagram is ${state.diagramType}.Make sure that the diagram is very advanced and appealing. Provide me only the code that should have been start and end and nothing else.`;
+    const prompt = generate_mermaid_code_prompt(
+      state.searchTerm,
+      state.diagramType
+    );
     try {
-      const response = await axios.post(
-        `${BASE_URL}//image/generate`,
-        {
-          prompt: prompt,
-        }
-      );
+      const response = await axios.post(`${BASE_URL}/image/generate`, {
+        prompt: prompt,
+      });
       const result = response.data.generatedContent;
-      console.log("RESULT", result);
       const cleanedText = result
         .replace(/```/g, "")
         .replace(/^mermaid/, "")
         .trim();
-      setState((prevState) => ({
-        ...prevState,
+      setState((prev) => ({
+        ...prev,
         diagramDefinition: cleanedText,
         content: true,
         loading: false,
@@ -131,15 +132,7 @@ export default function Component() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button className="flex items-center gap-2 bg-black text-white tracking-wide font-bold">
-              <span>
-                {state.diagramType === "er-diagram"
-                  ? "ER Diagram"
-                  : state.diagramType === "sequence-diagram"
-                  ? "Sequence Diagram"
-                  : state.diagramType === "class-diagram"
-                  ? "Class Diagram"
-                  : "State Diagram"}
-              </span>
+              <span>{diagramTypeLabels[state.diagramType as DiagramType]}</span>
               <ChevronDownIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -217,7 +210,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4 text-justify">
+              <p className="mt-4">
                 Create a sequence diagram for a user login flow, depicting the
                 interactions between the User, Login Service, Authentication
                 Service, and Database
@@ -238,7 +231,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4 text-justify">
+              <p className="mt-4">
                 Generate a class diagram for a banking application, including
                 classes like Account, Transaction, Customer, and Loan, along
                 with their attributes and methods
@@ -259,7 +252,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4 text-justify">
+              <p className="mt-4">
                 Diagram the activity flow for a product checkout process,
                 including steps like Add to Cart, Select Shipping, Enter
                 Payment, and Complete Order
@@ -281,7 +274,9 @@ export default function Component() {
           <Card className="bg-[#f8f9fa]">
             <CardContent className="mt-4">
               <p>
-              Design an ER diagram for a social media platform including entities: Users, Posts, Comments, Likes, and Friendships, and their relationships.
+                Design an ER diagram for a social media platform including
+                entities: Users, Posts, Comments, Likes, and Friendships, and
+                their relationships.
               </p>
               <div className="flex justify-center">
                 <Button
@@ -298,9 +293,11 @@ export default function Component() {
             </CardContent>
           </Card>
           <Card className="bg-[#f8f9fa]">
-            <CardContent className="mt-4 text-justify">
+            <CardContent className="mt-4">
               <p>
-              Design a class diagram for a library management system, including classes: Library, Book, Member, Staff, Loan, and Reservation, and their relationships.
+                Design a class diagram for a library management system,
+                including classes: Library, Book, Member, Staff, Loan, and
+                Reservation, and their relationships.
               </p>
               <div className="flex justify-center">
                 <Button
@@ -324,9 +321,11 @@ export default function Component() {
               <CardTitle className="text-3xl">About Diagrams</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-base text-justify">
+              <div className="space-y-2 text-base">
                 <p>
-                 Design an ER diagram for a social media platform including entities: Users, Posts, Comments, Likes, and Friendships, and their relationships.
+                  Design an ER diagram for a social media platform including
+                  entities: Users, Posts, Comments, Likes, and Friendships, and
+                  their relationships.
                 </p>
                 <p>
                   There are various types of diagrams, each with its own purpose

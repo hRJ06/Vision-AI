@@ -228,7 +228,7 @@ export default function Component() {
   );
 }
 
-function ArrowRightIcon(props) {
+function ArrowRightIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -248,7 +248,7 @@ function ArrowRightIcon(props) {
   );
 }
 
-function BotIcon(props) {
+function BotIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -272,7 +272,7 @@ function BotIcon(props) {
   );
 }
 
-function DatabaseIcon(props) {
+function DatabaseIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -293,7 +293,7 @@ function DatabaseIcon(props) {
   );
 }
 
-function GaugeIcon(props) {
+function GaugeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -313,7 +313,7 @@ function GaugeIcon(props) {
   );
 }
 
-function LayersIcon(props) {
+function LayersIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -334,7 +334,7 @@ function LayersIcon(props) {
   );
 }
 
-function MapIcon(props) {
+function MapIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -355,7 +355,7 @@ function MapIcon(props) {
   );
 }
 
-function ScanIcon(props) {
+function ScanIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -377,7 +377,7 @@ function ScanIcon(props) {
   );
 }
 
-function ShieldIcon(props) {
+function ShieldIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -392,26 +392,6 @@ function ShieldIcon(props) {
       strokeLinejoin="round"
     >
       <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-    </svg>
-  );
-}
-
-function XIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
     </svg>
   );
 }

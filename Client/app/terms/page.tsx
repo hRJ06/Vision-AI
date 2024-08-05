@@ -74,7 +74,7 @@ export default function Component() {
             interruption, or loss of data.
           </p>
           <p>
-            In no event shall Vision AI's total liability exceed the amount paid
+            In no event shall Vision AI&apos;s total liability exceed the amount paid
             by you for the services in the 12 months preceding the event giving
             rise to the claim.
           </p>

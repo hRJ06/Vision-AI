@@ -39,7 +39,7 @@ export default function Component() {
                   <p className="text-muted-foreground">
                     Vision AI provides a secure and easy-to-use interface to
                     connect your internal databases. Simply provide the
-                    necessary connection details, and we'll handle the rest.
+                    necessary connection details, and we&apos;ll handle the rest.
                   </p>
                 </div>
                 <div>
@@ -48,8 +48,8 @@ export default function Component() {
                   </h4>
                   <p className="text-muted-foreground">
                     Vision AI supports a wide range of databases, including
-                    MySQL, PostgreSQL, Oracle, SQL Server, and more. We're
-                    constantly expanding our database support, so if you don't
+                    MySQL, PostgreSQL, Oracle, SQL Server, and more. We&apos;re
+                    constantly expanding our database support, so if you don&apos;t
                     see your database listed, please let us know.
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export default function Component() {
                     diagrams?
                   </h4>
                   <p className="text-muted-foreground">
-                    Vision AI's advanced analytics capabilities can identify
+                    Vision AI&apos;s advanced analytics capabilities can identify
                     optimization opportunities, potential issues, and other
                     insights within your ER diagrams. We analyze factors like
                     table relationships, data types, and normalization to
@@ -139,7 +139,7 @@ export default function Component() {
                     Yes, our analysis engine can detect optimization
                     opportunities, such as redundant or unnecessary
                     relationships, and potential issues like data integrity
-                    problems or performance bottlenecks. We'll highlight these
+                    problems or performance bottlenecks. We&apoll highlight these
                     findings to help you improve your database design.
                   </p>
                 </div>
@@ -243,7 +243,7 @@ export default function Component() {
                     Upgrading or downgrading your Vision AI plan is a simple
                     process. You can do it directly from your account dashboard,
                     and the changes will take effect immediately. If you need to
-                    scale your usage up or down, we'll make sure the transition
+                    scale your usage up or down, we&apos;ll make sure the transition
                     is seamless and your data remains secure.
                   </p>
                 </div>

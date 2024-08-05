@@ -1,14 +1,15 @@
 "use server";
 import { EmailTemplate } from "@/components/EmailTemplate";
 import { Mail } from "@/types";
-import { Resend } from "resend";
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { RESEND_SENDER, RESEND_SUBJECT } from "../utils";
+import { resend } from "../resend";
+
 export const sendEmail = async ({ name, email, message }: Mail) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: "noreply@vision.ai <noreply@vision-ai.in>",
+      from: RESEND_SENDER,
       to: email!,
-      subject: "Thank You For Choosing Vision AI",
+      subject: RESEND_SUBJECT,
       react: EmailTemplate({ name, message }),
     });
     if (error) {

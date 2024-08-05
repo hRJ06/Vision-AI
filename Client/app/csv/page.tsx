@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import Link from "next/link";
 import { Message } from "@/types";
+import { YOU_MESSAGE_ROLE_SET } from "@/lib/utils";
 
 export default function Component() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -191,9 +192,9 @@ export default function Component() {
                 <Avatar className="h-8 w-8 shrink-0 border">
                   <AvatarImage
                     src={`${
-                      message.sender === "You"
-                        ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
-                        : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
+                      YOU_MESSAGE_ROLE_SET.has(message.sender)
+                        ? "/Human.png"
+                        : "/AI.png"
                     }`}
                   />
                   <AvatarFallback>{message.sender}</AvatarFallback>
@@ -207,9 +208,13 @@ export default function Component() {
                   </div>
                   <div
                     className={`bg-${
-                      message.sender === "You" ? "primary" : "muted"
+                      YOU_MESSAGE_ROLE_SET.has(message.sender)
+                        ? "primary"
+                        : "muted"
                     } rounded-lg p-3 ${
-                      message.sender === "You" ? "text-primary-foreground" : ""
+                      YOU_MESSAGE_ROLE_SET.has(message.sender)
+                        ? "text-primary-foreground"
+                        : ""
                     }`}
                   >
                     <p>{message.text}</p>

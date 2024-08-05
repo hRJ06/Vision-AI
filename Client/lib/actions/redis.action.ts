@@ -1,6 +1,11 @@
 "use server";
 import { redis } from "../redis";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  CACHE_RESPONSE_SET,
+  generate_redis_cache_check_prompt,
+  getModel,
+  REDIS_EXPIRATION_TIME,
+} from "../utils";
 
 export const cache = async (
   db_url: string,
@@ -9,9 +14,8 @@ export const cache = async (
 ) => {
   try {
     const key = db_url + "_" + user_prompt;
-    const expirationTime = 7200;
     await redis.set(key, content);
-    await redis.expire(key, expirationTime);
+    await redis.expire(key, REDIS_EXPIRATION_TIME);
   } catch (error) {
     console.error(error);
     throw new Error("Please Try Again.");
@@ -19,8 +23,7 @@ export const cache = async (
 };
 
 export const checkKey = async (db_url: string, user_prompt: string) => {
-  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = getModel();
 
   try {
     const keys = await redis.keys(`${db_url}*`);
@@ -30,7 +33,7 @@ export const checkKey = async (db_url: string, user_prompt: string) => {
     });
 
     const gemini_prompts = prompts.map((prompt) => {
-      return `I will give you two sentences. Just return me YES or NO, nothing else that whether they mean to say the same or not, dont match word by word. The first sentence is ${user_prompt}. The second prompt is ${prompt}`;
+      return generate_redis_cache_check_prompt(user_prompt, prompt);
     });
 
     const results = await Promise.all(
@@ -40,23 +43,18 @@ export const checkKey = async (db_url: string, user_prompt: string) => {
     );
 
     for (let i = 0; i < results.length; i++) {
-      const responseText = await results[i].response.text();
+      const responseText = results[i].response.text();
       const text = responseText.trim().toUpperCase();
-      console.log("GEMINI RESPONSE", text);
-
-      if (text === "YES") {
+      if (CACHE_RESPONSE_SET.has(text)) {
         const cached_key = keys[i];
-        console.log("KEY", cached_key);
-
         const response = await redis.get(cached_key);
-        console.log("RESPONSE", response);
         return response;
       }
     }
 
     return "FALSE";
   } catch (error) {
-    console.error("Error in checkKey function:", error);
+    console.error(error);
     throw new Error("Please Try Again.");
   }
 };

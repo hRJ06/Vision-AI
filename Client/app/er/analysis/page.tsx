@@ -10,30 +10,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import { AI_MESSAGE_ROLE_SET } from "@/lib/utils";
+import { ChatMessage } from "@/types";
 
 export default function Component() {
   const [loading, setLoading] = useState<Boolean>(false);
-  const [copied, setcopied] = useState<Boolean>(false);
+  const [copied, setCopied] = useState<Boolean>(false);
   const [responses, setResponses] = useState<string>("");
   const [formattedResponses, setFormattedResponses] = useState<JSX.Element[]>(
     []
   );
   const [imageUrl, setImageURL] = useState<string>("");
-  const [userPrompt, setuserPrompt] = useState("");
-  const [chats, setchats] = useState([
+  const [userPrompt, setUserPrompt] = useState("");
+  const [chats, setChats] = useState<ChatMessage[]>([
     {
       msg: "Hi there! How can i help You with the image you uploaded?",
       role: "AI",
     },
   ]);
+
+  /* ONRENDER URL */
   const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
   /* IMAGE TO SQL */
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setResponses("");
-    setchats((prevChats) => {
+    setChats((prevChats) => {
       const newChats = [...prevChats.slice(0, 1)];
       return newChats;
     });
@@ -61,11 +65,12 @@ export default function Component() {
       reader.readAsDataURL(file);
     }
   };
-  const formatMessage = (message) => {
+
+  /* FORMAT GEMINI RESPONSE */
+  const formatMessage = (message: string): JSX.Element | JSX.Element[] => {
     const lines = message.split("\n");
     let isTable = false;
-    const tableData = [];
-
+    const tableData: string[][] = [];
     lines.forEach((line) => {
       const columns = line
         .split("|")
@@ -76,12 +81,10 @@ export default function Component() {
         tableData.push(columns);
       }
     });
-
     if (isTable && tableData.length > 1) {
       tableData.splice(1, 1);
       const headers = tableData[0];
       const rows = tableData.slice(1);
-
       return (
         <table
           style={{ width: "100%", borderCollapse: "collapse", margin: "1em 0" }}
@@ -124,11 +127,8 @@ export default function Component() {
         </table>
       );
     }
-
-    // Otherwise, process as regular text
     return lines.map((part, index) => {
       const isList = /^\d+\./.test(part.trim());
-
       const formattedPart = part
         .split(/(\*\*.*?\*\*|mailto:[^\s]+)/g)
         .map((subPart, subIndex) => {
@@ -143,7 +143,6 @@ export default function Component() {
           }
           return subPart;
         });
-
       return (
         <div key={index} style={{ marginBottom: isList ? "0.5em" : "0" }}>
           {formattedPart}
@@ -167,19 +166,20 @@ export default function Component() {
     }
   }, [responses]);
 
+  /* HANDLER FUNCTION TO COPY SQL QUERY */
   const handleCopy = () => {
-    setcopied(true);
+    setCopied(true);
     navigator.clipboard.writeText(responses);
   };
 
   /* CHAT WITH IMAGE */
-
-  const handleImageChat = async (e: any) => {
+  const handleImageChat = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
     if (userPrompt.trim()) {
-      setchats([...chats, { msg: userPrompt, role: "User" }]);
-
+      setChats((prevChats: ChatMessage[]) => [
+        ...prevChats,
+        { msg: userPrompt, role: "User" },
+      ]);
       try {
         const response = await axios.post(
           `${BASE_URL}/image/chat`,
@@ -193,16 +193,15 @@ export default function Component() {
             },
           }
         );
-        setuserPrompt("");
-        setchats((prevChats) => [
+        setUserPrompt("");
+        setChats((prevChats: ChatMessage[]) => [
           ...prevChats,
           { msg: response?.data?.generatedContent, role: "AI" },
         ]);
       } catch (error) {
-        console.error("Error", error);
+        console.error("Error - ", error);
       }
-
-      setuserPrompt("");
+      setUserPrompt("");
     }
   };
 
@@ -289,9 +288,9 @@ export default function Component() {
                     <Avatar className="h-8 w-8 shrink-0 border">
                       <AvatarImage
                         src={`${
-                          chat.role === "User"
-                            ? "https://w1.pngwing.com/pngs/743/500/png-transparent-circle-silhouette-logo-user-user-profile-green-facial-expression-nose-cartoon-thumbnail.png"
-                            : "https://img.freepik.com/free-vector/graident-ai-robot-vectorart_78370-4114.jpg?size=338&ext=jpg&ga=GA1.1.2008272138.1721433600&semt=sph"
+                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                            ? "/AI.png"
+                            : "/Human.png"
                         }`}
                       />
                       <AvatarFallback>{chat.role}</AvatarFallback>
@@ -326,7 +325,7 @@ export default function Component() {
                   placeholder="Upload Image to start the conversation.."
                   className="min-h-[48px] w-full rounded-2xl resize-none border border-neutral-400 bg-background p-4 pr-16 shadow-sm"
                   value={userPrompt}
-                  onChange={(e) => setuserPrompt(e.target.value)}
+                  onChange={(e) => setUserPrompt(e.target.value)}
                 />
                 <Button
                   type="submit"

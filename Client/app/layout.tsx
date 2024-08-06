@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Dosis } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 const dosis = Dosis({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -25,6 +27,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={dosis.className}>
         {children}
+        <Analytics />
+        <SpeedInsights />
         <Toaster />
       </body>
     </html>

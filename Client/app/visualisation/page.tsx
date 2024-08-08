@@ -269,7 +269,7 @@ export default function Component() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "diagram.svg";
+      link.download = "Chart.svg";
       link.click();
       URL.revokeObjectURL(url);
     }

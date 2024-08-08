@@ -29,9 +29,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function Step({Data}:{Data:object[]}) {
+export function Step({Data}:{Data:Record<string, string>}) {
 
-  const data = Data;
+  const data = Array.isArray(Data) ? Data : [];
+console.log("DataStep", data);
 
   if (data.length > 0) {
     const keys = Object.keys(data[0]);
@@ -39,12 +40,12 @@ export function Step({Data}:{Data:object[]}) {
       chartConfig.desktop.label = keys[1]; 
     }
   }
-
-  const mappedData = data.map((item:any) => {
+  
+  const mappedData = data.map((item: Record<string, string>) => {
     const keys = Object.keys(item);
     return {
       [keys[0]]: item[keys[0]], 
-      desktop: item[keys[1]] 
+      desktop: item[keys[1]]
     };
   });
 

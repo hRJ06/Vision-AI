@@ -19,66 +19,49 @@ import {
 } from "@/components/ui/chart"
 
 function getDistinctGrayShades(count: number): string[] {
-  const step = Math.floor(255 / count);
+  const step = Math.floor(254 / count); 
   const shades = [];
   for (let i = 0; i < count; i++) {
-    const grayValue = Math.floor((255 / (count - 1)) * i);
+    const grayValue = Math.min(254, step * i); 
     shades.push(`rgb(${grayValue}, ${grayValue}, ${grayValue})`);
   }
   return shades;
 }
 
-const input = {
-  "marks": "[3,5]",
-  "id": "['15','10']",
-  "status": "success"
-};
 
-function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
-  const keys = Object.keys(input);
-  const dataArray: Array<Record<string, any>> = [];
-
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
-  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
-
-  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
-
-  for (let i = 0; i < maxLength; i++) {
-    const obj: Record<string, any> = {};
-    arrayKeys.forEach((key, index) => {
-      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
-      // Convert values in the second column to numbers
-      if (index === 1 && value !== null) {
-        value = Number(value);
-      }
-      obj[key] = value;
-    });
-    dataArray.push(obj);
-  }
-
-  return dataArray;
+function convertToDataArray(input: Array<Record<string, any>>): Array<Record<string, any>> {
+  return input.map(item => {
+    const keys = Object.keys(item);
+    const formattedItem: Record<string, any> = {};
+    formattedItem[keys[0]] = item[keys[0]];
+    formattedItem[keys[1]] = String(item[keys[1]]);
+    return formattedItem;
+  });
 }
 
-function generateChartConfig(input: Record<string, string>): ChartConfig {
-  const keys = Object.keys(input);
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
+function generateChartConfig(data: Array<Record<string, string>>): ChartConfig {
+  if (data.length === 0) return {};
+
+  const keys = Object.keys(data[0]);
   const chartConfig: ChartConfig = {};
 
-  arrayKeys.forEach(key => {
+  keys.forEach(key => {
     chartConfig[key] = { label: key.charAt(0).toUpperCase() + key.slice(1) };
   });
 
   return chartConfig;
 }
 
-const chartConfig = generateChartConfig(input);
-
-export function Labellist({ Data }: { Data: object[] }) {
-  const data = convertToDataArray(input);
+export function Labellist({ Data }: { Data: Array<Record<string, any>> }) {
+  if (Data === undefined) {
+    return <div>No data available</div>;
+  }
+  const data = convertToDataArray(Data);
+  const chartConfig = generateChartConfig(data);
+  // console.log("Config", chartConfig);
   const keys = Object.keys(data[0]);
-
-  const sc = keys[1];
   const fc = keys[0];
+  const sc = keys[1];
 
   const shades = getDistinctGrayShades(data.length);
 
@@ -95,20 +78,20 @@ export function Labellist({ Data }: { Data: object[] }) {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[300px] w-full"
         >
-          <PieChart>
+          <PieChart width={300} height={300}>
             <ChartTooltip
-              content={<ChartTooltipContent nameKey={sc} hideLabel />}
+              content={<ChartTooltipContent nameKey={fc} hideLabel />}
             />
-            <Pie data={data} dataKey={sc} nameKey={fc} outerRadius={100}>
+            <Pie data={data} dataKey={fc} nameKey={fc} outerRadius={100}>
               <LabelList
                 dataKey={sc}
                 position="outside"
                 fill="#fff"
                 stroke="none"
                 fontSize={12}
-                formatter={(value: any) => `${chartConfig[fc]?.label}: ${value}`}
+                formatter={(value: any) => `${chartConfig[sc]?.label}: ${value}`}
               />
             </Pie>
           </PieChart>

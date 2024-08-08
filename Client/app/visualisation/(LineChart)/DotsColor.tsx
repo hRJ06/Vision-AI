@@ -52,8 +52,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function DotsColor({Data}:{Data:object[]}) {
-  const data = Data;
+export function DotsColor({Data}:{Data:Record<string, string>}) {
+  const data = Array.isArray(Data) ? Data : [];
 
   if (data.length > 0) {
     const keys = Object.keys(data[0]);

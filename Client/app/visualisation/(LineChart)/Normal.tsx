@@ -31,8 +31,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function Normal({Data}:{Data:object[]}) {
-  const data = Data;
+export function Normal({Data}:{Data:Record<string, string>}) {
+  const data = Array.isArray(Data) ? Data : [];
   if (data.length > 0) {
     const keys = Object.keys(data[0]);
     if (keys.length > 1) {

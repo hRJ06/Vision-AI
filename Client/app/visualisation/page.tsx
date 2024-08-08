@@ -133,7 +133,7 @@ export default function Component() {
     }
 
     try {
-      let response = await axios.post("https://ae6e-103-161-223-11.ngrok-free.app/fetch-table", data, {
+      let response = await axios.post("http://127.0.0.1:5000/fetch-table", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -200,7 +200,7 @@ export default function Component() {
 
     try {
       let response = await axios.post(
-        "https://ae6e-103-161-223-11.ngrok-free.app/fetch-table-data",
+        "http://127.0.0.1:5000/fetch-table-data",
         {...data, "db": Cookies.get("db")},
         {
           headers: {

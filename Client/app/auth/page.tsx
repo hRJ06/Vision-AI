@@ -172,7 +172,6 @@ export default function Component() {
               <div>
                 <Label htmlFor="lob">Line of Business</Label>
                 <Select
-                  id="lob"
                   name="lob"
                   value={formData.lob}
                   onValueChange={(value) =>

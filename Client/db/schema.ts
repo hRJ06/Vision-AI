@@ -17,16 +17,8 @@ export const organization = pgTable("organizations", {
 });
 
 export const rolesEnum = pgEnum("popularity", [
-  "C",
-  "CR",
-  "CRU",
-  "CRUD",
-  "R",
-  "RU",
-  "RD",
-  "U",
-  "UD",
-  "D",
+  "Read",
+  "Write",
 ]);
 
 export const user = pgTable(

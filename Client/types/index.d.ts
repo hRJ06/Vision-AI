@@ -56,5 +56,13 @@ export interface LoginOrganizationProps {
   email: string;
   password: string;
 }
+
+export interface AddUserProps {
+  token: string;
+  name: string;
+  email: string;
+  role: "Read" | "Write";
+}
+
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

@@ -1,20 +1,25 @@
 "use server";
 import db from "@/db/drizzle";
-import { organization } from "@/db/schema";
-import { LoginOrganizationProps, RegisterOrganizationProps } from "@/types";
+import { organization, user } from "@/db/schema";
+import {
+  AddUserProps,
+  LoginOrganizationProps,
+  RegisterOrganizationProps,
+} from "@/types";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 
+/* REGISTER ORGANIZATION */
 export const registerOrganization = async (
   organizationData: RegisterOrganizationProps
 ) => {
   try {
-    const user = await db
+    const savedOrganization = await db
       .select()
       .from(organization)
       .where(eq(organization.email, organizationData.email));
-    if (user.length > 0) {
+    if (savedOrganization.length > 0) {
       return JSON.stringify({
         success: false,
         message: "You are already registered.",
@@ -31,6 +36,7 @@ export const registerOrganization = async (
   }
 };
 
+/* LOGIN ORGANIZATION */
 export const loginOrganization = async (
   organizationData: LoginOrganizationProps
 ) => {
@@ -54,6 +60,7 @@ export const loginOrganization = async (
         });
         return JSON.stringify({ success: true, token: token });
       } else {
+        return { success: false, message: "Password don't match." };
       }
     } else {
       return { success: false, message: "You are not registered with us." };
@@ -61,5 +68,68 @@ export const loginOrganization = async (
   } catch (error) {
     console.error(error);
     return JSON.stringify({ sucess: false });
+  }
+};
+
+/* ADD NEW USER TO AN ORGANIZATION */
+export const addUser = async (userData: AddUserProps) => {
+  try {
+    try {
+      const decode = jwt.verify(
+        userData.token,
+        process.env.JWT_SECRET_KEY!
+      ) as JwtPayload;
+      const email = decode.email as string;
+      const currentOrganization = await db
+        .select()
+        .from(organization)
+        .where(eq(organization.email, email));
+      if (currentOrganization[0]) {
+        const newUser = {
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          organizationId: currentOrganization[0].id,
+        };
+        await db.insert(user).values(newUser);
+      } else {
+        return JSON.stringify({ success: false, token: "Invalid Token" });
+      }
+    } catch (error) {
+      return JSON.stringify({ success: false, token: "Invalid Token" });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+/* GET ALL USER FROM AN ORGANIZATION */
+export const getUsers = async (token: string) => {
+  try {
+    try {
+      const decode = jwt.verify(
+        token,
+        process.env.JWT_SECRET_KEY!
+      ) as JwtPayload;
+      const email = decode.email as string;
+      const currentOrganization = await db
+        .select()
+        .from(organization)
+        .where(eq(organization.email, email));
+      if (currentOrganization[0]) {
+        const users = await db
+          .select()
+          .from(user)
+          .where(eq(user.organizationId, currentOrganization[0].id));
+        return users;
+      } else {
+        return JSON.stringify({ success: false, token: "Invalid Token" });
+      }
+    } catch (error) {
+      return JSON.stringify({ success: false, token: "Invalid Token" });
+    }
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Please Try Again." };
   }
 };

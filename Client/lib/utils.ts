@@ -49,6 +49,7 @@ export const AI_MESSAGE_ROLE_SET = new Set(["AI"]);
 export const YOU_MESSAGE_ROLE_SET = new Set(["You"]);
 export const ENTER_KEY_PRESS_SET = new Set(["Enter"]);
 export const CACHE_RESPONSE_SET = new Set(["YES"]);
+export const FORM_TYPE_SET = new Set(["Login"]);
 
 /* ENUM FOR DIAGRAM TYPES */
 export enum DiagramType {

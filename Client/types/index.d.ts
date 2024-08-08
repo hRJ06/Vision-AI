@@ -44,5 +44,17 @@ export interface FormData {
   message: string;
 }
 
+export interface RegisterOrganizationProps {
+  name: string;
+  email: string;
+  password: string;
+  lob: string;
+  domain: string;
+}
+
+export interface LoginOrganizationProps {
+  email: string;
+  password: string;
+}
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

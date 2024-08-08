@@ -57,7 +57,8 @@ export interface LoginOrganizationProps {
   password: string;
 }
 
-export interface AddUserProps {
+export interface UserProps {
+  id?: string;
   token: string;
   name: string;
   email: string;

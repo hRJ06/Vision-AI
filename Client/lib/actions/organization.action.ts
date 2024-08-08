@@ -2,7 +2,7 @@
 import db from "@/db/drizzle";
 import { organization, user } from "@/db/schema";
 import {
-  AddUserProps,
+  UserProps,
   LoginOrganizationProps,
   RegisterOrganizationProps,
 } from "@/types";
@@ -72,7 +72,7 @@ export const loginOrganization = async (
 };
 
 /* ADD NEW USER TO AN ORGANIZATION */
-export const addUser = async (userData: AddUserProps) => {
+export const addUser = async (userData: UserProps) => {
   try {
     try {
       const decode = jwt.verify(
@@ -130,6 +130,25 @@ export const getUsers = async (token: string) => {
     }
   } catch (error) {
     console.error(error);
-    return { success: false, message: "Please Try Again." };
+    return JSON.stringify({ success: false, message: "Please Try Again." });
+  }
+};
+
+/* EDIT AN USER OF AN ORGANIZATION */
+export const editUser = async (userData: UserProps) => {
+  try {
+    const editedUser = {
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+    };
+    await db
+      .update(user)
+      .set(editedUser)
+      .where(eq(user.id, Number(userData.id)));
+    return JSON.stringify({ success: false, token: "Invalid Token" });
+  } catch (error) {
+    console.error(error);
+    return JSON.stringify({ success: false, message: "Please Try Again." });
   }
 };

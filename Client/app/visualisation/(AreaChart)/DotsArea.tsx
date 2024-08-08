@@ -26,36 +26,15 @@ function getRandomRgb() {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-const input = {
-  "marks": "[3,5,7,8,9]",
-  "id": "['15','10','13','11','19']",
-  "status": "success"
-};
 
-function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
-  const keys = Object.keys(input);
-  const dataArray: Array<Record<string, any>> = [];
-
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
-  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
-
-
-  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
-
-  for (let i = 0; i < maxLength; i++) {
-    const obj: Record<string, any> = {};
-    arrayKeys.forEach((key, index) => {
-      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
-      // Convert values in the second column to numbers
-      if (index === 1 && value !== null) {
-        value = Number(value);
-      }
-      obj[key] = value;
-    });
-    dataArray.push(obj);
-  }
-
-  return dataArray;
+function convertToDataArray(input: Array<Record<string, any>>): Array<Record<string, any>> {
+  return input.map(item => {
+    const keys = Object.keys(item);
+    const formattedItem: Record<string, any> = {};
+    formattedItem[keys[0]] = item[keys[0]];
+    formattedItem[keys[1]] = String(item[keys[1]]);
+    return formattedItem;
+  });
 }
 
 
@@ -63,23 +42,23 @@ const chartConfig = {
 
 } satisfies ChartConfig
 
-export function DotsArea({ Data }: { Data: object[] }) {
+export function DotsArea({ Data }: { Data: Array<Record<string, any>> }) {
 
-  const data = convertToDataArray(input)
- 
+  if (Data === undefined) {
+    return <div>No data available</div>;
+  }
+  const data = convertToDataArray(Data);
   const keys = Object.keys(data[0]);
-
-  const sc = keys[1];
   const fc = keys[0];
+  const sc = keys[1];
 
-
-  data.forEach((item:any)=>{
+  data.forEach((item: any) => {
     item.fill = getRandomRgb();
-  })
+  });
 
   return (
-    <Card>
-      <CardHeader className="items-center">
+    <Card className="flex flex-col bg-gray-100  ">
+      <CardHeader className="items-center pb-0">
         <CardTitle>Radar Chart - Dots</CardTitle>
         <CardDescription>
           Showing total visitors for the last 6 months
@@ -92,10 +71,10 @@ export function DotsArea({ Data }: { Data: object[] }) {
         >
           <RadarChart data={data}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <PolarAngleAxis dataKey={fc} />
+            <PolarAngleAxis dataKey={sc} />
             <PolarGrid />
             <Radar
-              dataKey={sc}
+              dataKey={fc}
               fill="var(--color-desktop)"
               fillOpacity={0.6}
               dot={{

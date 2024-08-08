@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { TrendingUp } from "lucide-react"
-import { Pie, PieChart } from "recharts"
+import { TrendingUp } from "lucide-react";
+import { Pie, PieChart } from "recharts";
 
 import {
   Card,
@@ -10,21 +10,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-
-// const data = [
-//   { marks: 10, id: 2 },
-//   { marks: 12, id: 1 },
-//   { marks: 17, id: 5 },
-//   { marks: 10, id: 6 },
-//   { marks: 13, id: 8 },
-// ];
+} from "@/components/ui/chart";
 
 function getRandomRgb() {
   const r = Math.floor(Math.random() * 256);
@@ -33,56 +25,35 @@ function getRandomRgb() {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-const input = {
-  "marks": "[3,5]",
-  "id": "['15','10']",
-  "status": "success"
-};
-
-function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
-  const keys = Object.keys(input);
-  const dataArray: Array<Record<string, any>> = [];
-
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
-  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
-
-
-  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
-
-  for (let i = 0; i < maxLength; i++) {
-    const obj: Record<string, any> = {};
-    arrayKeys.forEach((key, index) => {
-      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
-      // Convert values in the second column to numbers
-      if (index === 1 && value !== null) {
-        value = Number(value);
-      }
-      obj[key] = value;
-    });
-    dataArray.push(obj);
-  }
-
-  return dataArray;
+function convertToDataArray(input: Array<Record<string, any>>): Array<Record<string, any>> {
+  return input.map(item => {
+    const keys = Object.keys(item);
+    const formattedItem: Record<string, any> = {};
+    formattedItem[keys[0]] = item[keys[0]];
+    formattedItem[keys[1]] = String(item[keys[1]]);
+    return formattedItem;
+  });
 }
-
 
 const chartConfig = {
 
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
+export function Donut({ Data }: { Data: Array<Record<string, any>> }) {
+  // console.log("first", Data);
+  
 
-export function Donut({ Data }: { Data: object[] }) {
-  const data = convertToDataArray(input)
- 
+  if (Data === undefined) {
+    return <div>No data available</div>;
+  }
+  const data = convertToDataArray(Data);
   const keys = Object.keys(data[0]);
-
-  const sc = keys[1];
   const fc = keys[0];
+  const sc = keys[1];
 
-
-  data.forEach((item:any)=>{
+  data.forEach((item: any) => {
     item.fill = getRandomRgb();
-  })
+  });
 
   return (
     <Card className="flex flex-col bg-gray-900 text-white">
@@ -118,5 +89,5 @@ export function Donut({ Data }: { Data: object[] }) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -34,10 +34,10 @@ import { DotsArea } from "./(AreaChart)/DotsArea"
 import { GridFilled } from "./(AreaChart)/GridFilled"
 import { GridCircle } from "./(AreaChart)/GridCircle"
 import { GridCircleFilled } from "./(AreaChart)/GridCircleFilled"
+import Cookies from "js-cookie"
 
 export default function Component() {
-
-
+  
   const { toast } = useToast();
 
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
@@ -65,7 +65,10 @@ export default function Component() {
 
   // 0 means sum 1 means count
   const [options, setoptions] = useState("0");
-  const [Data, setdata] = useState([]);
+  type InputType = Record<string, string>;
+
+  const [Data, setdata] =useState<InputType>();
+  // const [Data1, setdata1] = useState(input);
 
 
   const handleTableChange = (value: any) => {
@@ -130,7 +133,7 @@ export default function Component() {
     }
 
     try {
-      let response = await axios.post("http://127.0.0.1:5000/fetch-table", data, {
+      let response = await axios.post("https://ae6e-103-161-223-11.ngrok-free.app/fetch-table", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -138,7 +141,7 @@ export default function Component() {
 
       // console.log(response);
       if (response) {
-
+        Cookies.set("db", response?.data?.db);
         let value = await JSONFORMATTER(response?.data?.tables_info);
 
         value = value.slice(7, -3);
@@ -176,75 +179,103 @@ export default function Component() {
 
 
   const Chart = async () => {
+    
     const data = {
       table: selectedTable,
       first_column: selectedColumn,
       second_column: selectedColumn2,
-      User: User,
-      Password: Password,
-      Host: Host,
-      Port: Port,
-      Database: Database,
       Type: selectedChart,
-      Option: options
+      Option: options,
     };
+  
+    if (!data.table || !data.first_column || !data.second_column) {
+      toast({
+        title: "Generation Failed",
+        variant: "destructive",
+        description: "Please provide table and column values to generate the Charts.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return; 
+    }
 
-    // console.log("data", data);
-    // try {
-    //   let response = await axios.post("http://127.0.0.1:5000/fetch-table-data", data, {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
+    try {
+      let response = await axios.post(
+        "https://ae6e-103-161-223-11.ngrok-free.app/fetch-table-data",
+        {...data, "db": Cookies.get("db")},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      const firstData = JSON.parse(response.data[`${selectedColumn}`]);
+      const secondData = JSON.parse(response.data[`${selectedColumn2}`]);
+  
+      const convertAndFilterData = (data: any) => {
+        return data
+          .map((item: any) => (item === "None" ? 0 : item))
+          .filter((item: any) => item !== "None");
+      };
+  
+      const convertedFirstData = convertAndFilterData(firstData);
+      const convertedSecondData = convertAndFilterData(secondData);
+  
+      console.log("convertedFirstData", convertedFirstData);
+      console.log("convertedSecondData", convertedSecondData);
+      console.log("response", response);
+  
+      const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
+      const formattedData = Array.from({ length: minLength }, (_, index) => ({
+        [selectedColumn]: convertedFirstData[index],
+        [selectedColumn2]: convertedSecondData[index],
+      }));
+  
+      console.log("FormattedData", formattedData);
+      setdata(formattedData);
+  
+      if (response.data.status === "success") {
+        toast({
+          variant: "success",
+          title: "Generated Successfully",
+          description: "The connection was successful.",
+        });
+      } else {
+        toast({
+          title: "Connection Failed",
+          variant: "destructive",
+          description: response.data.message || "There was an error connecting.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+  };
+  
+  
 
-    //   const firstData = JSON.parse(response.data.first_data);
-    //   const secondData = JSON.parse(response.data.second_data);
+  // DOWNLOAD HANDLER
+  const downloadDiagram = () => {
+    const svgElement = document.querySelector(".chart") as SVGElement;
+    if (svgElement) {
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const blob = new Blob([svgData], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "diagram.svg";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+  
 
-    //   const convertAndFilterData = (data: any) => {
-    //     return data.map((item: any) => item === "None" ? 0 : item).filter((item: any) => item !== "None");
-    //   };
-
-    //   const convertedFirstData = convertAndFilterData(firstData);
-    //   const convertedSecondData = convertAndFilterData(secondData);
-    //   console.log("convertedFirstData", convertedFirstData);
-    //   console.log("convertedSecondData", convertedSecondData);
-    //   console.log("response", response);
-    //   if (response.data.status === "success") {
-
-    //     const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
-    //     const formattedData = Array.from({ length: minLength }, (_, index) => ({
-    //       [selectedColumn]: convertedFirstData[index],
-    //       [selectedColumn2]: convertedSecondData[index]
-    //     }));
-
-    //     // console.log("response2", formattedData);
-    //     const FinalData = formattedData;
-    //     setdata(FinalData);
-
-    //     toast({
-    //       variant: "success",
-    //       title: "Generated Successful",
-    //       description: "The connection was successful.",
-    //     });
-    //   } else {
-    //     toast({
-    //       title: "Connection Failed",
-    //       variant: "destructive",
-    //       description:
-    //         response.data.message || "There was an error connecting.",
-    //       action: <ToastAction altText="Try again">Try again</ToastAction>,
-    //     });
-    //   }
-
-    // } catch (error: any) {
-    //   toast({
-    //     variant: "destructive",
-    //     title: "Error",
-    //     description: error.message || "An unexpected error occurred.",
-    //     action: <ToastAction altText="Try again">Try again</ToastAction>,
-    //   });
-    // }
-  }
 
   // console.log("first Schema:", schema);
   // console.log("data", Data);
@@ -281,7 +312,7 @@ export default function Component() {
 
       <div className="flex flex-col items-center justify-center bg-muted/40 p-4">
         {/* chart */}
-        <div className="mt-8 w-[1000px]">
+        <div className="mt-8 w-[1000px] chart">
           <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
             {selectedChart == "" ? (
               <div>
@@ -441,17 +472,9 @@ export default function Component() {
 
         <div className="mt-4 font-semibold text-xl">Export</div>
         <div className="grid gap-2">
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white" onClick={()=> downloadDiagram()}>
             <FileIcon className="h-4 w-4 mr-2" />
-            CSV
-          </Button>
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
-            <FileIcon className="h-4 w-4 mr-2" />
-            JSON
-          </Button>
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white">
-            <FileIcon className="h-4 w-4 mr-2" />
-            Excel
+            SVG
           </Button>
         </div>
 
@@ -660,7 +683,7 @@ export default function Component() {
           </div>
 
           <div className="mt-2 text-center ">
-            <Button className="bg-black w-full" onClick={Chart}>Generate</Button>
+            <Button className="bg-black w-full" onClick={()=>Chart()}>Generate</Button>
           </div>
         </div>
       </div>

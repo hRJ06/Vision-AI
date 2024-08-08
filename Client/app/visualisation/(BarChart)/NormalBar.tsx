@@ -19,45 +19,24 @@ import {
 } from "@/components/ui/chart"
 
 function getDistinctGrayShades(count: number): string[] {
-  const step = Math.floor(255 / count);
+  const step = Math.floor(254 / count); 
   const shades = [];
   for (let i = 0; i < count; i++) {
-    const grayValue = step * i;
+    const grayValue = Math.min(254, step * i); 
     shades.push(`rgb(${grayValue}, ${grayValue}, ${grayValue})`);
   }
   return shades;
 }
 
-const input = {
-  "marks": "[3,5]",
-  "id": "['15','10']",
-  "status": "success"
-};
 
-function convertToDataArray(input: Record<string, string>): Array<Record<string, any>> {
-  const keys = Object.keys(input);
-  const dataArray: Array<Record<string, any>> = [];
-
-  const arrayKeys = keys.filter(key => input[key].startsWith("[") && input[key].endsWith("]"));
-  const parsedArrays = arrayKeys.map(key => JSON.parse(input[key].replace(/'/g, '"')));
-
-
-  const maxLength = Math.max(...parsedArrays.map(arr => arr.length));
-
-  for (let i = 0; i < maxLength; i++) {
-    const obj: Record<string, any> = {};
-    arrayKeys.forEach((key, index) => {
-      let value = parsedArrays[index][i] !== undefined ? parsedArrays[index][i] : null;
-      // Convert values in the second column to numbers
-      if (index === 1 && value !== null) {
-        value = Number(value);
-      }
-      obj[key] = value;
-    });
-    dataArray.push(obj);
-  }
-
-  return dataArray;
+function convertToDataArray(input: Array<Record<string, any>>): Array<Record<string, any>> {
+  return input.map(item => {
+    const keys = Object.keys(item);
+    const formattedItem: Record<string, any> = {};
+    formattedItem[keys[0]] = item[keys[0]];
+    formattedItem[keys[1]] = String(item[keys[1]]);
+    return formattedItem;
+  });
 }
 
 
@@ -68,15 +47,16 @@ const chartConfig = {
 
 export function NormalBar({ Data }: { Data: object[] }) {
 
-  const data = convertToDataArray(input)
+  if (Data === undefined) {
+    return <div>No data available</div>;
+  }
+  const data = convertToDataArray(Data);
+
  
   const keys = Object.keys(data[0]);
-
-  const sc = keys[1];
   const fc = keys[0];
+  const sc = keys[1];
 
-
-  
   const shades = getDistinctGrayShades(data.length);
 
   data.forEach((item: any, index: number) => {

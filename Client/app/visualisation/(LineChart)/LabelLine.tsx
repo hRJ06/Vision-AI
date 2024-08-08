@@ -37,9 +37,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function LabelLine({Data}:{Data:object[]}) {
+export function LabelLine({Data}:{Data:Record<string, string>}) {
 
-  const data = Data;
+  const data = Array.isArray(Data) ? Data : [];
 
   if (data.length > 0) {
     const keys = Object.keys(data[0]);

@@ -1,228 +1,101 @@
-"use client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "@/components/ui/select";
-import Image from "next/image";
-import { useState } from "react";
-import {
-  loginOrganization,
-  registerOrganization,
-} from "@/lib/actions/organization.action";
-import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { FORM_TYPE_SET } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { FaDatabase } from "react-icons/fa6";
+
 
 export default function Component() {
-  const { toast } = useToast();
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    lob: "",
-    domain: "",
-  });
-  const [tabValue, setTabValue] = useState("Login");
+    return (
+        <div className="flex flex-col md:flex-row items-center justify-center h-screen relative">
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    let response;
-    if (FORM_TYPE_SET.has(tabValue)) {
-      response = await loginOrganization(formData);
-    } else {
-      response = await registerOrganization(formData);
-    }
-    const parsedResponse = JSON.parse(response as string);
-    if (parsedResponse.success) {
-      toast({
-        variant: "success",
-        title: FORM_TYPE_SET.has(tabValue)
-          ? "Login Successful"
-          : "Registration Successful",
-        description: FORM_TYPE_SET.has(tabValue)
-          ? "Welcome back!"
-          : "Thank you for registering with us.",
-      });
-      router.push("/add");
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: parsedResponse.message,
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    }
-  };
+            <Link href="/" prefetch={false} className="flex justify-start">
+                <div><h1 className="text-xl lg:mb-[800px] ml-10  font-semibold ">
+                    <FaDatabase />
+                </h1></div>
+            </Link>
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <Image
-            src="/Logo.png"
-            alt="Vision AI"
-            width={48}
-            height={48}
-            className="mx-auto"
-            style={{ aspectRatio: "48/48", objectFit: "cover" }}
-            loading="lazy"
-          />
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-            Welcome to Vision AI
-          </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            Get started with our powerful AI-powered vision tools.
-          </p>
+            {/* first section */}
+            <div className="flex flex-col items-center justify-center p-8 md:p-12 lg:p-16 w-full md:w-3/5 relative">
+
+                {/* Main content */}
+                <div className="space-y-2 text-center mb-8">
+                    <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold">Welcome to Vision AI</h1>
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold">
+                        Advancing Innovation through Intelligent Solutions
+                    </h2>
+                    <p className="text-muted-foreground text-sm md:text-base lg:text-lg">
+                        Yooo Hoo!!! Excited? Come join the venture with us.
+                    </p>
+                </div>
+
+
+                <div className="flex flex-col gap-4 w-[50%]">
+                    <Link
+                        href="/auth/org"
+                        className="inline-flex h-12 items-center justify-center rounded-md dark:bg-[#0D1526] text-white bg-[#161616] px-8 text-lg font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                        prefetch={false}
+                    >
+                        <BriefcaseIcon className="mr-2 h-4 w-4" />
+                        Org
+                    </Link>
+                    <Link
+                        href="#"
+                        className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-lg font-medium shadow-sm transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                        prefetch={false}
+                    >
+                        <CodeIcon className="mr-2 h-4 w-4" />
+                        Dev
+                    </Link>
+                </div>
+            </div>
+
+            {/* second section */}
+            <div className="w-full md:w-2/5 h-full dark:bg-[#0D1526] bg-[#161616]">
+                {/* Empty black section */}
+            </div>
+
         </div>
-        <Tabs
-          defaultValue="Login"
-          className="space-y-4"
-          onValueChange={setTabValue}
+    );
+}
+
+
+
+function BriefcaseIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
         >
-          <TabsList className="grid grid-cols-2 gap-2">
-            <TabsTrigger value="Login">Login</TabsTrigger>
-            <TabsTrigger value="Signup">Sign Up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="Login">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <Label htmlFor="email">Email address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Sign in
-              </Button>
-            </form>
-          </TabsContent>
-          <TabsContent value="Signup">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="lob">Line of Business</Label>
-                <Select
-                  name="lob"
-                  value={formData.lob}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, lob: value })
-                  }
-                  required
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a domain" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="accounting">Accounting</SelectItem>
-                      <SelectItem value="investment-banking">
-                        Investment Banking
-                      </SelectItem>
-                      <SelectItem value="healthcare">Healthcare</SelectItem>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="manufacturing">
-                        Manufacturing
-                      </SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="real-estate">Real Estate</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="legal">Legal</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="domain">Domain</Label>
-                <Input
-                  id="domain"
-                  type="text"
-                  placeholder="Your domain"
-                  name="domain"
-                  value={formData.domain}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Sign up
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
+            <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            <rect width="20" height="14" x="2" y="6" rx="2" />
+        </svg>
+    )
+}
+
+
+function CodeIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+        </svg>
+    )
 }

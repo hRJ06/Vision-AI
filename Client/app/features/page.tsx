@@ -1,3 +1,5 @@
+"use client"
+import { useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -5,8 +7,64 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { FaLessThan } from "react-icons/fa6";
 
 export default function Component() {
+
+  const cards = [
+    {
+      id: 1,
+      icon: <DatabaseIcon className="w-6 h-6 text-primary-foreground" />,
+      title: "Connect to your internal databases",
+      description:
+        "Seamlessly integrate Vision AI with your existing databases to unlock powerful insights and automation.",
+      link: "/c",
+    },
+    {
+      id: 2,
+      icon: <MapIcon className="w-6 h-6 text-primary-foreground" />,
+      title: "Generate ER diagrams",
+      description:
+        "Automatically generate comprehensive ER diagrams from your database structures, making it easy to visualize and understand your data.",
+      link: "/er/generate",
+    },
+    {
+      id: 3,
+      icon: <ScanIcon className="w-6 h-6 text-primary-foreground" />,
+      title: "Analyze database structures",
+      description:
+        "Gain deep insights into your database structures, including table relationships, data types, and more, to optimize your data management.",
+      link: "/er/analysis",
+    },
+    {
+      id: 4,
+      icon: <BotIcon className="w-6 h-6 text-primary-foreground" />,
+      title: "Leverage NLP-powered processing",
+      description:
+        "Harness the power of cutting-edge AI models to process and extract insights from your data, taking your analysis to new heights.",
+      link: "/csv",
+    },
+    {
+      id: 5,
+      icon: <GraphIcon className="w-6 h-6 text-primary-foreground" />,
+      title: "Visualize Your DB",
+      description:
+        "Visualize your database structures with advanced tools, simplifying data analysis and management to achieve greater efficiency.",
+      link: "/visualisation",
+    },
+  ];
+
+
+  const [visibleCards, setVisibleCards] = useState(0);
+
+  const handleNext = () => {
+    setVisibleCards((prev) => (prev < cards.length - 4 ? prev + 1 : prev));
+  };
+
+  const handlePrev = () => {
+    setVisibleCards((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
   return (
     <div className="w-full">
       <section className="w-full py-12 md:py-24 lg:py-32">
@@ -27,119 +85,48 @@ export default function Component() {
       </section>
       <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
         <div className="container grid grid-cols-1 gap-6 px-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4 lg:gap-10">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="bg-primary rounded-md p-3 flex items-center justify-center">
-                  <DatabaseIcon className="w-6 h-6 text-primary-foreground" />
+          {cards.slice(visibleCards, visibleCards + 4).map((card) => (
+            <Card key={card.id}>
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="bg-primary rounded-md p-3 flex items-center justify-center">
+                    {card.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold">{card.title}</h3>
                 </div>
-                <h3 className="text-xl font-semibold">
-                  Connect to your internal databases
-                </h3>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Seamlessly integrate Vision AI with your existing databases to
-                unlock powerful insights and automation.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link
-                href="/c"
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                <ArrowRightIcon className="mr-2 h-4 w-4" />
-                Explore
-              </Link>
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="bg-primary rounded-md p-3 flex items-center justify-center">
-                  <MapIcon className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold">Generate ER diagrams</h3>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Automatically generate comprehensive ER diagrams from your
-                database structures, making it easy to visualize and understand
-                your data.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link
-                href="/er/generate"
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                <ArrowRightIcon className="mr-2 h-4 w-4" />
-                Explore
-              </Link>
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="bg-primary rounded-md p-3 flex items-center justify-center">
-                  <ScanIcon className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold">
-                  Analyze database structures
-                </h3>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Gain deep insights into your database structures, including
-                table relationships, data types, and more, to optimize your data
-                management.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link
-                href="/er/analysis"
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                <ArrowRightIcon className="mr-2 h-4 w-4" />
-                Explore
-              </Link>
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="bg-primary rounded-md p-3 flex items-center justify-center">
-                  <BotIcon className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold">
-                  Leverage NLP-powered processing
-                </h3>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Harness the power of cutting-edge AI models to process and
-                extract insights from your data, taking your analysis to new
-                heights.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link
-                href="/csv"
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                prefetch={false}
-              >
-                <ArrowRightIcon className="mr-2 h-4 w-4" />
-                Explore
-              </Link>
-            </CardFooter>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{card.description}</p>
+              </CardContent>
+              <CardFooter>
+                <Link
+                  href={card.link}
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                  prefetch={false}
+                >
+                  <ArrowRightIcon className="mr-2 h-4 w-4" />
+                  Explore
+                </Link>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={handlePrev}
+            className="mr-4 h-9 w-9 rounded-full bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 flex items-center justify-center"
+            disabled={visibleCards === 0}
+          >
+            <FaLessThan />
+          </button>
+          <button
+            onClick={handleNext}
+            className="h-9 w-9 rounded-full bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 flex items-center justify-center"
+            disabled={visibleCards === cards.length - 4}
+          >
+            <FaLessThan className="transform rotate-180"/>
+          </button>
+
         </div>
       </section>
       <section className="w-full py-12 md:py-24 lg:py-32">
@@ -392,6 +379,24 @@ function ShieldIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
     >
       <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+    </svg>
+  );
+}
+function GraphIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 12v8a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10 8v12a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1zM16 4v16a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1z" />
     </svg>
   );
 }

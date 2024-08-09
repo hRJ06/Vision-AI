@@ -462,7 +462,7 @@ export default function Component() {
                 <Link href="/faq">
                   <Button
                     variant="outline"
-                    className="text-black hover:bg-black hover:text-white font-bold py-3 px-6 text-lg"
+                    className="text-black hover:bg-black dark:text-white hover:text-white font-bold py-3 px-6 text-lg"
                   >
                     FAQ
                   </Button>

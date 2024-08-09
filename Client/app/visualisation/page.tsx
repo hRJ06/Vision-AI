@@ -330,10 +330,8 @@ export default function Component() {
         <div className="mt-8 w-full max-w-[800px] chart">
           <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
             {isClicked ? (
-              <div className="space-y-2 lg:text-start text-center">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                  Welcome to Vision AI
-                </h1>
+              <div className="space-y-2  text-center">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">Welcome to Vision AI</h1>
                 <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold">
                   Pioneering the Future of Intelligent Solutions
                 </h2>
@@ -403,7 +401,7 @@ export default function Component() {
           <Button
             variant="outline"
             size="sm"
-            className="justify-start bg-black text-white"
+            className="justify-start bg-black mt-4 text-white"
             onClick={() => downloadDiagram()}
             disabled={isClicked}
           >
@@ -768,9 +766,7 @@ export default function Component() {
           </div>
 
           <div className="mt-2 text-center">
-            <Button className="bg-black w-full" onClick={() => Chart()}>
-              Generate
-            </Button>
+            <Button className="dark:bg-white bg-black text-white dark:text-black  w-full" onClick={() => Chart()}>Generate</Button>
           </div>
         </div>
       </div>

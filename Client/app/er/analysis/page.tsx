@@ -14,6 +14,7 @@ import { MouseEvent, useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 import { AI_MESSAGE_ROLE_SET } from "@/lib/utils";
 import { ChatMessage } from "@/types";
+import Link from "next/link";
 
 export default function Component() {
   const [loading, setLoading] = useState<Boolean>(false);
@@ -277,7 +278,13 @@ export default function Component() {
           <div className="flex flex-col lg:w-2/3 w-full">
             <Card className="flex-1">
               <CardHeader>
-                <CardTitle>Vision AI</CardTitle>
+                <CardTitle>
+                  <Link href="/" prefetch={false}>
+                    <h1 className="text-xl lg:text-left text-center font-semibold">
+                      Vision AI{" "}
+                    </h1>
+                  </Link>
+                </CardTitle>
                 <CardDescription>
                   This Chat is based on the current uploaded image only.
                 </CardDescription>
@@ -287,24 +294,21 @@ export default function Component() {
                   <div key={index} className={`flex items-start gap-4 mb-3`}>
                     <Avatar className="h-8 w-8 shrink-0 border">
                       <AvatarImage
-                        src={`${
-                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                        src={`${AI_MESSAGE_ROLE_SET.has(chat.role)
                             ? "/AI.png"
                             : "/Human.png"
-                        }`}
+                          }`}
                       />
                       <AvatarFallback>{chat.role}</AvatarFallback>
                     </Avatar>
                     <div className="max-w-[700px]">
                       <div className="grid gap-1">
                         <div
-                          className={`prose text-muted-foreground  bg-${
-                            chat.role === "AI" ? "muted" : "primary"
-                          }  p-2 rounded-md ${
-                            chat.role === "User"
+                          className={`prose text-muted-foreground  bg-${chat.role === "AI" ? "muted" : "primary"
+                            }  p-2 rounded-md ${chat.role === "User"
                               ? "text-primary-foreground"
                               : ""
-                          }`}
+                            }`}
                         >
                           {typeof chat.msg === "string" ? (
                             formatMessage(chat.msg)

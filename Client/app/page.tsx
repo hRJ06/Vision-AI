@@ -2,19 +2,14 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function Component() {
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link
-          href="#"
-          className="flex items-center justify-center"
-          prefetch={false}
-        >
-          <span className="sr-only">Vision AI</span>
-        </Link>
-        <nav className="lg:ml-auto flex gap-4 sm:gap-6 justify-center lg:w-auto w-full">
+        <nav className="lg:ml-auto flex gap-4 sm:gap-6 justify-center items-center lg:w-auto w-full ">
+          <ThemeSwitcher/>
           <Link
             href="#features"
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -60,7 +55,7 @@ export default function Component() {
                     processing with our cutting-edge AI models.
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                <div className="flex flex-col gap-2 min-[400px]:flex-row lg:m-0 mx-auto w-full lg:justify-start justify-center">
                   <Link
                     href="/c"
                     className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-bold tracking-wide text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
@@ -73,7 +68,7 @@ export default function Component() {
                     className="inline-flex h-10 items-center text-blue-600 justify-center rounded-md border border-input bg-background tracking-wide font-extrabold px-8 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
-                    Explore Features
+                    Explore Feature
                   </Link>
                 </div>
               </div>

@@ -31,8 +31,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Employee } from "@/types";
 import Link from "next/link";
-import SkeletonLoader from "@/components/SkeletonLoader"; // Import the SkeletonLoader component
-
+import SkeletonLoader from "@/components/SkeletonLoader";
+import cookie from "js-cookie";
+import { Edit2 } from "lucide-react";
+import { MdDelete, MdEdit } from "react-icons/md";
 export default function Component() {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -45,18 +47,21 @@ export default function Component() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const token = sessionStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
+  const token = cookie.get("token");
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!token) router.push("/auth");
-      setLoading(true); // Set loading to true when fetching data
+      if (!token) {
+        router.push("/auth");
+        return;
+      }
+      setLoading(true);
       try {
         const users = await getUsers(token as string);
         setEmployees(users as any);
       } finally {
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false);
       }
     };
     fetchUsers();
@@ -74,7 +79,7 @@ export default function Component() {
   };
 
   const handleSaveEmployee = async () => {
-    const token = sessionStorage.getItem("token");
+    const token = cookie.get("token");
     if (!token) {
       router.push("/auth");
       return;
@@ -141,24 +146,31 @@ export default function Component() {
               setIsModalOpen(true);
             }}
           >
-            Add
+            ADD
           </Button>
         </div>
         <div className="overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-extrabold">ID</TableHead>
-                <TableHead className="font-extrabold">Name</TableHead>
-                <TableHead className="font-extrabold">Email</TableHead>
-                <TableHead className="font-extrabold">Role</TableHead>
-                <TableHead className="font-extrabold">Actions</TableHead>
+                <TableHead className="font-extrabold text-lg">ID</TableHead>
+                <TableHead className="font-extrabold text-lg uppercase">
+                  Name
+                </TableHead>
+                <TableHead className="font-extrabold text-lg uppercase">
+                  Email
+                </TableHead>
+                <TableHead className="font-extrabold text-lg uppercase">
+                  Role
+                </TableHead>
+                <TableHead className="font-extrabold text-lg uppercase">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading
-                ?
-                  Array.from({ length: 14 }).map((_, index) => (
+                ? Array.from({ length: 15 }).map((_, index) => (
                     <TableRow key={index}>
                       <TableCell>
                         <SkeletonLoader width="2.5rem" height="1.5rem" />
@@ -179,10 +191,22 @@ export default function Component() {
                   ))
                 : employees.map((employee, index) => (
                     <TableRow key={employee.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{employee.name}</TableCell>
-                      <TableCell>{employee.email}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-lg">{index + 1}</TableCell>
+                      <TableCell className="text-lg font-bold">{employee.name}</TableCell>
+                      <TableCell className="text-lg">
+                        {(() => {
+                          const [localPart, domainPart] =
+                            employee.email.split("@");
+                          return (
+                            <>
+                              {localPart}@
+                              <span className="font-bold">{domainPart}</span>
+                            </>
+                          );
+                        })()}
+                      </TableCell>
+
+                      <TableCell className="text-lg">
                         <div className="flex items-center">
                           <div className="flex items-center bg-gray-200 px-2 py-1 rounded-full">
                             <span
@@ -193,7 +217,7 @@ export default function Component() {
                               }`}
                             ></span>
                             <span
-                              className={`text-sm font-semibold ${
+                              className={`text-sm font-semibold uppercase tracking-wider ${
                                 employee.role != "Read"
                                   ? "text-red-500"
                                   : "text-green-500"
@@ -205,13 +229,19 @@ export default function Component() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          style={{ backgroundColor: "black", color: "white" }}
-                          onClick={() => handleEditEmployee(employee)}
-                        >
-                          Edit
-                        </Button>
+                        <div className="flex gap-x-2 ">
+                          <div
+                            className="bg-black text-white p-2 rounded-md"
+                            onClick={() => handleEditEmployee(employee)}
+                          >
+                            {" "}
+                            <MdEdit />
+                          </div>
+                          <div className="bg-red-500 text-white p-2 rounded-md">
+                            {" "}
+                            <MdDelete />
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -272,7 +302,10 @@ export default function Component() {
               <Select
                 value={newEmployee.role}
                 onValueChange={(value) =>
-                  setNewEmployee((prev) => ({ ...prev, role: value }))
+                  setNewEmployee((prev) => ({
+                    ...prev,
+                    role: value as "Read" | "Write",
+                  }))
                 }
               >
                 <SelectTrigger>

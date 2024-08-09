@@ -53,7 +53,6 @@ export default function Component() {
           ? "Welcome back!"
           : "Thank you for registering with us.",
       });
-      sessionStorage.setItem("token", parsedResponse.token);
       router.push("/add");
     } else {
       toast({

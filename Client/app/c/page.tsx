@@ -28,7 +28,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { DownloadIcon, EllipsisVertical, Download } from "lucide-react";
-import Cookies from "js-cookie";
 import { cache, checkKey } from "@/lib/actions/redis.action";
 import {
   AI_MESSAGE_ROLE_SET,
@@ -37,6 +36,7 @@ import {
   getModel,
   INVALID_RESPONSE_SET,
 } from "@/lib/utils";
+import cookie from "js-cookie";
 
 export default function Component() {
   const { toast } = useToast();
@@ -238,7 +238,7 @@ export default function Component() {
         const schema_description = response.data.schema_description;
         const db = response.data.db;
         setSchemaInfo(schema_description);
-        Cookies.set("db", db, { secure: true, sameSite: "strict" });
+        cookie.set("db", db, { secure: true });
         toast({
           variant: "success",
           title: "Connection Successful",
@@ -268,7 +268,7 @@ export default function Component() {
     e: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
-    const db_uri = Cookies.get("db");
+    const db_uri = cookie.get("db");
     if (!db_uri) {
       toast({
         variant: "destructive",

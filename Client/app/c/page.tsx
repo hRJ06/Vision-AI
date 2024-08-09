@@ -418,9 +418,11 @@ export default function Component() {
       {/* WELCOME CHAT */}
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
-          <h1 className="text-xl lg:text-left text-center font-semibold">
-            Vision AI{" "}
-          </h1>
+          <Link href="/" prefetch={false}>
+            <h1 className="text-xl lg:text-left text-center font-semibold">
+              Vision AI{" "}
+            </h1>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -477,32 +479,28 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div
                   key={index}
-                  className={`flex items-start gap-4 ${
-                    AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
-                  } `}
+                  className={`flex items-start gap-4 ${AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
+                    } `}
                 >
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
-                      src={`${
-                        AI_MESSAGE_ROLE_SET.has(chat.role)
-                          ? "/AI.png"
-                          : "/Human.png"
-                      }`}
+                      src={`${AI_MESSAGE_ROLE_SET.has(chat.role)
+                        ? "/AI.png"
+                        : "/Human.png"
+                        }`}
                     />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
                     <div className="grid gap-1">
                       <div
-                        className={`prose text-muted-foreground  bg-${
-                          AI_MESSAGE_ROLE_SET.has(chat.role)
-                            ? "muted"
-                            : "primary"
-                        }  p-2 rounded-md ${
-                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                        className={`prose text-muted-foreground  bg-${AI_MESSAGE_ROLE_SET.has(chat.role)
+                          ? "muted"
+                          : "primary"
+                          }  p-2 rounded-md ${AI_MESSAGE_ROLE_SET.has(chat.role)
                             ? ""
                             : "text-primary-foreground"
-                        }`}
+                          }`}
                       >
                         {AI_MESSAGE_ROLE_SET.has(chat.role) ? (
                           <>
@@ -541,7 +539,7 @@ export default function Component() {
         {welcome && (
           <form
             onSubmit={handleSendMessage}
-            className="sticky bottom-0 z-10 border-t bg-background/50 p-4 backdrop-blur-md"
+            className="sticky bottom-0 z-10 border-t bg-background p-2 mt-40"
           >
             <div className="relative">
               <Textarea
@@ -560,6 +558,7 @@ export default function Component() {
               </Button>
             </div>
           </form>
+
         )}
       </div>
     </div>

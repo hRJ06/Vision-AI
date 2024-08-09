@@ -35,9 +35,10 @@ import { GridFilled } from "./(AreaChart)/GridFilled"
 import { GridCircle } from "./(AreaChart)/GridCircle"
 import { GridCircleFilled } from "./(AreaChart)/GridCircleFilled"
 import Cookies from "js-cookie"
+import Link from "next/link"
 
 export default function Component() {
-  
+
   const { toast } = useToast();
 
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
@@ -48,6 +49,7 @@ export default function Component() {
   const [BarType, setBarType] = useState("");
   const [AreaType, setAreaType] = useState("");
   const [PieType, setPieType] = useState("");
+  const [isClicked, setisClicked] = useState(true);
 
   const [databaseSchema, setdatabaseSchema] = useState("");
   const [schema, setschema] = useState(null);
@@ -67,7 +69,7 @@ export default function Component() {
   const [options, setoptions] = useState("0");
   type InputType = Record<string, string>;
 
-  const [Data, setdata] =useState<InputType>();
+  const [Data, setdata] = useState<InputType>();
   // const [Data1, setdata1] = useState(input);
 
 
@@ -179,7 +181,7 @@ export default function Component() {
 
 
   const Chart = async () => {
-    
+
     const data = {
       table: selectedTable,
       first_column: selectedColumn,
@@ -187,7 +189,7 @@ export default function Component() {
       Type: selectedChart,
       Option: options,
     };
-  
+
     if (!data.table || !data.first_column || !data.second_column) {
       toast({
         title: "Generation Failed",
@@ -195,45 +197,45 @@ export default function Component() {
         description: "Please provide table and column values to generate the Charts.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
-      return; 
+      return;
     }
 
     try {
       let response = await axios.post(
         "http://127.0.0.1:5000/fetch-table-data",
-        {...data, "db": Cookies.get("db")},
+        { ...data, "db": Cookies.get("db") },
         {
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-  
+
       const firstData = JSON.parse(response.data[`${selectedColumn}`]);
       const secondData = JSON.parse(response.data[`${selectedColumn2}`]);
-  
+
       const convertAndFilterData = (data: any) => {
         return data
           .map((item: any) => (item === "None" ? 0 : item))
           .filter((item: any) => item !== "None");
       };
-  
+
       const convertedFirstData = convertAndFilterData(firstData);
       const convertedSecondData = convertAndFilterData(secondData);
-  
+
       console.log("convertedFirstData", convertedFirstData);
       console.log("convertedSecondData", convertedSecondData);
       console.log("response", response);
-  
+
       const minLength = Math.min(convertedFirstData.length, convertedSecondData.length);
       const formattedData = Array.from({ length: minLength }, (_, index) => ({
         [selectedColumn]: convertedFirstData[index],
         [selectedColumn2]: convertedSecondData[index],
       }));
-  
+
       console.log("FormattedData", formattedData);
       setdata(formattedData);
-  
+      setisClicked(false);
       if (response.data.status === "success") {
         toast({
           variant: "success",
@@ -257,8 +259,8 @@ export default function Component() {
       });
     }
   };
-  
-  
+
+
 
   // DOWNLOAD HANDLER
   const downloadDiagram = () => {
@@ -274,193 +276,116 @@ export default function Component() {
       URL.revokeObjectURL(url);
     }
   };
-  
+
 
 
   // console.log("first Schema:", schema);
   // console.log("data", Data);
 
   return (
-    <div className="grid min-h-screen w-full grid-cols-[240px_1fr_240px]">
-      <div className="flex flex-col border-r bg-background p-4">
-        <div className="mb-4 font-semibold">Database Credentials</div>
-        <div className="grid gap-2">
-          <div className="grid gap-1">
+    <div className="grid min-h-screen w-full lg:grid-cols-[300px_1fr_300px] grid-cols-1">
 
-            <Label htmlFor="host">Host</Label>
+      {/* FIRST SECTION */}
+      <div className="flex flex-col border-r bg-background p-4 w-full md:w-[320px] lg:w-[280px]">
+        <div className="mx-auto mb-4 lg:mx-0">
+          <Link href="/" prefetch={false}>
+            <h1 className="text-xl lg:text-left text-center font-semibold">
+              Vision AI{" "}
+            </h1>
+          </Link>
+        </div>
+        <h3 className="text-sm font-medium  text-muted-foreground ml-2">
+          Database Credentials
+        </h3>
+
+
+
+        <div className="grid gap-2 space-y-3 mt-2 p-1">
+          <div className="grid gap-1">
             <Input id="host" placeholder="localhost" onChange={(e) => setHost(e.target.value)} value={Host} />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="port">Port</Label>
-            <Input id="port" placeholder="5432" onChange={(e) => setPort(e.target.value)} value={Port} />
+            <Input id="port" placeholder="port" onChange={(e) => setPort(e.target.value)} value={Port} />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="username">User</Label>
-            <Input id="username" placeholder="your-username" onChange={(e) => setUser(e.target.value)} value={User} />
+            <Input id="username" placeholder="username" onChange={(e) => setUser(e.target.value)} value={User} />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="database">Database</Label>
-            <Input id="database" placeholder="your-database" onChange={(e) => setDatabase(e.target.value)} value={Database} />
+            <Input id="database" placeholder="database" onChange={(e) => setDatabase(e.target.value)} value={Database} />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="your-password" onChange={(e) => setPassword(e.target.value)} value={Password} />
+            <Input id="password" type="password" placeholder="password" onChange={(e) => setPassword(e.target.value)} value={Password} />
+          </div>
+          <div className="grid gap-1">
+            <Button className="mt-4 w-full py-2 px-4 rounded border-none" onClick={() => connectToDB()}>
+              Connect
+            </Button>
           </div>
         </div>
-        <Button className="mt-4" onClick={() => connectToDB()}>Connect</Button>
       </div>
 
-      <div className="flex flex-col items-center justify-center bg-muted/40 p-4">
+      {/* MIDDLE SECTION */}
+      <div className="flex flex-col items-center justify-center bg-muted/40 p-4 flex-grow">
         {/* chart */}
-        <div className="mt-8 w-[1000px] chart">
+        <div className="mt-8 w-full max-w-[800px] chart">
           <div className="space-y-2 w-full aspect-[6/3] flex items-center justify-center">
-            {selectedChart == "" ? (
-              <div>
-                <h1 className="text-5xl font-bold">Welcome to Visualisation</h1>
-                <h2 className="text-3xl font-semibold">Let's get started</h2>
+            {isClicked ? (
+              <div className="space-y-2 lg:text-start text-center">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">Welcome to Vision AI</h1>
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold">
+                  Pioneering the Future of Intelligent Solutions
+                </h2>
+                <p className="text-muted-foreground text-sm md:text-base lg:text-lg">
+                  Start a conversation by connecting to a chat server.
+                </p>
               </div>
             ) : (
               <>
-                {
-                  selectedChart == "Line" &&
+                {selectedChart == "Line" && (
                   <div className="w-full aspect-w-6 aspect-h-3">
-
-                    {LinearType == "Normal" && (
-                      <div className="w-full h-full">
-                        <Normal Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "Step" && (
-                      <div className="w-full h-full">
-                        <Step Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "Linear" && (
-                      <div className="w-full h-full">
-                        <Linear Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "Dots" && (
-                      <div className="w-full h-full">
-                        <Dots Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "DotsColor" && (
-                      <div className="w-full h-full">
-                        <DotsColor Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "Label" && (
-                      <div className="w-full h-full">
-                        <LabelLine Data={Data} />
-                      </div>
-                    )}
-                    {LinearType == "CustomDots" && (
-                      <div className="w-full h-full">
-                        <CustomDots Data={Data} />
-                      </div>
-                    )}
+                    {/* Line types */}
+                    {LinearType == "Normal" && <Normal Data={Data} />}
+                    {LinearType == "Step" && <Step Data={Data} />}
+                    {LinearType == "Linear" && <Linear Data={Data} />}
+                    {LinearType == "Dots" && <Dots Data={Data} />}
+                    {LinearType == "DotsColor" && <DotsColor Data={Data} />}
+                    {LinearType == "Label" && <LabelLine Data={Data} />}
+                    {LinearType == "CustomDots" && <CustomDots Data={Data} />}
                   </div>
-                }
+                )}
 
-                {
-                  selectedChart == "Pie" &&
+                {selectedChart == "Pie" && (
                   <div className="w-full aspect-w-6 aspect-h-3">
-                    {PieType == "Donut" && (
-                      <div className="w-full h-full">
-                        <Donut Data={Data} />
-                      </div>
-                    )}
-                    {PieType == "DonutText" && (
-                      <div className="w-full h-full">
-                        <DonutText Data={Data} />
-                      </div>
-                    )}
-                    {PieType == "DonutActive" && (
-                      <div className="w-full h-full">
-                        <DonutActive Data={Data} />
-                      </div>
-                    )}
-                    {PieType == "Label" && (
-                      <div className="w-full h-full">
-                        <LabelPie Data={Data} />
-                      </div>
-                    )}
-                    {PieType == "LabelList" && (
-                      <div className="w-full h-full">
-                        <Labellist Data={Data} />
-                      </div>
-                    )}
+                    {/* Pie types */}
+                    {PieType == "Donut" && <Donut Data={Data} />}
+                    {PieType == "DonutText" && <DonutText Data={Data} />}
+                    {PieType == "DonutActive" && <DonutActive Data={Data} />}
+                    {PieType == "Label" && <LabelPie Data={Data} />}
+                    {PieType == "LabelList" && <Labellist Data={Data} />}
                   </div>
-                }
+                )}
 
-                {
-                  selectedChart == "Bar" &&
+                {selectedChart == "Bar" && (
                   <div className="w-full aspect-w-6 aspect-h-3">
-                    {BarType == "NormalBar" && (
-                      <div className="w-full h-full">
-                        <NormalBar Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "LabelBar" && (
-                      <div className="w-full h-full">
-                        <LabelBar Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "CustomLabel" && (
-                      <div className="w-full h-full">
-                        <CustomLabel Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "Mixed" && (
-                      <div className="w-full h-full">
-                        <Mixed Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "Active" && (
-                      <div className="w-full h-full">
-                        <Active Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "Negative" && (
-                      <div className="w-full h-full">
-                        <Negative Data={Data} />
-                      </div>
-                    )}
-                    {BarType == "Horizontal" && (
-                      <div className="w-full h-full">
-                        <Horizontal Data={Data} />
-                      </div>
-                    )}
+                    {/* Bar types */}
+                    {BarType == "NormalBar" && <NormalBar Data={Data} />}
+                    {BarType == "LabelBar" && <LabelBar Data={Data} />}
+                    {BarType == "CustomLabel" && <CustomLabel Data={Data} />}
+                    {BarType == "Mixed" && <Mixed Data={Data} />}
+                    {BarType == "Active" && <Active Data={Data} />}
+                    {BarType == "Negative" && <Negative Data={Data} />}
+                    {BarType == "Horizontal" && <Horizontal Data={Data} />}
                   </div>
-                }
-
-                {
-                  selectedChart == "Area" &&
+                )}
+                {selectedChart == "Area" && (
                   <div className="w-full aspect-w-6 aspect-h-3">
-
-                    {AreaType == "Dots" && (
-                      <div className="w-full h-full">
-                        <DotsArea Data={Data} />
-                      </div>
-                    )}
-                    {AreaType == "GridFilled" && (
-                      <div className="w-full h-full">
-                        <GridFilled Data={Data} />
-                      </div>
-                    )}
-                    {AreaType == "GridCircle" && (
-                      <div className="w-full h-full">
-                        <GridCircle Data={Data} />
-                      </div>
-                    )}
-                    {AreaType == "GridCircleFilled" && (
-                      <div className="w-full h-full">
-                        <GridCircleFilled Data={Data} />
-                      </div>
-                    )}
+                    {/* Area types */}
+                    {AreaType == "Dots" && <DotsArea Data={Data} />}
+                    {AreaType == "GridFilled" && <GridFilled Data={Data} />}
+                    {AreaType == "GridCircle" && <GridCircle Data={Data} />}
+                    {AreaType == "GridCircleFilled" && <GridCircleFilled Data={Data} />}
                   </div>
-                }
+                )}
               </>
             )}
           </div>
@@ -468,18 +393,18 @@ export default function Component() {
       </div>
 
 
-      <div className="flex flex-col border-l bg-background p-4">
-
+      {/* THIRD SECTION */}
+      <div className="flex flex-col border-l bg-background p-4 flex-none  w-full md:w-[320px] lg:w-[280px]">
         <div className="mt-4 font-semibold text-xl">Export</div>
         <div className="grid gap-2">
-          <Button variant="outline" size="sm" className="justify-start bg-black text-white" onClick={()=> downloadDiagram()}>
+          <Button variant="outline" size="sm" className="justify-start bg-black text-white" onClick={() => downloadDiagram()} disabled={isClicked}>
             <FileIcon className="h-4 w-4 mr-2" />
             SVG
           </Button>
         </div>
 
         <div className="mt-4">
-          <div className="font-semibold text-xl">Select Tables</div>
+          <div className="font-semibold text-xl">Table</div>
           <div className="mt-2">
             <DropdownMenu>
               <DropdownMenuContent align="end">
@@ -494,7 +419,7 @@ export default function Component() {
 
           <div className="mt-2">
             <Select onValueChange={handleTableChange}>
-              <SelectTrigger className="w-[180px] bg-black text-white">
+              <SelectTrigger className="lg:w-[180px] w-full bg-black text-white">
                 <SelectValue placeholder="Select Table" value={selectedTable} />
               </SelectTrigger>
               <SelectContent>
@@ -506,9 +431,10 @@ export default function Component() {
               </SelectContent>
             </Select>
           </div>
+          <div className="font-semibold text-xl mt-4">Columns</div>
           <div className="mt-2">
             <Select onValueChange={setSelectedColumn}>
-              <SelectTrigger className="w-[180px] bg-black text-white">
+              <SelectTrigger className="lg:w-[180px] w-full bg-black text-white">
                 <SelectValue placeholder="Select Column" value={selectedColumn} />
               </SelectTrigger>
               <SelectContent>
@@ -523,7 +449,7 @@ export default function Component() {
           </div>
           <div className="mt-2">
             <Select onValueChange={setSelectedColumn2}>
-              <SelectTrigger className="w-[180px] bg-black text-white">
+              <SelectTrigger className="lg:w-[180px] w-full bg-black text-white">
                 <SelectValue placeholder="Select Column" value={selectedColumn2} />
               </SelectTrigger>
               <SelectContent>
@@ -536,18 +462,30 @@ export default function Component() {
               </SelectContent>
             </Select>
           </div>
-
         </div>
 
-
         <div className="mt-4">
-          <div className="font-semibold text-xl">Chart Options</div>
+          <div className="font-semibold text-xl">Chart</div>
 
-          {/* count and sum */}
+          {/* Count and Sum */}
           <div className="flex gap-x-3">
-            <div className="mt-2">
-              {
-                selectedChart == "Bar" &&
+            <div className="mt-2 w-full">
+              {selectedChart == "Bar" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white  w-full">
+                      {options === '0' ? 'Sum' : 'Count'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={options} onValueChange={setoptions} >
+                      <DropdownMenuRadioItem value="0">Sum</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="1">Count</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {selectedChart == "Pie" && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
@@ -561,54 +499,17 @@ export default function Component() {
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              }
-              {
-                selectedChart == "Pie" &&
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
-                      {options === '0' ? 'Sum' : 'Count'}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup value={options} onValueChange={setoptions}>
-                      <DropdownMenuRadioItem value="0">Sum</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="1">Count</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              }
-            </div>
-            <div className="mt-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-x-2">
-                    <PaletteIcon className="h-4 w-4" />
-                    Color Gradient
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuRadioGroup value="default">
-                    <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="rainbow">Rainbow</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="pastel">Pastel</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="neon">Neon</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              )}
             </div>
           </div>
 
-
-          <div className="flex gap-x-3">
+          <div className="flex gap-x-3 justify-center w-full">
             <div className="mt-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-black text-white  hover:bg-gray-900 hover:text-white">
+                  <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
                     <BarChartIcon className="h-4 w-4" />
-                    {
-                      selectedChart == "" ? "Charts" : selectedChart
-                    }
+                    {selectedChart == "" ? "Charts" : selectedChart}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -622,17 +523,16 @@ export default function Component() {
               </DropdownMenu>
             </div>
 
-
             <div className="mt-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="bg-black text-white hover:bg-gray-900 hover:text-white">
-                    <BarChartIcon className="h-4 w-4 " />
+                    <BarChartIcon className="h-4 w-4" />
                     {LinearType == "" ? "Types" : LinearType}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuRadioGroup >
+                  <DropdownMenuRadioGroup>
                     {selectedChart === "Line" &&
                       <>
                         <DropdownMenuRadioItem value="Normal" onClick={() => setLinearType("Normal")}>Normal</DropdownMenuRadioItem>
@@ -655,7 +555,6 @@ export default function Component() {
                         <DropdownMenuRadioItem onClick={() => setBarType("Active")} value="Active">Active</DropdownMenuRadioItem>
                       </>
                     }
-
                     {selectedChart === "Area" &&
                       <>
                         <DropdownMenuRadioItem onClick={() => setAreaType("Dots")} value="Dots">Dots</DropdownMenuRadioItem>
@@ -664,7 +563,6 @@ export default function Component() {
                         <DropdownMenuRadioItem onClick={() => setAreaType("GridCircleFilled")} value="GridCircleFilled">GridCircleFilled</DropdownMenuRadioItem>
                       </>
                     }
-
                     {selectedChart === "Pie" &&
                       <>
                         <DropdownMenuRadioItem onClick={() => setPieType("Donut")} value="Donut">Donut</DropdownMenuRadioItem>
@@ -674,22 +572,19 @@ export default function Component() {
                         <DropdownMenuRadioItem onClick={() => setPieType("LabelList")} value="LabelList">LabelList</DropdownMenuRadioItem>
                       </>
                     }
-
                   </DropdownMenuRadioGroup>
-
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
 
-          <div className="mt-2 text-center ">
-            <Button className="bg-black w-full" onClick={()=>Chart()}>Generate</Button>
+          <div className="mt-2 text-center">
+            <Button className="bg-black w-full" onClick={() => Chart()}>Generate</Button>
           </div>
         </div>
       </div>
+
     </div>
-
-
   )
 }
 
@@ -738,111 +633,3 @@ function FileIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-
-function LinechartChart(props: any) {
-  return (
-    <div {...props}>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <LineChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-          <Line dataKey="desktop" type="natural" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
-        </LineChart>
-      </ChartContainer>
-    </div>
-  )
-}
-
-
-function PaletteIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
-      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
-      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
-      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-    </svg>
-  )
-}
-
-
-function PlusIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}
-
-
-function XIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  )
-}

@@ -28,82 +28,75 @@ import { Input } from "@/components/ui/input";
 import { addUser, editUser, getUsers } from "@/lib/actions/organization.action";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { Employee } from "@/types";
+import Link from "next/link";
+import SkeletonLoader from "@/components/SkeletonLoader"; // Import the SkeletonLoader component
 
 export default function Component() {
   const { toast } = useToast();
-  const [employees, setEmployees] = useState([]);
-  const [newEmployee, setNewEmployee] = useState({
-    id: "", // Added id for editing
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [newEmployee, setNewEmployee] = useState<Employee>({
+    id: "",
     name: "",
     email: "",
     role: "Read",
   });
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // State for tracking edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
+  const token = sessionStorage.getItem("token");
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const token = sessionStorage.getItem("token");
-      if (!token) redirect("/auth");
-      const users = await getUsers(token as string);
-      setEmployees(users);
+      if (!token) router.push("/auth");
+      setLoading(true); // Set loading to true when fetching data
+      try {
+        const users = await getUsers(token as string);
+        setEmployees(users as any);
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
+      }
     };
-
     fetchUsers();
-  }, []);
+  }, [router, token]);
 
-  const handleRoleChange = (id, role) => {
-    setEmployees((prevEmployees) =>
-      prevEmployees.map((employee) =>
-        employee.id === id ? { ...employee, role } : employee
-      )
-    );
-  };
-
-  const handleEditEmployee = (id) => {
-    const employee = employees.find((e) => e.id === id);
+  const handleEditEmployee = (employee: Employee) => {
     setNewEmployee({
       id: employee.id,
       name: employee.name,
       email: employee.email,
       role: employee.role,
     });
-    setIsEditing(true); // Set editing mode to true
+    setIsEditing(true);
     setIsModalOpen(true);
   };
 
   const handleSaveEmployee = async () => {
     const token = sessionStorage.getItem("token");
-
     if (!token) {
-      toast({
-        variant: "destructive",
-        title: "Authentication error",
-        action: <ToastAction altText="Log in">Log in</ToastAction>,
-      });
+      router.push("/auth");
       return;
     }
-
     try {
       if (isEditing) {
-        // If editing an existing employee
         await editUser({
           id: newEmployee.id,
+          token,
           name: newEmployee.name,
           email: newEmployee.email,
-          role: newEmployee.role as "Read" | "Write",
+          role: newEmployee.role,
         });
         toast({
           variant: "success",
           title: "Employee updated successfully",
         });
       } else {
-        // If adding a new employee
         await addUser({
           name: newEmployee.name,
           email: newEmployee.email,
-          role: newEmployee.role as "Read" | "Write",
+          role: newEmployee.role,
           token: token as string,
         });
         toast({
@@ -112,11 +105,10 @@ export default function Component() {
         });
       }
 
-      // Close the dialog and refresh the employee list
       setIsModalOpen(false);
       const users = await getUsers(token as string);
-      setEmployees(users);
-      setIsEditing(false); // Reset edit mode
+      setEmployees(users as any);
+      setIsEditing(false);
       setNewEmployee({
         id: "",
         name: "",
@@ -134,68 +126,124 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Employees</h1>
-        <Button
-          onClick={() => {
-            setIsEditing(false); // Ensure adding mode is selected
-            setIsModalOpen(true);
-          }}
-        >
-          Add Employee
-        </Button>
-      </div>
-      <div className="overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {employees.map((employee) => (
-              <TableRow key={employee.id}>
-                <TableCell>{employee.name}</TableCell>
-                <TableCell>{employee.email}</TableCell>
-                <TableCell>
-                  <Select
-                    value={employee.role}
-                    onValueChange={(role) =>
-                      handleRoleChange(employee.id, role)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Read">Read</SelectItem>
-                      <SelectItem value="Write">Write</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleEditEmployee(employee.id)}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
+    <div className="flex flex-col min-h-screen p-6">
+      <div className="flex-grow">
+        <div className="flex items-center justify-between">
+          <h1
+            className="text-2xl font-bold cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            Vision AI
+          </h1>
+          <Button
+            onClick={() => {
+              setIsEditing(false);
+              setIsModalOpen(true);
+            }}
+          >
+            Add
+          </Button>
+        </div>
+        <div className="overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-extrabold">ID</TableHead>
+                <TableHead className="font-extrabold">Name</TableHead>
+                <TableHead className="font-extrabold">Email</TableHead>
+                <TableHead className="font-extrabold">Role</TableHead>
+                <TableHead className="font-extrabold">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {loading
+                ?
+                  Array.from({ length: 14 }).map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <SkeletonLoader width="2.5rem" height="1.5rem" />
+                      </TableCell>
+                      <TableCell>
+                        <SkeletonLoader width="8rem" height="1.5rem" />
+                      </TableCell>
+                      <TableCell>
+                        <SkeletonLoader width="10rem" height="1.5rem" />
+                      </TableCell>
+                      <TableCell>
+                        <SkeletonLoader width="6rem" height="1.5rem" />
+                      </TableCell>
+                      <TableCell>
+                        <SkeletonLoader width="5rem" height="1.5rem" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : employees.map((employee, index) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{employee.name}</TableCell>
+                      <TableCell>{employee.email}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <div className="flex items-center bg-gray-200 px-2 py-1 rounded-full">
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full mr-2 animate-blink ${
+                                employee.role != "Read"
+                                  ? "bg-red-500"
+                                  : "bg-green-500"
+                              }`}
+                            ></span>
+                            <span
+                              className={`text-sm font-semibold ${
+                                employee.role != "Read"
+                                  ? "text-red-500"
+                                  : "text-green-500"
+                              }`}
+                            >
+                              {employee.role}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          style={{ backgroundColor: "black", color: "white" }}
+                          onClick={() => handleEditEmployee(employee)}
+                        >
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-muted-foreground">
+          &copy; 2024 Vision AI. All rights reserved.
+        </p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link
+            href="/terms"
+            className="text-xs hover:underline underline-offset-4"
+            prefetch={false}
+          >
+            Terms of Service
+          </Link>
+          <Link
+            href="/privacy"
+            className="text-xs hover:underline underline-offset-4"
+            prefetch={false}
+          >
+            Privacy
+          </Link>
+        </nav>
+      </footer>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Edit Employee" : "Add Employee"}
-            </DialogTitle>
+            <DialogTitle>{isEditing ? "Edit" : "Add"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid gap-2">
@@ -222,14 +270,13 @@ export default function Component() {
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
               <Select
-                id="role"
                 value={newEmployee.role}
-                onValueChange={(role) =>
-                  setNewEmployee((prev) => ({ ...prev, role }))
+                onValueChange={(value) =>
+                  setNewEmployee((prev) => ({ ...prev, role: value }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{newEmployee.role}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Read">Read</SelectItem>
@@ -240,13 +287,8 @@ export default function Component() {
           </div>
           <DialogFooter>
             <Button onClick={handleSaveEmployee}>
-              {isEditing ? "Save Changes" : "Save"}
+              {isEditing ? "Save" : "Add"}
             </Button>
-            <div>
-              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-                Cancel
-              </Button>
-            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

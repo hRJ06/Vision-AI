@@ -20,9 +20,11 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { FORM_TYPE_SET } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function Component() {
   const { toast } = useToast();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -52,6 +54,7 @@ export default function Component() {
           : "Thank you for registering with us.",
       });
       sessionStorage.setItem("token", parsedResponse.token);
+      router.push("/add");
     } else {
       toast({
         variant: "destructive",

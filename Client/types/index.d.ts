@@ -65,5 +65,13 @@ export interface UserProps {
   role: "Read" | "Write";
 }
 
+export interface Employee {
+  id: string;
+  organizationId?: Number;
+  name: string;
+  email: string;
+  role: "Read" | "Write";
+}
+
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

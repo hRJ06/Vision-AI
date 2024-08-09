@@ -317,9 +317,9 @@ def fetch_table_data():
         print("Database connected")
         if type != "Line":
             option = int(option)
-            segment = f"SUM({second_column})" if option != 1 else "COUNT(*)"
-            sql_query_first = f"SELECT DISTINCT {first_column} AS {first_column} FROM {table} ORDER BY {first_column} ASC"
-            sql_query_second = f"SELECT {segment} AS {second_column} FROM {table} GROUP BY {first_column} ORDER BY {first_column} ASC"
+            segment = f"SUM({first_column})" if option != 1 else "COUNT(*)"
+            sql_query_first = f"SELECT DISTINCT {second_column} AS {second_column} FROM {table} ORDER BY {second_column} ASC"
+            sql_query_second = f"SELECT {segment} AS {first_column} FROM {table} GROUP BY {second_column} ORDER BY {second_column} ASC"
         else:
             sql_query_first = f"SELECT {first_column} FROM {table};"
             sql_query_second = f"SELECT {second_column} FROM {table};"
@@ -364,7 +364,7 @@ def fetch_table_data():
             return result[:-2] + result[-1]
 
         first_data = clean_and_format_data(first_column_data)
-        second_data = clean_and_format_data(second_column_data)
+        second_data = clean_and_format_data(second_column_data).replace("'", "")
         formatted_first_data = f"{first_data}"
         formatted_second_data = f"{second_data}"
         return (

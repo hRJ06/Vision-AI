@@ -15,7 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import Link from "next/link";
 import { Message } from "@/types";
-import { YOU_MESSAGE_ROLE_SET } from "@/lib/utils";
+import { ENTER_KEY_PRESS_SET, YOU_MESSAGE_ROLE_SET } from "@/lib/utils";
 
 export default function Component() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -105,7 +105,7 @@ export default function Component() {
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (ENTER_KEY_PRESS_SET.has(e.key) && !e.shiftKey) {
       e.preventDefault();
       handleQuery();
     }
@@ -153,7 +153,7 @@ export default function Component() {
         <div className="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar>
-              <AvatarImage src="/placeholder-user.jpg" />
+              <AvatarImage src="/User.jpg" />
               <AvatarFallback>AC</AvatarFallback>
             </Avatar>
             <div>

@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import otpGenerator from "otp-generator";
+import { ChartConfig } from "@/components/ui/chart";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -36,6 +37,11 @@ export const generate_redis_cache_check_prompt = (
   return `I will give you two sentences. Simply respond with YES or NO based on whether they convey the same meaning, without matching the words exactly. The first sentence is: "${user_prompt}". The second sentence is: "${prompt}".`;
 };
 
+/* GENERATE JSON FORMATTER PROMPT */
+export const generate_JSON_prompt = (prompt: string): string => {
+  return `I will provide a JSON message. Please correct it to the proper format and return only the final JSON output, nothing else. The message is ${prompt}.`;
+};
+
 /* CONFIGURATION FOR GENERATIVE MODEL */
 export const getModel = () => {
   const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
@@ -57,6 +63,64 @@ export function generateOTP() {
 export function getOTPExpiration() {
   return new Date(Date.now() + 30 * 60000).toISOString();
 }
+
+/* RGB GENERATOR */
+export function getRGB() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/* GREY CODE GENERATOR */
+export function getGrayCode(count: number): string[] {
+  const step = Math.floor(254 / count);
+  const shades = [];
+  for (let i = 0; i < count; i++) {
+    const grayValue = Math.min(254, step * i);
+    shades.push(`rgb(${grayValue}, ${grayValue}, ${grayValue})`);
+  }
+  return shades;
+}
+
+/* DATA ARRAY GENERATOR */
+export function convertToDataArray(
+  input: Array<Record<string, any>>
+): Array<Record<string, any>> {
+  return input.map((item) => {
+    const keys = Object.keys(item);
+    const formattedItem: Record<string, any> = {};
+    formattedItem[keys[0]] = item[keys[0]];
+    formattedItem[keys[1]] = String(item[keys[1]]);
+    return formattedItem;
+  });
+}
+
+/* CHART CONFIG GENERATOR */
+export function generateChartConfig(
+  data: Array<Record<string, string>>
+): ChartConfig {
+  if (!data.length) return {};
+  const keys = Object.keys(data[0]);
+  const chartConfig: ChartConfig = {};
+  keys.forEach((key) => {
+    chartConfig[key] = { label: key.charAt(0).toUpperCase() + key.slice(1) };
+  });
+  return chartConfig;
+}
+
+/* GENERATE LINE CHART DATA */
+export const generateLineChartData = (
+  data: Array<Record<string, string>>
+): Array<Record<string, string>> => {
+  return data.map((item: Record<string, string>) => {
+    const keys = Object.keys(item);
+    return {
+      [keys[0]]: item[keys[0]],
+      desktop: item[keys[1]],
+    };
+  });
+};
 
 /* CONSTANTS */
 export const INVALID_RESPONSE_SET = new Set(["FALSE"]);

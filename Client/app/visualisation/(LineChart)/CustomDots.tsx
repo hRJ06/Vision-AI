@@ -1,30 +1,16 @@
-"use client"
+"use client";
 
-import { GitCommitVertical, TrendingUp } from "lucide-react"
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { GitCommitVertical, TrendingUp } from "lucide-react";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
+} from "@/components/ui/chart";
+import { generateLineChartData } from "@/lib/utils";
 
 const chartConfig = {
   desktop: {
@@ -35,36 +21,27 @@ const chartConfig = {
     label: "Mobile",
     color: "hsl(var(--chart-2))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
-export function CustomDots({Data}:{Data:Record<string, string>}) {
-
-  const data = Array.isArray(Data) ? Data : [];
-
-  if (data.length > 0) {
-    const keys = Object.keys(data[0]);
+export function CustomDots({ data }: { data: Record<string, string> }) {
+  const dataArray = Array.isArray(data) ? data : [];
+  if (dataArray.length > 0) {
+    const keys = Object.keys(dataArray[0]);
     if (keys.length > 1) {
-      chartConfig.desktop.label = keys[1]; 
+      chartConfig.desktop.label = keys[1];
     }
   }
-  const mappedData = data.map((item:any) => {
-    const keys = Object.keys(item);
-    return {
-      [keys[0]]: item[keys[0]], 
-      desktop: item[keys[1]] 
-    };
-  });
+  const chartData = generateLineChartData(dataArray);
   return (
     <Card className="bg-gray-900 text-white">
       <CardHeader>
         <CardTitle>Line Chart - Custom Dots</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={mappedData}
+            data={chartData}
             margin={{
               left: 12,
               right: 12,
@@ -88,7 +65,7 @@ export function CustomDots({Data}:{Data:Record<string, string>}) {
               stroke="#7987A1"
               strokeWidth={2}
               dot={({ cx, cy, payload }) => {
-                const r = 24
+                const r = 24;
                 return (
                   <GitCommitVertical
                     key={payload.month}
@@ -99,20 +76,12 @@ export function CustomDots({Data}:{Data:Record<string, string>}) {
                     fill="#6c7990"
                     stroke="#545e70"
                   />
-                )
+                );
               }}
             />
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
     </Card>
-  )
+  );
 }

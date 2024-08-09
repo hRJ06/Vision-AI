@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-
+import otpGenerator from "otp-generator";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -42,6 +42,21 @@ export const getModel = () => {
   const genAI = new GoogleGenerativeAI(`${API_KEY}`);
   return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 };
+
+/* OTP GENERATOR */
+export function generateOTP() {
+  const otp = otpGenerator.generate(4, {
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    digits: true,
+  });
+  return Number(otp);
+}
+
+/* OTP EXPIRATION GENERATOR */
+export function getOTPExpiration() {
+  return new Date(Date.now() + 30 * 60000).toISOString();
+}
 
 /* CONSTANTS */
 export const INVALID_RESPONSE_SET = new Set(["FALSE"]);

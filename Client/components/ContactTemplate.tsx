@@ -15,7 +15,7 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-export const EmailTemplate = ({ name, message }: Mail) => {
+export const ContactTemplate = ({ name, message }: Mail) => {
   const previewText = `Hello ${name}, Thank You for connecting with us!`;
 
   return (

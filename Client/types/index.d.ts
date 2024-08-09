@@ -32,10 +32,16 @@ export interface Message {
   time?: string;
 }
 
-export interface Mail {
+export interface ContactMail {
   name: string;
   email?: string;
   message: string;
+}
+
+export interface OTPEmail {
+  name: string;
+  email: string;
+  token: number;
 }
 
 export interface FormData {
@@ -57,6 +63,10 @@ export interface LoginOrganizationProps {
   password: string;
 }
 
+export interface LoginUserProps {
+  email: string;
+}
+
 export interface UserProps {
   id?: string;
   token: string;
@@ -73,5 +83,9 @@ export interface Employee {
   role: "Read" | "Write";
 }
 
+export interface VerifyUserProps {
+  otp: string;
+  email: string;
+}
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { AwardIcon, DatabaseIcon } from "lucide-react";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { sendEmail } from "@/lib/actions/mail.action";
 import { FormData } from "@/types";
+import { sendContactEmail } from "@/lib/actions/mail.action";
 
 
 
@@ -37,7 +37,7 @@ export default function Component() {
       return;
     }
     try {
-      const response = await sendEmail(formData);
+      const response = await sendContactEmail(formData);
       if (response) {
         toast({
           variant: "success",

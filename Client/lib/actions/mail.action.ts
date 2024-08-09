@@ -2,8 +2,8 @@
 import { ContactMail, OTPEmail } from "@/types";
 import { RESEND_SENDER, RESEND_SUBJECT } from "../utils";
 import { resend } from "../resend";
-import { ContactTemplate } from "@/components/ContactTemplate";
-import OTPTemplate from "@/components/OTPTemplate";
+import { ContactTemplate } from "@/components/template/ContactTemplate";
+import OTPTemplate from "@/components/template/OTPTemplate";
 
 export const sendContactEmail = async ({ name, email, message }: ContactMail) => {
   try {

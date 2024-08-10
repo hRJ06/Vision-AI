@@ -21,12 +21,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
+import { AiOutlineEdit } from "react-icons/ai";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { DownloadIcon, EllipsisVertical, Download } from "lucide-react";
 import { cache, checkKey } from "@/lib/actions/redis.action";
 import {
@@ -37,6 +45,8 @@ import {
   INVALID_RESPONSE_SET,
 } from "@/lib/utils";
 import cookie from "js-cookie";
+import { addMessage, createChat } from "@/lib/actions/chat.action";
+import { Loader } from "lucide-react";
 
 export default function Component() {
   const { toast } = useToast();
@@ -46,6 +56,10 @@ export default function Component() {
   const [schemaInfo, setSchemaInfo] = useState<string>("");
   const [welcome, setWelcome] = useState<Boolean>(false);
   const [inputText, setInputText] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [name, setName] = useState<string>("");
+  const [chatID, setChatID] = useState<string>("");
+
   const [chats, setChats] = useState<ChatMessage[]>([
     {
       msg: "Hi there! How can I help You today?",
@@ -172,6 +186,7 @@ export default function Component() {
     });
   };
 
+
   /* DOWNLOAD HANDLER FOR IMAGE IN VISUALISATION RESPONSE */
   const handleDownload = useCallback(async (url: string): Promise<void> => {
     try {
@@ -190,6 +205,7 @@ export default function Component() {
       console.error("Error downloading the image -", error);
     }
   }, []);
+
 
   /* DOWNLOAD HANDLER FOR DB REPORT */
   const downloadHandler = useCallback(async () => {
@@ -216,6 +232,8 @@ export default function Component() {
       console.error(error);
     }
   }, [databaseCredentials, schemaInfo]);
+
+
 
   /* DB CONNECTION HANDLER */
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -262,6 +280,65 @@ export default function Component() {
       });
     }
   };
+
+
+
+  /*ADD MESSAGE */
+  const addNewMessage = async () => {
+
+    if (!chatID) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Chat ID is missing.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return;
+    }
+
+    try {
+      const promises = chats.map(({ msg, role, link }) =>
+        addMessage({
+          id: chatID,
+          msg: msg,
+          role: role,
+          link: link,
+        })
+      );
+  
+      const responses = await Promise.all(promises);
+      const parsedResponse = responses.map((response)=>{
+        return JSON.parse(response as string);
+      })
+      const allSuccessful = parsedResponse.every(response => response.success);
+
+      if (allSuccessful) {
+        toast({
+          variant: "success",
+          title: "Success",
+          description: "All messages were sent successfully.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Some messages failed to send.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
+
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+    
+  }
+
 
   /* CHAT MESSAGE HANDLER */
   const handleSendMessage = async (
@@ -313,17 +390,61 @@ export default function Component() {
           newChat = cachedResponse;
         }
         setChats((prevChats) => [...prevChats, newChat]);
+        addNewMessage();
       } catch (error) {
         console.error(error);
       }
     }
   };
 
+
+  /*Chat Create */
+  const submitNameHandler = async () => {
+    // console.log(name);
+
+    try {
+      const response = await createChat(name);
+      const parsedResponse = JSON.parse(response as string);
+
+      if (parsedResponse.success) {
+        setChatID(parsedResponse.chat._id);
+        toast({
+          variant: "success",
+          title: "Chat Created",
+          description: "Let's Get Started!",
+        });
+        setWelcome(true);
+        setIsOpen(false);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error Creating Chat",
+          description: "Enter Correct Name",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+      }
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+  }
+
+  console.log("chatID", chatID);
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
       <div className="flex flex-col border-r bg-muted/40 p-4 md:border-r">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold ml-2">AI Assistant</h2>
+          <Link href="/" prefetch={false}>
+            <h1 className="text-xl lg:text-left text-center font-semibold">
+              Vision AI{" "}
+            </h1>
+          </Link>
         </div>
 
         {/* DB CONNECT */}
@@ -418,11 +539,9 @@ export default function Component() {
       {/* WELCOME CHAT */}
       <div className="flex flex-col">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
-          <Link href="/" prefetch={false}>
-            <h1 className="text-xl lg:text-left text-center font-semibold">
-              Vision AI{" "}
-            </h1>
-          </Link>
+          <h1 className="text-xl lg:text-left text-center font-semibold">
+            {name}
+          </h1>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -455,7 +574,7 @@ export default function Component() {
                 <Button
                   variant="outline"
                   className="bg-black text-white py-3 px-6 text-lg font-semibold"
-                  onClick={() => setWelcome(true)}
+                  onClick={() => setIsOpen(true)}
                 >
                   Get Started
                 </Button>
@@ -561,6 +680,34 @@ export default function Component() {
 
         )}
       </div>
+
+      {/* MODAL */}
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-xs sm:max-w-md sm:px-10 mx-auto">
+          <DialogHeader>
+            <DialogTitle>Name</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4 w-full">
+              <Input
+                id="name"
+                className="flex-1"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <AiOutlineEdit className="text-gray-500 cursor-pointer" size={30} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={submitNameHandler}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

@@ -63,7 +63,7 @@ export interface LoginOrganizationProps {
   password: string;
 }
 
-export interface LoginUserProps {
+export interface VerifyUserProps {
   email: string;
 }
 
@@ -83,14 +83,17 @@ export interface Employee {
   role: "Read" | "Write";
 }
 
-export interface VerifyUserProps {
+export interface LoginUserProps {
   otp: string;
   email: string;
 }
 
-export interface CreateChatParams {
-  token: string;
-  name: string;
+export interface AddChatMessageProps {
+  id: string;
+  msg: string;
+  role: "AI" | "User";
+  link?: string | null;
 }
+
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

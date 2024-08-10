@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
 
 /* VERIFY USER */
-export const verifyUser = async (userData: LoginUserProps) => {
+export const verifyUser = async (userData: VerifyUserProps) => {
   try {
     const savedUser = await db
       .select()
@@ -21,7 +21,7 @@ export const verifyUser = async (userData: LoginUserProps) => {
       const expirationTime = getOTPExpiration();
       await db
         .update(user)
-        .set({ otp: generatedOTP, expiresIn: expirationTime });
+        .set({ otp: generatedOTP, expiresIn: expirationTime }).where(eq(user.email, userData.email));
       const req = {
         name: db_user.name as string,
         email: db_user.email,
@@ -41,8 +41,9 @@ export const verifyUser = async (userData: LoginUserProps) => {
     return JSON.stringify({ success: false });
   }
 };
+
 /* LOGIN USER THROUGH OTP */
-export const loginUser = async ({ otp, email }: VerifyUserProps) => {
+export const loginUser = async ({ otp, email }: LoginUserProps) => {
   try {
     const savedUser = await db.select().from(user).where(eq(user.email, email));
     if (savedUser[0]) {

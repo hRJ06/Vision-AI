@@ -95,5 +95,10 @@ export interface AddChatMessageProps {
   link?: string | null;
 }
 
+export interface RenameChatProps {
+  id: string;
+  name: string;
+}
+
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

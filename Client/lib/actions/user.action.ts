@@ -70,3 +70,4 @@ export const loginUser = async ({ otp, email }: LoginUserProps) => {
     return JSON.stringify({ success: false });
   }
 };
+

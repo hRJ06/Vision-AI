@@ -12,7 +12,6 @@ import google.generativeai as genai
 from langchain import OpenAI
 import re
 import os
-from flask_pymongo import PyMongo
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from cryptography.fernet import Fernet  
@@ -34,18 +33,12 @@ os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
 TIME_DELTA = timedelta(hours=2)
 
-app.config["MONGO_URI"] = os.getenv("MONGO_URI")
-mongo = PyMongo(app).db
-
 app.secret_key = os.getenv("SECRET_KEY")
 
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
 
 key = Fernet.generate_key()
 cipher_suite = Fernet(key)
-
-if "Logs" not in mongo.list_collection_names():
-    mongo.create_collection("Logs")
 
 def encrypt_data(data):
     return cipher_suite.encrypt(data.encode()).decode()
@@ -240,20 +233,6 @@ def chat():
             ans = ans.replace("\\_", "_")
             print("ANS", ans)
             chat_history.append(AIMessage(content=ans))
-            db = parse_db_uri(db_uri)
-            collection = mongo["Logs"]
-            document = {
-                "device": device_info,
-                "user_ip": user_ip,
-                "user": db.get("user"),
-                "host": db.get("host"),
-                "port": db.get("port"),
-                "database": db.get("database"),
-                "query": user_query,
-                "response": ans,
-                "createdAt": datetime.utcnow(),
-            }
-            collection.insert_one(document)
         else:
             response = "Database connection not established."
             chat_history.append(AIMessage(content=response))

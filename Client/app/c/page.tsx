@@ -405,7 +405,7 @@ export default function Component() {
     try {
       const response = await createChat(name);
       const parsedResponse = JSON.parse(response as string);
-
+      
       if (parsedResponse.success) {
         setChatID(parsedResponse.chat._id);
         toast({

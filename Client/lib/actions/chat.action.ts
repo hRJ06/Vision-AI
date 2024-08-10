@@ -1,3 +1,4 @@
+"use server"
 import { AddChatMessageProps, RenameChatProps } from "@/types";
 import { connectToDB } from "../mongoose";
 import Chat from "../model/chat.model";
@@ -7,6 +8,7 @@ import { eq } from "drizzle-orm";
 import Message from "../model/message.model";
 import { cookies } from "next/headers";
 import { JwtPayload } from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 /* DECODE USER JWT TOKEN */
 function decodeUserToken(): { email: string } | null {

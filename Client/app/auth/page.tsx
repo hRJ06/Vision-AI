@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { FaDatabase } from "react-icons/fa6";
 
@@ -17,7 +18,7 @@ export default function Component() {
         </div>
       </Link>
 
-      <div className="flex flex-col items-center justify-center p-8 md:p-12 lg:p-16 w-full md:w-3/5 relative">
+      <div className="flex flex-col items-center justify-center p-8 md:p-12 lg:p-16 w-full md:w-3/5 relative lg:mt-0 mt-[15%]">
         <div className="space-y-2 text-center mb-8">
           <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold">
             Welcome to Vision AI
@@ -52,8 +53,13 @@ export default function Component() {
       </div>
 
       {/* second section */}
-      <div className="w-full md:w-2/5 h-full dark:bg-[#0D1526] bg-[#161616]">
-        {/* Empty black section */}
+      <div className="w-full md:w-2/5 h-full dark:bg-[#000000] bg-[#000000] flex items-center justify-center">
+        <Image
+          src="/Auth.gif"
+          alt="Authorisation"
+          width={500}
+          height={500}
+        />
       </div>
     </div>
   );

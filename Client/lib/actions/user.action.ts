@@ -7,8 +7,8 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
 
-/* LOGIN USER */
-export const loginUser = async (userData: LoginUserProps) => {
+/* VERIFY USER */
+export const verifyUser = async (userData: LoginUserProps) => {
   try {
     const savedUser = await db
       .select()
@@ -41,13 +41,15 @@ export const loginUser = async (userData: LoginUserProps) => {
     return JSON.stringify({ success: false });
   }
 };
-/* VERIFY USER THROUGH OTP */
-export const verifyUser = async ({ otp, email }: VerifyUserProps) => {
+/* LOGIN USER THROUGH OTP */
+export const loginUser = async ({ otp, email }: VerifyUserProps) => {
   try {
     const savedUser = await db.select().from(user).where(eq(user.email, email));
     if (savedUser[0]) {
       const db_user = savedUser[0];
       if (db_user.otp != Number(otp)) {
+        return JSON.stringify({ success: false });
+      } else {
         const payload = {
           email: db_user.email,
           role: db_user.role,
@@ -60,8 +62,6 @@ export const verifyUser = async ({ otp, email }: VerifyUserProps) => {
           expires: getCookieExpiration(),
         });
         return JSON.stringify({ success: true });
-      } else {
-        return JSON.stringify({ success: false });
       }
     }
   } catch (error) {

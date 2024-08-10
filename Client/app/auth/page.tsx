@@ -4,7 +4,11 @@ import { FaDatabase } from "react-icons/fa6";
 export default function Component() {
   return (
     <div className="flex flex-col md:flex-row items-center justify-center h-screen relative">
-      <Link href="/" prefetch={false} className="absolute top-0 left-0 mt-4 ml-4 flex justify-start lg:mt-4 lg:ml-10">
+      <Link
+        href="/"
+        prefetch={false}
+        className="absolute top-0 left-0 mt-4 ml-4 flex justify-start lg:mt-4 lg:ml-10"
+      >
         <div>
           <div className="text-xl font-semibold flex items-center space-x-2">
             <FaDatabase />
@@ -37,7 +41,7 @@ export default function Component() {
             Org
           </Link>
           <Link
-            href="#"
+            href="/auth/dev"
             className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-lg font-medium shadow-sm transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             prefetch={false}
           >

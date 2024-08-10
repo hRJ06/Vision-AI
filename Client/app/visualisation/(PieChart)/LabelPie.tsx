@@ -33,7 +33,7 @@ export function LabelPie({ data }: { data: Array<Record<string, any>> }) {
     item.fill = getRGB();
   });
   return (
-    <Card className="flex flex-col bg-gray-900 text-white">
+    <Card className="flex flex-col bg-white text-black">
       <CardHeader className="items-center pb-0">
         <CardTitle>Pie Chart - Label</CardTitle>
       </CardHeader>

@@ -87,5 +87,10 @@ export interface VerifyUserProps {
   otp: string;
   email: string;
 }
+
+export interface CreateChatParams {
+  token: string;
+  name: string;
+}
 /* GEMINI CONFIG */
 export type CachedResponse = string | JsonObject;

@@ -14,7 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader, Download } from "lucide-react";
 import { ComponentState, DiagramType } from "@/types";
 import axios from "axios";
-import { diagramTypeLabels, ENTER_KEY_PRESS_SET, generate_mermaid_code_prompt } from "@/lib/utils";
+import {
+  diagramTypeLabels,
+  downloadSVGDiagram,
+  ENTER_KEY_PRESS_SET,
+  generate_mermaid_code_prompt,
+} from "@/lib/utils";
 
 const ERDiagram = dynamic(() => import("@/components/ERDiagram"), {
   ssr: false,
@@ -67,22 +72,6 @@ export default function Component() {
       }
     }
   };
-
-  /* HANDLER FUNCTION TO DOWNLOAD DB DIAGRAM */
-  const downloadDiagram = () => {
-    const svgElement = document.querySelector(".mermaid svg") as SVGElement;
-    if (svgElement) {
-      const svgData = new XMLSerializer().serializeToString(svgElement);
-      const blob = new Blob([svgData], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "diagram.svg";
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
   /* HANDLER FUNCTION TO GENERATE DB DIAGRAM THROUGH PREDEFINED PROMPT */
   const handleGenerateClick = async (content: string) => {
     setState((prevState) => ({
@@ -122,7 +111,7 @@ export default function Component() {
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search for diagrams..."
+            placeholder="Search for diagram"
             className="w-full rounded-md bg-background pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             value={state.searchTerm}
             onChange={handleSearch}
@@ -178,7 +167,7 @@ export default function Component() {
           <div className="flex justify-center">
             <Button
               variant="outline"
-              onClick={downloadDiagram}
+              onClick={() => downloadSVGDiagram("mermaid", "Diagram")}
               className="inline-flex items-center gap-2 bg-black text-white text-sm px-2 py-2 w-[150px]"
             >
               <Download className="h-4 w-4" />
@@ -210,7 +199,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4">
+              <p className="mt-4 text-justify">
                 Create a sequence diagram for a user login flow, depicting the
                 interactions between the User, Login Service, Authentication
                 Service, and Database
@@ -231,7 +220,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4">
+              <p className="mt-4 text-justify">
                 Generate a class diagram for a banking application, including
                 classes like Account, Transaction, Customer, and Loan, along
                 with their attributes and methods
@@ -252,7 +241,7 @@ export default function Component() {
           </Card>
           <Card className="bg-[#f8f9fa]">
             <CardContent>
-              <p className="mt-4">
+              <p className="mt-4 text-justify">
                 Diagram the activity flow for a product checkout process,
                 including steps like Add to Cart, Select Shipping, Enter
                 Payment, and Complete Order
@@ -272,7 +261,7 @@ export default function Component() {
             </CardContent>
           </Card>
           <Card className="bg-[#f8f9fa]">
-            <CardContent className="mt-4">
+            <CardContent className="mt-4 text-justify">
               <p>
                 Design an ER diagram for a social media platform including
                 entities: Users, Posts, Comments, Likes, and Friendships, and
@@ -293,7 +282,7 @@ export default function Component() {
             </CardContent>
           </Card>
           <Card className="bg-[#f8f9fa]">
-            <CardContent className="mt-4">
+            <CardContent className="mt-4 text-justify">
               <p>
                 Design a class diagram for a library management system,
                 including classes: Library, Book, Member, Staff, Loan, and
@@ -315,7 +304,7 @@ export default function Component() {
           </Card>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 text-justify">
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl">About Diagrams</CardTitle>

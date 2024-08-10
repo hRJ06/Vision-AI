@@ -3,6 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import otpGenerator from "otp-generator";
 import { ChartConfig } from "@/components/ui/chart";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -61,9 +62,13 @@ export function generateOTP() {
 
 /* OTP EXPIRATION GENERATOR */
 export function getOTPExpiration() {
-  return new Date(Date.now() + 30 * 60000).toISOString();
+  return new Date(Date.now() + 2 * 60000).toISOString();
 }
 
+/* COOKIE EXPIRATION GENERATOR */
+export function getCookieExpiration() {
+  return new Date(Date.now() + 5 * 60 * 60 * 1000);
+}
 /* RGB GENERATOR */
 export function getRGB() {
   const r = Math.floor(Math.random() * 256);
@@ -122,6 +127,21 @@ export const generateLineChartData = (
   });
 };
 
+/* SVG DOWNLOAD HANDLER */
+export const downloadSVGDiagram = (className: string, name: string) => {
+  const svgElement = document.querySelector(`.${className}`) as SVGElement;
+  if (svgElement) {
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const blob = new Blob([svgData], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${name}.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+};
+
 /* CONSTANTS */
 export const INVALID_RESPONSE_SET = new Set(["FALSE"]);
 export const AI_MESSAGE_ROLE_SET = new Set(["AI"]);
@@ -129,6 +149,7 @@ export const YOU_MESSAGE_ROLE_SET = new Set(["You"]);
 export const ENTER_KEY_PRESS_SET = new Set(["Enter"]);
 export const CACHE_RESPONSE_SET = new Set(["YES"]);
 export const FORM_TYPE_SET = new Set(["Login"]);
+export const DISABLED_TYPE_SET = new Set(["Line", "Area", ""]);
 
 /* ENUM FOR DIAGRAM TYPES */
 export enum DiagramType {

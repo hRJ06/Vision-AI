@@ -10,6 +10,7 @@ import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { getCookieExpiration } from "../utils";
 
 /* REGISTER ORGANIZATION */
 export const registerOrganization = async (
@@ -58,8 +59,11 @@ export const loginOrganization = async (
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET_KEY!, {
           expiresIn: process.env.JWT_EXPIRATION_TIME!,
-        });``
-        cookies().set("token", token, { secure: true });
+        });
+        cookies().set("token", token, {
+          secure: true,
+          expires: getCookieExpiration(),
+        });
         return JSON.stringify({ success: true });
       } else {
         return { success: false, message: "Password don't match." };

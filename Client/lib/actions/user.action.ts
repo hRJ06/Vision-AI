@@ -2,7 +2,9 @@ import db from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { LoginUserProps, VerifyUserProps } from "@/types";
 import { eq } from "drizzle-orm";
-import { generateOTP, getOTPExpiration } from "../utils";
+import { generateOTP, getCookieExpiration, getOTPExpiration } from "../utils";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
 
 /* LOGIN USER */
@@ -46,6 +48,17 @@ export const verifyUser = async ({ otp, email }: VerifyUserProps) => {
     if (savedUser[0]) {
       const db_user = savedUser[0];
       if (db_user.otp != Number(otp)) {
+        const payload = {
+          email: db_user.email,
+          role: db_user.role,
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY!, {
+          expiresIn: process.env.JWT_EXPIRATION_TIME!,
+        });
+        cookies().set("token", token, {
+          secure: true,
+          expires: getCookieExpiration(),
+        });
         return JSON.stringify({ success: true });
       } else {
         return JSON.stringify({ success: false });

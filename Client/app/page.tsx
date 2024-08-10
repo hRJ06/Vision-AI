@@ -49,7 +49,7 @@ export default function Component() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Unlock the Power of Your Data with Vision AI
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl text-justify">
                     Connect to your internal databases, generate ER diagrams,
                     analyze database structures, and leverage NLP-powered
                     processing with our cutting-edge AI models.
@@ -103,7 +103,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Connect to Databases
                       </h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-justify">
                         Easily connect to your internal databases and leverage
                         our powerful AI models to analyze and process your data.
                       </p>
@@ -114,7 +114,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Generate ER Diagrams
                       </h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-justify">
                         Automatically generate detailed ER diagrams from your
                         database schema, making it easy to visualize and
                         understand your data structure.
@@ -126,7 +126,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Analyze Database Structure
                       </h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-justify">
                         Leverage our advanced AI models to analyze your database
                         structure, identify potential issues, and suggest
                         optimizations.
@@ -138,7 +138,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         NLP-powered Processing
                       </h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground text-justify">
                         Utilize our cutting-edge natural language processing
                         (NLP) capabilities to extract insights and perform
                         advanced data processing tasks.
@@ -163,7 +163,7 @@ export default function Component() {
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                 Trusted by Leading Organizations
               </h2>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-justify">
                 Vision AI has been helping businesses of all sizes unlock the
                 power of their data. See what our customers have to say.
               </p>
@@ -174,14 +174,14 @@ export default function Component() {
                 className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-base tracking-wide font-bold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
-                View Case Studies
+                View Testimonial
               </Link>
               <Link
                 href="/contact"
                 className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-base tracking-wide font-bold transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
-                Contact Sales
+                Contact Sale
               </Link>
             </div>
           </div>

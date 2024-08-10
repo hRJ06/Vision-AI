@@ -38,7 +38,7 @@ export default function Component() {
                         Org
                     </Link>
                     <Link
-                        href="#"
+                        href="/auth/dev"
                         className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-lg font-medium shadow-sm transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                         prefetch={false}
                     >

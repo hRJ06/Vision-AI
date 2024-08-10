@@ -25,7 +25,7 @@ export const OTPTemplate = ({ name, token }: AccessTokenEmailProps) => (
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Img src={`/Logo.png`} width="32" height="32" alt="Github" />
+        <Img src={`https://e7.pngegg.com/pngimages/343/191/png-clipart-database-computer-icons-microsoft-sql-server-database-miscellaneous-black.png`} width="32" height="32" alt="Github" />
 
         <Text style={title}>
           <strong>@{name}</strong>, a personal access was created on your

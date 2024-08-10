@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import otpGenerator from "otp-generator";
 import { ChartConfig } from "@/components/ui/chart";
 
 export function cn(...inputs: ClassValue[]) {
@@ -52,12 +51,7 @@ export const getModel = () => {
 
 /* OTP GENERATOR */
 export function generateOTP() {
-  const otp = otpGenerator.generate(4, {
-    upperCaseAlphabets: false,
-    lowerCaseAlphabets: false,
-    digits: true,
-  });
-  return Number(otp);
+  return Math.floor(1000 + Math.random() * 9000);
 }
 
 /* OTP EXPIRATION GENERATOR */
@@ -169,7 +163,8 @@ export const diagramTypeLabels: { [key in DiagramType]: string } = {
 
 /* RESEND CONFIGURATION */
 export const RESEND_SENDER = "noreply@vision.ai <noreply@vision-ai.in>";
-export const RESEND_SUBJECT = "Thank You For Choosing Vision AI";
+export const RESEND_CONTACT_SUBJECT = "Thank You For Choosing Vision AI";
+export const RESEND_OTP_SUBJECT = "Please get your Access Token";
 
 /* REDIS CONFIGURATION */
 export const REDIS_EXPIRATION_TIME = 7200;

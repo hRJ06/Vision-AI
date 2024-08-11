@@ -373,7 +373,7 @@ export default function Component() {
                     <TableCell className="text-lg truncate">{chat.name}</TableCell>
                     <TableCell className="text-lg">
                       <a
-                        href={`http://vision-ai.in/${chat._id}`}
+                        href={`http://vision-ai.in/c/${chat._id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline underline-offset-4 text-sm font-semibold tracking-wider"

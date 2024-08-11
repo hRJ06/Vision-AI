@@ -68,29 +68,6 @@ def init_db(user, password, host, port, database):
     return db_uri
 
 
-def parse_user_agent(user_agent):
-    """
-    A basic function to parse the User-Agent string.
-    This can be replaced with a more sophisticated parser if needed.
-    """
-    if not user_agent:
-        return "Unknown device"
-
-    if "Windows" in user_agent:
-        os = "Windows"
-    elif "Macintosh" in user_agent:
-        os = "Mac OS"
-    elif "Linux" in user_agent:
-        os = "Linux"
-    else:
-        os = "Other"
-
-    if "Mobile" in user_agent:
-        device = "Mobile"
-    else:
-        device = "Desktop"
-
-    return f"{os} - {device}"
 
 
 def generator():

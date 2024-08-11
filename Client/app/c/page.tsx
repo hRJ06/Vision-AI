@@ -243,7 +243,7 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
+      const response = await axios.post("https://bb26-103-161-223-11.ngrok-free.app/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -338,7 +338,7 @@ export default function Component() {
         let newChat: ChatMessage = { msg: "", role: "User" };
         if (INVALID_RESPONSE_SET.has(cachedResponse)) {
           const response = await axios.post(
-            "http://127.0.0.1:5000/chat",
+            "https://bb26-103-161-223-11.ngrok-free.app/chat",
             { message: userPrompt, db: db_uri },
             {
               headers: {

@@ -105,31 +105,12 @@ export async function getAllMessages(id: string) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-<<<<<<< Updated upstream
-    const currentOgranization = await db
-      .select()
-      .from(organization)
-      .where(eq(organization.email, decoded.email));
-    if (currentOgranization[0]) {
-      const chat = await Chat.findOne({ _id: id }).populate("messages").exec();
-      if (!chat) {
-        return JSON.stringify({ success: false, message: "Invalid ID" });
-      }
-      return JSON.stringify({
-        success: true,
-        message: chat.messages,
-      });
-    } else {
-      return JSON.stringify({ success: false, message: "Invalid Token" });
-    }
-=======
     const chat = await Chat.findOne({ _id: id }).populate('messages').exec();
     return JSON.stringify({
       success: true,
       message: chat.messages,
       name:chat.name
     });
->>>>>>> Stashed changes
   } catch (error: any) {
     console.error(error);
     throw new Error(`Failed to get messages - ${error.message}`);

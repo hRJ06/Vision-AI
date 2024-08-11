@@ -46,7 +46,7 @@ import {
 } from "@/lib/utils";
 import cookie from "js-cookie";
 import { addMessage, createChat } from "@/lib/actions/chat.action";
-import { Loader } from "lucide-react";
+import Lottie from "lottie-react";
 
 export default function Component() {
   const { toast } = useToast();
@@ -400,14 +400,13 @@ export default function Component() {
     }
   };
 
-
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
       <div className="flex flex-col border-r bg-muted/40 p-4 md:border-r">
         <div className="flex items-center justify-between">
           <Link href="/" prefetch={false}>
             <h1 className="text-xl lg:text-left text-center font-semibold">
-              Vision AI{" "}
+              Vision AI
             </h1>
           </Link>
         </div>
@@ -502,7 +501,7 @@ export default function Component() {
       </div>
 
       {/* WELCOME CHAT */}
-      <div className="flex flex-col">
+      <div className="flex flex-col h-screen overflow-hidden">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
           <h1 className="text-xl lg:text-left text-center font-semibold">
             {name}
@@ -558,7 +557,7 @@ export default function Component() {
 
         {/* Chats */}
         {welcome && (
-          <div className="flex-1 overflow-auto p-4 max-h-[calc(100vh-10rem)]">
+          <div className="flex-1 overflow-auto p-4">
             <div className="flex flex-col gap-4">
               {chats.map((chat, index) => (
                 <div
@@ -627,7 +626,7 @@ export default function Component() {
         {welcome && (
           <form
             onSubmit={handleSendMessage}
-            className="sticky bottom-0 z-10 border-t bg-background p-2 mt-40"
+            className="sticky bottom-0 z-10 border-t bg-background p-2"
           >
             <div className="relative">
               <Textarea

@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import db from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { LoginUserProps, VerifyUserProps } from "@/types";
@@ -7,6 +7,9 @@ import { generateOTP, getCookieExpiration, getOTPExpiration } from "../utils";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
+import { connectToDB } from "../mongoose";
+import Chat from "../model/chat.model";
+import mongoose from "mongoose";
 
 /* VERIFY USER */
 export const verifyUser = async (userData: VerifyUserProps) => {
@@ -22,7 +25,8 @@ export const verifyUser = async (userData: VerifyUserProps) => {
       const expirationTime = getOTPExpiration();
       await db
         .update(user)
-        .set({ otp: generatedOTP, expiresIn: expirationTime }).where(eq(user.email, userData.email));
+        .set({ otp: generatedOTP, expiresIn: expirationTime })
+        .where(eq(user.email, userData.email));
       const req = {
         name: db_user.name as string,
         email: db_user.email,
@@ -72,3 +76,24 @@ export const loginUser = async ({ otp, email }: LoginUserProps) => {
   }
 };
 
+/* GET USER CHATS */
+export const userChats = async (email: string) => {
+  try {
+    const currentUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email));
+    connectToDB();
+    if (currentUser[0]) {
+      const chats = currentUser[0].chats?.map((id) => id.replace(/"/g, ""));
+      const chatObjectIds = chats?.map((id) => new mongoose.Types.ObjectId(id));
+      const populatedChats = await Chat.find({ _id: { $in: chatObjectIds } });
+      return JSON.stringify({ success: true, chats: populatedChats });
+    } else {
+      return JSON.stringify({ success: false, message: "Invalid Token" });
+    }
+  } catch (error) {
+    console.error(error);
+    return JSON.stringify({ success: false });
+  }
+};

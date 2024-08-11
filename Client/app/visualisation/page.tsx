@@ -108,8 +108,7 @@ export default function Component() {
           },
         }
       );
-
-      if (response) {
+      if (response?.data?.status) {
         Cookies.set("db", response?.data?.db);
         let value = await formatHandler(response?.data?.tables_info);
         value = value.slice(7, -3);

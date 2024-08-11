@@ -3,7 +3,7 @@ import { AddChatMessageProps, RenameChatProps } from "@/types";
 import { connectToDB } from "../mongoose";
 import Chat from "../model/chat.model";
 import db from "@/db/drizzle";
-import { user } from "@/db/schema";
+import { organization, user } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import Message from "../model/message.model";
 import { cookies } from "next/headers";
@@ -105,14 +105,14 @@ export async function getAllMessages(id: string) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-    const currentUser = await db
+    const currentOgranization = await db
       .select()
-      .from(user)
-      .where(eq(user.email, decoded.email));
-    if (currentUser[0]) {
-      const chat = await Chat.findOne({ _id: id, user: currentUser[0].id });
+      .from(organization)
+      .where(eq(organization.email, decoded.email));
+    if (currentOgranization[0]) {
+      const chat = await Chat.findOne({ _id: id }).populate("messages").exec();
       if (!chat) {
-        return JSON.stringify({ success: false, message: "Invalid Token" });
+        return JSON.stringify({ success: false, message: "Invalid ID" });
       }
       return JSON.stringify({
         success: true,

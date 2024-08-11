@@ -47,7 +47,6 @@ import {
 import cookie from "js-cookie";
 import { addMessage, createChat } from "@/lib/actions/chat.action";
 
-
 export default function Component() {
   const { toast } = useToast();
 
@@ -248,7 +247,7 @@ export default function Component() {
           "Content-Type": "application/json",
         },
       });
-      if (response.data.status === "success") {
+      if (response.data.status) {
         const schema_description = response.data.schema_description;
         const db = response.data.db;
         setSchemaInfo(schema_description);
@@ -338,7 +337,7 @@ export default function Component() {
         let newChat: ChatMessage = { msg: "", role: "User" };
         if (INVALID_RESPONSE_SET.has(cachedResponse)) {
           const response = await axios.post(
-            "https://bb26-103-161-223-11.ngrok-free.app/chat",
+            "http://127.0.0.1:5000/chat",
             { message: userPrompt, db: db_uri },
             {
               headers: {

@@ -177,10 +177,10 @@ def connect():
                 final_string += ch
         db_uri = encrypt_data(db_uri)
         return jsonify(
-            {"status": "success", "schema_description": final_string, "db": db_uri}
+            {"status": True, "schema_description": final_string, "db": db_uri}
         )
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": False, "message": str(e)}), 500
 
 
 @app.route("/chat", methods=["POST"])
@@ -234,11 +234,11 @@ def fetch_tables():
         for ch in replaced_response:
             if ch != "\\":
                 final_string += ch
-        return jsonify({"status": "success", "tables_info": final_string, "db": encrypt_data(db_uri)}), 200
+        return jsonify({"status": True, "tables_info": final_string, "db": encrypt_data(db_uri)}), 200
 
     except Exception as e:
         print("Error - ", str(e))
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": False, "message": str(e)}), 500
 
 
 @app.route("/fetch-table-data", methods=["POST"])

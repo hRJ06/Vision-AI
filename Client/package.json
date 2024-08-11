@@ -37,6 +37,7 @@
     "class-variance-authority": "^0.7.0",
     "client": "file:",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.32.2",
     "input-otp": "^1.2.4",
     "ioredis": "^5.4.1",

@@ -46,7 +46,7 @@ import {
 } from "@/lib/utils";
 import cookie from "js-cookie";
 import { addMessage, createChat } from "@/lib/actions/chat.action";
-import Lottie from "lottie-react";
+
 
 export default function Component() {
   const { toast } = useToast();
@@ -243,7 +243,7 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("https://bb26-103-161-223-11.ngrok-free.app/connect", data, {
+      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -554,8 +554,6 @@ export default function Component() {
             </div>
           </div>
         )}
-
-        {/* Chats */}
         {welcome && (
           <div className="flex-1 overflow-auto p-4">
             <div className="flex flex-col gap-4">
@@ -647,9 +645,6 @@ export default function Component() {
           </form>
         )}
       </div>
-
-      {/* MODAL */}
-
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-xs sm:max-w-md sm:px-10 mx-auto">
           <DialogHeader>

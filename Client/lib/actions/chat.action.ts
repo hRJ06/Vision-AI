@@ -1,14 +1,14 @@
-"use server"
+"use server";
 import { AddChatMessageProps, RenameChatProps } from "@/types";
 import { connectToDB } from "../mongoose";
 import Chat from "../model/chat.model";
 import db from "@/db/drizzle";
 import { user } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import Message from "../model/message.model";
 import { cookies } from "next/headers";
 import { JwtPayload } from "jsonwebtoken";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 /* DECODE USER JWT TOKEN */
 function decodeUserToken(): { email: string } | null {
@@ -43,6 +43,12 @@ export async function createChat(name: string) {
         email: currentUser[0].email,
         user: currentUser[0].id,
       });
+      await db
+        .update(user)
+        .set({
+          chats: sql`array_append(${user.chats}, ${createdChat._id})`,
+        })
+        .where(eq(user.email, currentUser[0].email));
       return JSON.stringify({ success: true, chat: createdChat });
     } else {
       return JSON.stringify({ success: false, message: "Invalid Token" });
@@ -137,9 +143,11 @@ export async function renameChat({ id, name }: RenameChatProps) {
       const chat = await Chat.findOneAndUpdate({ _id: id }, { name: name });
       if (!chat) {
         return JSON.stringify({ success: false, message: "Invalid Chat ID" });
-      }
-      else {
-        return JSON.stringify({ success: true, message: "Successfully renamed chat" });
+      } else {
+        return JSON.stringify({
+          success: true,
+          message: "Successfully renamed chat",
+        });
       }
     } else {
       return JSON.stringify({ success: false, message: "Invalid Token" });

@@ -17,10 +17,7 @@ export const organization = pgTable("organizations", {
   lob: text("lob"),
 });
 
-export const rolesEnum = pgEnum("popularity", [
-  "Read",
-  "Write",
-]);
+export const rolesEnum = pgEnum("popularity", ["Read", "Write"]);
 
 export const user = pgTable(
   "user",
@@ -30,8 +27,9 @@ export const user = pgTable(
     email: text("email").notNull(),
     role: rolesEnum("role"),
     otp: integer("otp"),
-    expiresIn: date('expires_in'),
+    expiresIn: date("expires_in"),
     organizationId: integer("organization_id"),
+    chats: text("chats").array(),
   },
   (table) => {
     return { emailIdx: uniqueIndex("email_idx").on(table.email) };

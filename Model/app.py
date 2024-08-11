@@ -106,7 +106,7 @@ def get_sql_chain(db):
     
     Conversation History: {chat_history}
     
-    Write only the SQL query and nothing else. Do not wrap the SQL query in any other text, not even backticks.
+    Write only the SQL query and nothing else, but make sure confidential data like password should not be given. Do not wrap the SQL query in any other text, not even backticks.
     Do not add any backslashes before underscores in table or column names. In case even in the schema there are any table or database whose name has a \_ like this simply add _ in query not the backslash.
     
     for example:
@@ -156,7 +156,6 @@ def get_response(user_query, db, chat_history):
         RunnablePassthrough.assign(query=sql_chain).assign(
             schema=lambda _: db.get_table_info(),
             response=lambda vars: (
-                print("VARS", vars["query"]),
                 vars.update({"modified_query": vars["query"].replace("\\_", "_")}),
                 db.run(vars["modified_query"]),
             ),
@@ -212,16 +211,6 @@ def chat():
     user_query = request.json["message"]
     db_uri = request.json["db"]
     chat_history = session.get("chat_history", [])
-
-    if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
-    else:
-        user_ip = request.remote_addr
-
-    user_agent = request.headers.get("User-Agent")
-
-    device_info = parse_user_agent(user_agent)
-
     if user_query and user_query.strip() != "":
         chat_history.append(HumanMessage(content=user_query))
         db = SQLDatabase.from_uri(decrypt_data(db_uri))
@@ -231,7 +220,6 @@ def chat():
             for item in ai_response:
                 ans += item
             ans = ans.replace("\\_", "_")
-            print("ANS", ans)
             chat_history.append(AIMessage(content=ans))
         else:
             response = "Database connection not established."

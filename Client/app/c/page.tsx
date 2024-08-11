@@ -16,12 +16,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { CachedResponse, ChatMessage, DatabaseCredentials } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosResponse } from "axios";
-import { FormEvent, useCallback, useState } from "react";
+import React, { FormEvent, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
 import { AiOutlineEdit } from "react-icons/ai";
+import { MdDone } from "react-icons/md";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -45,7 +46,7 @@ import {
   INVALID_RESPONSE_SET,
 } from "@/lib/utils";
 import cookie from "js-cookie";
-import { addMessage, createChat } from "@/lib/actions/chat.action";
+import { addMessage, createChat, renameChat } from "@/lib/actions/chat.action";
 
 export default function Component() {
   const { toast } = useToast();
@@ -58,6 +59,7 @@ export default function Component() {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState<string>("");
   const [chatID, setChatID] = useState<string>("");
+  const [isEdit, setIsEdit] = useState<Boolean>(false);
 
   const [chats, setChats] = useState<ChatMessage[]>([
     {
@@ -399,6 +401,40 @@ export default function Component() {
     }
   };
 
+
+  /*EDIT CHAT NAME*/
+  const editChatName = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Name",
+        description: "Please provide a valid name.",
+      });
+      return;
+    }
+
+    let response = JSON.parse(await renameChat({ id: chatID, name: name }));
+
+    if (response.success) {
+      toast({
+        variant: "success",
+        title: "Name Updated Successfully",
+        description: "Let's Get Started!",
+      });
+      setIsEdit(false);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+  }
+
+
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
       <div className="flex flex-col border-r bg-muted/40 p-4 md:border-r">
@@ -502,9 +538,35 @@ export default function Component() {
       {/* WELCOME CHAT */}
       <div className="flex flex-col h-screen overflow-hidden">
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
-          <h1 className="text-xl lg:text-left text-center font-semibold">
-            {name}
-          </h1>
+          <div className="flex items-center gap-x-3">
+            <div>
+              {
+                !isEdit ?
+                  <h1 className="text-xl lg:text-left text-center font-semibold">
+                    {name}
+                  </h1>
+                  :
+                  <div className="flex items-center gap-x-3">
+                    <Input
+                      id="name"
+                      className=""
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                    <MdDone className="text-gray-500 cursor-pointer" size={30} onClick={(e) => editChatName(e)} />
+                  </div>
+              }
+            </div>
+            {
+              name && <AiOutlineEdit
+                className="text-gray-500 cursor-pointer"
+                size={30}
+                onClick={() => setIsEdit(true)}
+              />
+            }
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -559,32 +621,28 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div
                   key={index}
-                  className={`flex items-start gap-4 ${
-                    AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
-                  } `}
+                  className={`flex items-start gap-4 ${AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
+                    } `}
                 >
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
-                      src={`${
-                        AI_MESSAGE_ROLE_SET.has(chat.role)
-                          ? "/AI.png"
-                          : "/Human.png"
-                      }`}
+                      src={`${AI_MESSAGE_ROLE_SET.has(chat.role)
+                        ? "/AI.png"
+                        : "/Human.png"
+                        }`}
                     />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
                     <div className="grid gap-1">
                       <div
-                        className={`prose text-muted-foreground  bg-${
-                          AI_MESSAGE_ROLE_SET.has(chat.role)
-                            ? "muted"
-                            : "primary"
-                        }  p-2 rounded-md ${
-                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                        className={`prose text-muted-foreground  bg-${AI_MESSAGE_ROLE_SET.has(chat.role)
+                          ? "muted"
+                          : "primary"
+                          }  p-2 rounded-md ${AI_MESSAGE_ROLE_SET.has(chat.role)
                             ? ""
                             : "text-primary-foreground"
-                        }`}
+                          }`}
                       >
                         {AI_MESSAGE_ROLE_SET.has(chat.role) ? (
                           <>
@@ -657,10 +715,6 @@ export default function Component() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-              />
-              <AiOutlineEdit
-                className="text-gray-500 cursor-pointer"
-                size={30}
               />
             </div>
           </div>

@@ -25,7 +25,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { addUser, editUser, getUsers } from "@/lib/actions/organization.action";
+import {
+  addUser,
+  deleteUser,
+  editUser,
+  getUsers,
+} from "@/lib/actions/organization.action";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
@@ -50,23 +55,26 @@ export default function Component() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedUserLog, setSelectedUserLog] = useState<any[]>([]);
+  const [toDeleteEmployee, setToDeleteEmployee] = useState<string>("");
   const [isChatLogModalOpen, setIsChatLogModalOpen] = useState(false);
+  const [isDeleteEmployeeModalOpen, setIsDeleteEmployeeModalOpen] =
+    useState(false);
   const token = cookie.get("token");
-
+  const [isFetchingLogs, setIsFetchingLogs] = useState(false);
+  const fetchUsers = async () => {
+    if (!token) {
+      router.push("/auth");
+      return;
+    }
+    setLoading(true);
+    try {
+      const users = await getUsers(token as string);
+      setEmployees(users as any);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (!token) {
-        router.push("/auth");
-        return;
-      }
-      setLoading(true);
-      try {
-        const users = await getUsers(token as string);
-        setEmployees(users as any);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, [router, token]);
 
@@ -83,17 +91,20 @@ export default function Component() {
 
   const fetchUserLogs = async (email: string) => {
     try {
+      setIsFetchingLogs(true);
       const chats = await userChats(email);
       const parsedResponse = JSON.parse(chats);
       setSelectedUserLog(parsedResponse?.chats || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsFetchingLogs(false);
     }
   };
 
   const handleViewLogs = (email: string) => {
     fetchUserLogs(email);
-    setIsChatLogModalOpen(true);  // Open the chat log modal
+    setIsChatLogModalOpen(true); // Open the chat log modal
   };
 
   const handleSaveEmployee = async () => {
@@ -147,6 +158,30 @@ export default function Component() {
     }
   };
 
+  const removeUser = (email: string) => {
+    setToDeleteEmployee(email);
+    setIsDeleteEmployeeModalOpen(true);
+  };
+
+  const handleRemoveUser = async (e: React.MouseEvent) => {
+    const response = await deleteUser(toDeleteEmployee);
+    const parsedResponse = JSON.parse(response);
+    if (parsedResponse.success) {
+      toast({
+        variant: "success",
+        title: "Deleted Successfully",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Please Try Again",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    }
+    setIsDeleteEmployeeModalOpen(false);
+    fetchUsers();
+  };
   return (
     <div className="flex flex-col min-h-screen p-6">
       <div className="flex-grow">
@@ -261,7 +296,10 @@ export default function Component() {
                             {" "}
                             <MdEdit />
                           </div>
-                          <div className="bg-red-500 text-white p-2 rounded-md cursor-pointer">
+                          <div
+                            className="bg-red-500 text-white p-2 rounded-md cursor-pointer"
+                            onClick={() => removeUser(employee.email)}
+                          >
                             {" "}
                             <MdDelete />
                           </div>
@@ -281,23 +319,23 @@ export default function Component() {
           </Table>
         </div>
       </div>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0">
-        <span className="text-sm font-light">
+      <footer className="flex flex-wrap gap-1 sm:flex-nowrap py-6  w-full shrink-0 ">
+        <span className="text-xs lg:text-sm font-light">
           <Link href="/docs" className="text-blue-500 hover:underline">
-            Documentation
+            Documentation |
           </Link>
         </span>
-        <span className="text-sm font-light">
+        <span className="text-xs lg:text-sm font-light">
           <Link href="/about" className="text-blue-500 hover:underline">
-            About
+            About |
           </Link>
         </span>
-        <span className="text-sm font-light">
+        <span className="text-xs lg:text-sm font-light">
           <Link href="/contact" className="text-blue-500 hover:underline">
             Contact
           </Link>
         </span>
-        <nav className="ml-auto text-sm font-light">
+        <nav className="ml-auto  text-xs lg:text-sm font-light">
           <Link href="/privacy" className="text-blue-500 hover:underline">
             Privacy Policy
           </Link>{" "}
@@ -307,16 +345,24 @@ export default function Component() {
           </Link>
         </nav>
       </footer>
-      <Dialog open={isEmployeeModalOpen} onOpenChange={() => setIsEmployeeModalOpen(false)}>
+
+      <Dialog
+        open={isEmployeeModalOpen}
+        onOpenChange={() => setIsEmployeeModalOpen(false)}
+      >
         <DialogContent className="max-w-xs sm:max-w-md sm:px-10 mx-auto">
           <DialogHeader>
-            <DialogTitle>{isEditing ? "Edit Employee" : "Add Employee"}</DialogTitle>
+            <DialogTitle>
+              {isEditing ? "Edit Employee" : "Add Employee"}
+            </DialogTitle>
           </DialogHeader>
           <Label htmlFor="name">Name</Label>
           <Input
             id="name"
             value={newEmployee.name}
-            onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
+            onChange={(e) =>
+              setNewEmployee({ ...newEmployee, name: e.target.value })
+            }
             placeholder="John Doe"
           />
           <Label htmlFor="email" className="mt-4">
@@ -326,7 +372,9 @@ export default function Component() {
             id="email"
             type="email"
             value={newEmployee.email}
-            onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+            onChange={(e) =>
+              setNewEmployee({ ...newEmployee, email: e.target.value })
+            }
             placeholder="john.doe@example.com"
           />
           <Label htmlFor="role" className="mt-4">
@@ -335,7 +383,9 @@ export default function Component() {
           <Select
             id="role"
             value={newEmployee.role}
-            onValueChange={(value) => setNewEmployee({ ...newEmployee, role: value })}
+            onValueChange={(value) =>
+              setNewEmployee({ ...newEmployee, role: value })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a role" />
@@ -352,7 +402,10 @@ export default function Component() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog open={isChatLogModalOpen} onOpenChange={() => setIsChatLogModalOpen(false)}>
+      <Dialog
+        open={isChatLogModalOpen}
+        onOpenChange={() => setIsChatLogModalOpen(false)}
+      >
         <DialogContent className="max-w-xs sm:max-w-md sm:px-10 mx-auto">
           <DialogHeader>
             <DialogTitle>Logs</DialogTitle>
@@ -366,11 +419,25 @@ export default function Component() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {selectedUserLog.length > 0 ? (
+              {isFetchingLogs ? (
+                <TableRow>
+                  <TableCell className="text-lg">
+                    <SkeletonLoader width="2.5rem" height="1.5rem" />
+                  </TableCell>
+                  <TableCell className="text-lg truncate">
+                    <SkeletonLoader width="2.5rem" height="1.5rem" />
+                  </TableCell>
+                  <TableCell className="text-lg">
+                    <SkeletonLoader width="2.5rem" height="1.5rem" />
+                  </TableCell>
+                </TableRow>
+              ) : selectedUserLog.length > 0 ? (
                 selectedUserLog.map((chat: any, index) => (
                   <TableRow key={chat._id}>
                     <TableCell className="text-lg">{index + 1}</TableCell>
-                    <TableCell className="text-lg truncate">{chat.name}</TableCell>
+                    <TableCell className="text-lg truncate">
+                      {chat.name}
+                    </TableCell>
                     <TableCell className="text-lg">
                       <a
                         href={`http://vision-ai.in/c/${chat._id}`}
@@ -392,6 +459,35 @@ export default function Component() {
               )}
             </TableBody>
           </Table>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isDeleteEmployeeModalOpen}
+        onOpenChange={() => setIsDeleteEmployeeModalOpen(false)}
+      >
+        <DialogContent className="max-w-xs sm:max-w-md sm:px-10 mx-auto">
+          <DialogHeader>
+            <DialogTitle className="flex justify-start">
+              Are you sure you want to delete?
+            </DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-x-2 justify-end">
+              <Button
+                className="bg-red-500 hover:bg-red-600"
+                onClick={(e) => handleRemoveUser(e)}
+              >
+                Yes
+              </Button>
+              <Button
+                className="bg-green-500 hover:bg-green-600"
+                onClick={() => setIsDeleteEmployeeModalOpen(false)}
+              >
+                No
+              </Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

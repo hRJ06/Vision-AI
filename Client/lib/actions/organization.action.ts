@@ -109,6 +109,17 @@ export const addUser = async (userData: UserProps) => {
   }
 };
 
+/* DELETE USER FROM ORGANIZATION */
+export const deleteUser = async (email: string) => {
+  try {
+    await db.delete(user).where(eq(user.email, email));
+    return JSON.stringify({ success: true });
+  } catch (error) {
+    console.error(error);
+    return JSON.stringify({ sucess: false });
+  }
+};
+
 /* GET ALL USER FROM AN ORGANIZATION */
 export const getUsers = async (token: string) => {
   try {

@@ -186,7 +186,6 @@ export default function Component() {
     });
   };
 
-
   /* DOWNLOAD HANDLER FOR IMAGE IN VISUALISATION RESPONSE */
   const handleDownload = useCallback(async (url: string): Promise<void> => {
     try {
@@ -205,7 +204,6 @@ export default function Component() {
       console.error("Error downloading the image -", error);
     }
   }, []);
-
 
   /* DOWNLOAD HANDLER FOR DB REPORT */
   const downloadHandler = useCallback(async () => {
@@ -232,8 +230,6 @@ export default function Component() {
       console.error(error);
     }
   }, [databaseCredentials, schemaInfo]);
-
-
 
   /* DB CONNECTION HANDLER */
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -281,64 +277,36 @@ export default function Component() {
     }
   };
 
-
-
   /*ADD MESSAGE */
-  const addNewMessage = async () => {
-
+  const addNewMessage = async (chat: ChatMessage) => {
     if (!chatID) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Chat ID is missing.",
+        description: "Please login.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
       return;
     }
-
     try {
-      const promises = chats.map(({ msg, role, link }) =>
-        addMessage({
-          id: chatID,
-          msg: msg,
-          role: role,
-          link: link,
-        })
-      );
-  
-      const responses = await Promise.all(promises);
-      const parsedResponse = responses.map((response)=>{
-        return JSON.parse(response as string);
-      })
-      const allSuccessful = parsedResponse.every(response => response.success);
-
-      if (allSuccessful) {
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "All messages were sent successfully.",
-        });
-      } else {
+      const response = JSON.parse(await addMessage({ ...chat, id: chatID }));
+      if (!response.success) {
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Some messages failed to send.",
+          title: "Uh oh! Something went wrong.",
+          description: "Please Try Again.",
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
-
-
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Uh oh! Something went wrong.",
         description: error.message || "An unexpected error occurred.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     }
-    
-  }
-
+  };
 
   /* CHAT MESSAGE HANDLER */
   const handleSendMessage = async (
@@ -358,6 +326,9 @@ export default function Component() {
     }
     if (inputText.trim()) {
       const userPrompt = inputText;
+      const userChat: ChatMessage = { msg: userPrompt, role: "User" };
+      setChats((prevChats) => [...prevChats, userChat]);
+      addNewMessage(userChat);
       setInputText("");
       try {
         const cachedResponse: CachedResponse = await checkKey(
@@ -390,22 +361,18 @@ export default function Component() {
           newChat = cachedResponse;
         }
         setChats((prevChats) => [...prevChats, newChat]);
-        addNewMessage();
+        addNewMessage(newChat);
       } catch (error) {
         console.error(error);
       }
     }
   };
 
-
-  /*Chat Create */
-  const submitNameHandler = async () => {
-    // console.log(name);
-
+  /* CREATE CHAT */
+  const createChatHandler = async () => {
     try {
       const response = await createChat(name);
       const parsedResponse = JSON.parse(response as string);
-      
       if (parsedResponse.success) {
         setChatID(parsedResponse.chat._id);
         toast({
@@ -418,12 +385,11 @@ export default function Component() {
       } else {
         toast({
           variant: "destructive",
-          title: "Error Creating Chat",
-          description: "Enter Correct Name",
+          title: "Uh oh! Something went wrong.",
+          description: parsedResponse.message,
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
-
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -432,9 +398,8 @@ export default function Component() {
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     }
-  }
+  };
 
-  console.log("chatID", chatID);
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
@@ -598,28 +563,32 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div
                   key={index}
-                  className={`flex items-start gap-4 ${AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
-                    } `}
+                  className={`flex items-start gap-4 ${
+                    AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
+                  } `}
                 >
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
-                      src={`${AI_MESSAGE_ROLE_SET.has(chat.role)
-                        ? "/AI.png"
-                        : "/Human.png"
-                        }`}
+                      src={`${
+                        AI_MESSAGE_ROLE_SET.has(chat.role)
+                          ? "/AI.png"
+                          : "/Human.png"
+                      }`}
                     />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
                     <div className="grid gap-1">
                       <div
-                        className={`prose text-muted-foreground  bg-${AI_MESSAGE_ROLE_SET.has(chat.role)
-                          ? "muted"
-                          : "primary"
-                          }  p-2 rounded-md ${AI_MESSAGE_ROLE_SET.has(chat.role)
+                        className={`prose text-muted-foreground  bg-${
+                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                            ? "muted"
+                            : "primary"
+                        }  p-2 rounded-md ${
+                          AI_MESSAGE_ROLE_SET.has(chat.role)
                             ? ""
                             : "text-primary-foreground"
-                          }`}
+                        }`}
                       >
                         {AI_MESSAGE_ROLE_SET.has(chat.role) ? (
                           <>
@@ -677,7 +646,6 @@ export default function Component() {
               </Button>
             </div>
           </form>
-
         )}
       </div>
 
@@ -697,17 +665,19 @@ export default function Component() {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
-              <AiOutlineEdit className="text-gray-500 cursor-pointer" size={30} />
+              <AiOutlineEdit
+                className="text-gray-500 cursor-pointer"
+                size={30}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" onClick={submitNameHandler}>
+            <Button type="button" onClick={createChatHandler}>
               Create
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

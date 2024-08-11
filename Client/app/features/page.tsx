@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -10,7 +10,6 @@ import {
 import { FaLessThan } from "react-icons/fa6";
 
 export default function Component() {
-
   const cards = [
     {
       id: 1,
@@ -53,7 +52,6 @@ export default function Component() {
       link: "/visualisation",
     },
   ];
-
 
   const [visibleCards, setVisibleCards] = useState(0);
 
@@ -115,18 +113,17 @@ export default function Component() {
           <button
             onClick={handlePrev}
             className="mr-4 h-9 w-9 rounded-full bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 flex items-center justify-center"
-            disabled={visibleCards === 0}
+            disabled={!visibleCards}
           >
             <FaLessThan />
           </button>
           <button
             onClick={handleNext}
             className="h-9 w-9 rounded-full bg-primary text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 flex items-center justify-center"
-            disabled={visibleCards === cards.length - 4}
+            disabled={visibleCards != cards.length - 4 ? false : true}
           >
-            <FaLessThan className="transform rotate-180"/>
+            <FaLessThan className="transform rotate-180" />
           </button>
-
         </div>
       </section>
       <section className="w-full py-12 md:py-24 lg:py-32">

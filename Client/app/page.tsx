@@ -9,7 +9,7 @@ export default function Component() {
     <div className="flex flex-col min-h-[100dvh]">
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <nav className="lg:ml-auto flex gap-4 sm:gap-6 justify-center items-center lg:w-auto w-full ">
-          <ThemeSwitcher/>
+          <ThemeSwitcher />
           <Link
             href="#features"
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -49,7 +49,7 @@ export default function Component() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Unlock the Power of Your Data with Vision AI
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl text-justify">
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Connect to your internal databases, generate ER diagrams,
                     analyze database structures, and leverage NLP-powered
                     processing with our cutting-edge AI models.
@@ -103,7 +103,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Connect to Databases
                       </h3>
-                      <p className="text-muted-foreground text-justify">
+                      <p className="text-muted-foreground">
                         Easily connect to your internal databases and leverage
                         our powerful AI models to analyze and process your data.
                       </p>
@@ -114,7 +114,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Generate ER Diagrams
                       </h3>
-                      <p className="text-muted-foreground text-justify">
+                      <p className="text-muted-foreground">
                         Automatically generate detailed ER diagrams from your
                         database schema, making it easy to visualize and
                         understand your data structure.
@@ -126,7 +126,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         Analyze Database Structure
                       </h3>
-                      <p className="text-muted-foreground text-justify">
+                      <p className="text-muted-foreground">
                         Leverage our advanced AI models to analyze your database
                         structure, identify potential issues, and suggest
                         optimizations.
@@ -138,7 +138,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">
                         NLP-powered Processing
                       </h3>
-                      <p className="text-muted-foreground text-justify">
+                      <p className="text-muted-foreground">
                         Utilize our cutting-edge natural language processing
                         (NLP) capabilities to extract insights and perform
                         advanced data processing tasks.
@@ -163,7 +163,7 @@ export default function Component() {
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                 Trusted by Leading Organizations
               </h2>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-justify">
+              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Vision AI has been helping businesses of all sizes unlock the
                 power of their data. See what our customers have to say.
               </p>
@@ -186,7 +186,10 @@ export default function Component() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" id="partners">
+        <section
+          className="w-full py-12 md:py-24 lg:py-32 bg-muted"
+          id="partners"
+        >
           <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -207,7 +210,9 @@ export default function Component() {
                         <AvatarFallback>JD</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
-                        <h4 className="text-lg font-semibold">Smriti Mandana</h4>
+                        <h4 className="text-lg font-semibold">
+                          Smriti Mandana
+                        </h4>
                         <p className="text-muted-foreground">CEO, Acme Inc.</p>
                       </div>
                       <p className="mt-4 text-muted-foreground">
@@ -245,7 +250,7 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                      <AvatarImage src="https://avatar.iran.liara.run/public/37" />
+                        <AvatarImage src="https://avatar.iran.liara.run/public/37" />
                         <AvatarFallback>Koushik Sen</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
@@ -295,7 +300,7 @@ export default function Component() {
   );
 }
 
-function EyeIcon(props:React.SVGProps<SVGSVGElement>) {
+function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -315,7 +320,7 @@ function EyeIcon(props:React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function XIcon(props:React.SVGProps<SVGSVGElement>) {
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

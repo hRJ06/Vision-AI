@@ -36,22 +36,27 @@ export default function Component() {
   };
 
   const handleQuery = async () => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        sender: "You",
+        text: query,
+      },
+    ]);
+    setQuery("");
+  
     const data = { prompt: query, file: uploadedFile };
+  
     try {
       const response = await axios.post("http://127.0.0.1:5000/chat_csv", data);
       if (response) {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
-            sender: "You",
-            text: query,
-          },
-          {
             sender: "Vision",
             text: response.data.response,
           },
         ]);
-        setQuery("");
       }
     } catch (error) {
       console.error(error);

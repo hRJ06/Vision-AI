@@ -42,6 +42,9 @@ export default function Component() {
         sender: "You",
         text: query,
       },
+      {
+
+      }
     ]);
     setQuery("");
   
@@ -52,6 +55,9 @@ export default function Component() {
       if (response) {
         setMessages((prevMessages) => [
           ...prevMessages,
+          {
+
+          },
           {
             sender: "Vision",
             text: response.data.response,

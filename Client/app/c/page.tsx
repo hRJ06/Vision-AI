@@ -62,7 +62,7 @@ export default function Component() {
   const [name, setName] = useState<string>("");
   const [chatID, setChatID] = useState<string>("");
   const [isEdit, setIsEdit] = useState<Boolean>(false);
-
+  const [title,setTitle]=useState<string>("")
   const [chats, setChats] = useState<ChatMessage[]>([
     {
       msg: "Hi there! How can I help You today?",
@@ -400,6 +400,7 @@ export default function Component() {
   /* CREATE CHAT */
   const createChatHandler = async () => {
     try {
+      setName(title)
       const response = await createChat(name);
       const parsedResponse = JSON.parse(response as string);
       if (parsedResponse.success) {
@@ -744,8 +745,8 @@ export default function Component() {
               <Input
                 id="name"
                 className="flex-1"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>

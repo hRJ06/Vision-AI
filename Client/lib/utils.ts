@@ -42,6 +42,17 @@ export const generate_JSON_prompt = (prompt: string): string => {
   return `I will provide a JSON message. Please correct it to the proper format and return only the final JSON output, nothing else. The message is ${prompt}.`;
 };
 
+/* GENERATE CHECK CAN EXECUTE MESSAGE PROMPT */
+export const generate_check_can_execute_prompt = (
+  userPrompt: string,
+  role: string
+): string => {
+  return `I will provide you with a user prompt and the user's role, which can be either 'read' or 'write'. 
+  1. If the user role is 'read', return 'True' only if the prompt is related to read-only operations such as querying data.
+  2. If the user role is 'write', return 'True' if the prompt involves safe write operations, and return 'False' if the prompt is dangerous, such as operations that delete a large amount of data.
+  The user prompt is "${userPrompt}", and the user role is "${role}".`;
+};
+
 /* CONFIGURATION FOR GENERATIVE MODEL */
 export const getModel = () => {
   const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;

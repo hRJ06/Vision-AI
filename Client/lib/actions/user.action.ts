@@ -3,7 +3,11 @@ import db from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { LoginUserProps, VerifyUserProps } from "@/types";
 import { eq } from "drizzle-orm";
-import { generateOTP, getCookieExpiration, getOTPExpiration } from "../utils";
+import {
+  generateOTP,
+  getCookieExpiration,
+  getOTPExpiration,
+} from "../utils";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
@@ -64,6 +68,10 @@ export const loginUser = async ({ otp, email }: LoginUserProps) => {
           expiresIn: process.env.JWT_EXPIRATION_TIME!,
         });
         cookies().set("token", token, {
+          secure: true,
+          expires: getCookieExpiration(),
+        });
+        cookies().set("role", db_user.role!, {
           secure: true,
           expires: getCookieExpiration(),
         });

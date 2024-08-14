@@ -25,7 +25,7 @@ export const user = pgTable(
     id: serial("id").primaryKey(),
     name: text("name"),
     email: text("email").notNull(),
-    role: rolesEnum("role"),
+    role: rolesEnum("role").notNull(),
     otp: integer("otp"),
     expiresIn: date("expires_in"),
     organizationId: integer("organization_id"),

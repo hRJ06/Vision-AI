@@ -41,12 +41,14 @@ import { cache, checkKey } from "@/lib/actions/redis.action";
 import {
   AI_MESSAGE_ROLE_SET,
   containsLink,
+  generate_check_can_execute_prompt,
   generate_database_visualisation_prompt,
   getModel,
   INVALID_RESPONSE_SET,
 } from "@/lib/utils";
 import cookie from "js-cookie";
 import { addMessage, createChat, renameChat } from "@/lib/actions/chat.action";
+import { models } from "mongoose";
 
 export default function Component() {
   const { toast } = useToast();
@@ -309,6 +311,16 @@ export default function Component() {
     }
   };
 
+  /* HANDLER FUNCTION TO CHECK WHETHER CAN EXECUTE PROMPT */
+  const can_execute_prompt = async (prompt: string) => {
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
+    if (INVALID_RESPONSE_SET.has(response.trim().toUpperCase())) {
+      return false;
+    }
+    return true;
+  };
+
   /* CHAT MESSAGE HANDLER */
   const handleSendMessage = async (
     e: FormEvent<HTMLFormElement>
@@ -327,6 +339,22 @@ export default function Component() {
     }
     if (inputText.trim()) {
       const userPrompt = inputText;
+      const role = cookie.get("role") as string;
+      const check_can_execute_prompt = generate_check_can_execute_prompt(
+        userPrompt,
+        role
+      );
+      const can_execute_response = can_execute_prompt(check_can_execute_prompt);
+      if (!can_execute_response) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "You are not allowed to execute this action.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
+        setInputText("");
+        return;
+      }
       const userChat: ChatMessage = { msg: userPrompt, role: "User" };
       setChats((prevChats) => [...prevChats, userChat]);
       addNewMessage(userChat);
@@ -401,7 +429,6 @@ export default function Component() {
     }
   };
 
-
   /*EDIT CHAT NAME*/
   const editChatName = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -431,9 +458,7 @@ export default function Component() {
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     }
-  }
-
-
+  };
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex flex-col md:grid md:grid-cols-[280px_1fr]">
@@ -540,31 +565,34 @@ export default function Component() {
         <div className="sticky top-0 z-10 border-b bg-background/50 p-4 backdrop-blur-md flex justify-between items-baseline">
           <div className="flex items-center gap-x-3">
             <div>
-              {
-                !isEdit ?
-                  <h1 className="text-xl lg:text-left text-center font-semibold">
-                    {name}
-                  </h1>
-                  :
-                  <div className="flex items-center gap-x-3">
-                    <Input
-                      id="name"
-                      className=""
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                    <MdDone className="text-gray-500 cursor-pointer" size={30} onClick={(e) => editChatName(e)} />
-                  </div>
-              }
+              {!isEdit ? (
+                <h1 className="text-xl lg:text-left text-center font-semibold">
+                  {name}
+                </h1>
+              ) : (
+                <div className="flex items-center gap-x-3">
+                  <Input
+                    id="name"
+                    className=""
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                  <MdDone
+                    className="text-gray-500 cursor-pointer"
+                    size={30}
+                    onClick={(e) => editChatName(e)}
+                  />
+                </div>
+              )}
             </div>
-            {
-              name && <AiOutlineEdit
+            {name && (
+              <AiOutlineEdit
                 className="text-gray-500 cursor-pointer"
                 size={30}
                 onClick={() => setIsEdit(true)}
               />
-            }
+            )}
           </div>
 
           <DropdownMenu>
@@ -621,28 +649,32 @@ export default function Component() {
               {chats.map((chat, index) => (
                 <div
                   key={index}
-                  className={`flex items-start gap-4 ${AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
-                    } `}
+                  className={`flex items-start gap-4 ${
+                    AI_MESSAGE_ROLE_SET.has(chat.role) ? "" : "justify-end"
+                  } `}
                 >
                   <Avatar className="h-8 w-8 shrink-0 border">
                     <AvatarImage
-                      src={`${AI_MESSAGE_ROLE_SET.has(chat.role)
-                        ? "/AI.png"
-                        : "/Human.png"
-                        }`}
+                      src={`${
+                        AI_MESSAGE_ROLE_SET.has(chat.role)
+                          ? "/AI.png"
+                          : "/Human.png"
+                      }`}
                     />
                     <AvatarFallback>{chat.role}</AvatarFallback>
                   </Avatar>
                   <div className="max-w-[700px]">
                     <div className="grid gap-1">
                       <div
-                        className={`prose text-muted-foreground  bg-${AI_MESSAGE_ROLE_SET.has(chat.role)
-                          ? "muted"
-                          : "primary"
-                          }  p-2 rounded-md ${AI_MESSAGE_ROLE_SET.has(chat.role)
+                        className={`prose text-muted-foreground  bg-${
+                          AI_MESSAGE_ROLE_SET.has(chat.role)
+                            ? "muted"
+                            : "primary"
+                        }  p-2 rounded-md ${
+                          AI_MESSAGE_ROLE_SET.has(chat.role)
                             ? ""
                             : "text-primary-foreground"
-                          }`}
+                        }`}
                       >
                         {AI_MESSAGE_ROLE_SET.has(chat.role) ? (
                           <>

@@ -57,7 +57,7 @@ export default function Component() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row lg:m-0 mx-auto w-full lg:justify-start justify-center">
                   <Link
-                    href="/c"
+                    href="/auth"
                     className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-bold tracking-wide text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
@@ -206,8 +206,8 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="https://avatar.iran.liara.run/public/92" />
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarImage src="/Customer-1.png" alt="SM" />
+                        <AvatarFallback>SM</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
                         <h4 className="text-lg font-semibold">
@@ -216,10 +216,11 @@ export default function Component() {
                         <p className="text-muted-foreground">CEO, Acme Inc.</p>
                       </div>
                       <p className="mt-4 text-muted-foreground">
-                        "Vision AI has been a game-changer for our business. The
-                        ability to connect to our databases, generate ER
-                        diagrams, and leverage the NLP-powered processing has
-                        unlocked new insights and opportunities."
+                        &quot;Vision AI has been a game-changer for our
+                        business. The ability to connect to our databases,
+                        generate ER diagrams, and leverage the NLP-powered
+                        processing has unlocked new insights and
+                        opportunities.&quot;
                       </p>
                     </CardContent>
                   </Card>
@@ -228,8 +229,8 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="https://img.freepik.com/premium-vector/adult-male-character-smiling-portrait-rounded-avatar-photo-profile-media-cv-cheerful-man-middle-age-confident-personage-brunette-with-blush-cheeks-vector-flat-style_87689-2387.jpg" />
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarImage src="/Customer-2.png" alt="RB" />
+                        <AvatarFallback>RB</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
                         <h4 className="text-lg font-semibold">Rahul Bose</h4>
@@ -238,10 +239,11 @@ export default function Component() {
                         </p>
                       </div>
                       <p className="mt-4 text-muted-foreground">
-                        "We've been using Vision AI for over a year now, and
-                        it's become an essential tool in our data analytics
-                        workflow. The insights we've gained have helped us make
-                        more informed decisions and drive our business forward."
+                        &quot;We&#39;ve been using Vision AI for over a year
+                        now, and it&#39;s become an essential tool in our data
+                        analytics workflow. The insights we&#39;ve gained have
+                        helped us make more informed decisions and drive our
+                        business forward.&quot;
                       </p>
                     </CardContent>
                   </Card>
@@ -250,8 +252,8 @@ export default function Component() {
                   <Card className="w-full">
                     <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                       <Avatar>
-                        <AvatarImage src="https://avatar.iran.liara.run/public/37" />
-                        <AvatarFallback>Koushik Sen</AvatarFallback>
+                        <AvatarImage src="/Customer-3.png" alt="MJ" />
+                        <AvatarFallback>MJ</AvatarFallback>
                       </Avatar>
                       <div className="mt-4 space-y-1">
                         <h4 className="text-lg font-semibold">
@@ -262,10 +264,10 @@ export default function Component() {
                         </p>
                       </div>
                       <p className="mt-4 text-muted-foreground">
-                        "Vision AI has streamlined our data analysis workflows
-                        and helped us uncover insights that were previously
-                        hidden. The NLP-powered processing has been a
-                        game-changer for our team."
+                        &quot;Vision AI has streamlined our data analysis
+                        workflows and helped us uncover insights that were
+                        previously hidden. The NLP-powered processing has been a
+                        game-changer for our team.&quot;
                       </p>
                     </CardContent>
                   </Card>
@@ -297,45 +299,5 @@ export default function Component() {
         </nav>
       </footer>
     </div>
-  );
-}
-
-function EyeIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function XIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
   );
 }

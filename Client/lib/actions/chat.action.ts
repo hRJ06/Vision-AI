@@ -9,6 +9,7 @@ import Message from "../model/message.model";
 import { cookies } from "next/headers";
 import { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
+import { getCurrentUser } from "@/db/queries";
 
 /* DECODE USER JWT TOKEN */
 function decodeUserToken(): { email: string } | null {
@@ -33,10 +34,7 @@ export async function createChat(name: string) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-    const currentUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, decoded.email));
+    const currentUser = await getCurrentUser(decoded.email);
     if (currentUser[0]) {
       const createdChat = await Chat.create({
         name,
@@ -67,10 +65,7 @@ export async function addMessage({ id, msg, role, link }: AddChatMessageProps) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-    const currentUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, decoded.email));
+    const currentUser = await getCurrentUser(decoded.email);
     if (currentUser[0]) {
       const chat = await Chat.findOne({ _id: id, user: currentUser[0].id });
       if (!chat) {
@@ -105,11 +100,11 @@ export async function getAllMessages(id: string) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-    const chat = await Chat.findOne({ _id: id }).populate('messages').exec();
+    const chat = await Chat.findOne({ _id: id }).populate("messages").exec();
     return JSON.stringify({
       success: true,
       message: chat.messages,
-      name:chat.name
+      name: chat.name,
     });
   } catch (error: any) {
     console.error(error);
@@ -125,10 +120,7 @@ export async function renameChat({ id, name }: RenameChatProps) {
       return JSON.stringify({ success: false, message: "Please login" });
     }
     connectToDB();
-    const currentUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, decoded.email));
+    const currentUser = await getCurrentUser(decoded.email);
     if (currentUser[0]) {
       const chat = await Chat.findOneAndUpdate({ _id: id }, { name: name });
       if (!chat) {

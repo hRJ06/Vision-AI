@@ -11,16 +11,16 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getCookieExpiration } from "../utils";
+import { getCurrentOrganization, getOrganizationUsers } from "@/db/queries";
 
 /* REGISTER ORGANIZATION */
 export const registerOrganization = async (
   organizationData: RegisterOrganizationProps
 ) => {
   try {
-    const savedOrganization = await db
-      .select()
-      .from(organization)
-      .where(eq(organization.email, organizationData.email));
+    const savedOrganization = await getCurrentOrganization(
+      organizationData.email
+    );
     if (savedOrganization.length > 0) {
       return JSON.stringify({
         success: false,
@@ -43,11 +43,9 @@ export const loginOrganization = async (
   organizationData: LoginOrganizationProps
 ) => {
   try {
-    const savedOrganization = await db
-      .select()
-      .from(organization)
-      .where(eq(organization.email, organizationData.email))
-      .limit(1);
+    const savedOrganization = await getCurrentOrganization(
+      organizationData.email
+    );
     if (savedOrganization[0]) {
       const match = await bcrypt.compare(
         organizationData.password,
@@ -86,10 +84,7 @@ export const addUser = async (userData: UserProps) => {
         process.env.JWT_SECRET_KEY!
       ) as JwtPayload;
       const email = decode.email as string;
-      const currentOrganization = await db
-        .select()
-        .from(organization)
-        .where(eq(organization.email, email));
+      const currentOrganization = await getCurrentOrganization(email);
       if (currentOrganization[0]) {
         const newUser = {
           name: userData.name,
@@ -129,15 +124,9 @@ export const getUsers = async (token: string) => {
         process.env.JWT_SECRET_KEY!
       ) as JwtPayload;
       const email = decode.email as string;
-      const currentOrganization = await db
-        .select()
-        .from(organization)
-        .where(eq(organization.email, email));
+      const currentOrganization = await getCurrentOrganization(email);
       if (currentOrganization[0]) {
-        const users = await db
-          .select()
-          .from(user)
-          .where(eq(user.organizationId, currentOrganization[0].id));
+        const users = await getOrganizationUsers(currentOrganization[0].id);
         return users;
       } else {
         return JSON.stringify({ success: false, token: "Invalid Token" });

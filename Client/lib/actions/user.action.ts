@@ -3,26 +3,19 @@ import db from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { LoginUserProps, VerifyUserProps } from "@/types";
 import { eq } from "drizzle-orm";
-import {
-  generateOTP,
-  getCookieExpiration,
-  getOTPExpiration,
-} from "../utils";
+import { generateOTP, getCookieExpiration, getOTPExpiration } from "../utils";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "./mail.action";
 import { connectToDB } from "../mongoose";
 import Chat from "../model/chat.model";
 import mongoose from "mongoose";
+import { getCurrentUser, getUserChats } from "@/db/queries";
 
 /* VERIFY USER */
 export const verifyUser = async (userData: VerifyUserProps) => {
   try {
-    const savedUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, userData.email));
-
+    const savedUser = await getCurrentUser(userData.email);
     if (savedUser[0]) {
       const db_user = savedUser[0];
       const generatedOTP = generateOTP();
@@ -54,7 +47,7 @@ export const verifyUser = async (userData: VerifyUserProps) => {
 /* LOGIN USER THROUGH OTP */
 export const loginUser = async ({ otp, email }: LoginUserProps) => {
   try {
-    const savedUser = await db.select().from(user).where(eq(user.email, email));
+    const savedUser = await getCurrentUser(email);
     if (savedUser[0]) {
       const db_user = savedUser[0];
       if (db_user.otp != Number(otp)) {
@@ -87,10 +80,7 @@ export const loginUser = async ({ otp, email }: LoginUserProps) => {
 /* GET USER CHATS */
 export const userChats = async (email: string) => {
   try {
-    const currentUser = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email));
+    const currentUser = await getUserChats(email);
     connectToDB();
     if (currentUser[0]) {
       const chats = currentUser[0].chats?.map((id) => id.replace(/"/g, ""));

@@ -28,7 +28,9 @@ export const user = pgTable(
     role: rolesEnum("role").notNull(),
     otp: integer("otp"),
     expiresIn: date("expires_in"),
-    organizationId: integer("organization_id"),
+    organizationId: integer("organization_id")
+      .references(() => organization.id, { onDelete: "cascade" })
+      .notNull(),
     chats: text("chats").array(),
   },
   (table) => {

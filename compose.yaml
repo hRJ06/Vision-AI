@@ -20,12 +20,6 @@ services:
     build: ./Server
     ports: 
       - 4000:4000
-    environment:
-      PORT: 4000
-      API_KEY: "516337169296598"
-      API_SECRET: "t_faj3i3WIEmu3lG8eWsdJlPpik"
-      CLOUD_NAME: "dvpulu3cc"
-      GOOGLE_API_KEY: "AIzaSyDgd0ssQwlDFtY1QlSOJVUC_dsxON89ABs"
     develop:
       watch:
         - path: ./Server/package.json

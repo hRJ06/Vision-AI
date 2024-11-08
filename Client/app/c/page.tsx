@@ -48,11 +48,11 @@ import {
 } from "@/lib/utils";
 import cookie from "js-cookie";
 import { addMessage, createChat, renameChat } from "@/lib/actions/chat.action";
-import { models } from "mongoose";
 
 export default function Component() {
   const { toast } = useToast();
-
+  const MODEL_BASE_URL = process.env.NEXT_PUBLIC_MODEL_URL;
+  const SERVER_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL;
   const [databaseCredentials, setDatabaseCredentials] =
     useState<DatabaseCredentials | null>(null);
   const [schemaInfo, setSchemaInfo] = useState<string>("");
@@ -213,7 +213,7 @@ export default function Component() {
     const details = { ...databaseCredentials, schemaDescription: schemaInfo };
     try {
       const response: AxiosResponse<Blob> = await axios.post(
-        "http://localhost:4000/image/report",
+        `${SERVER_BASE_URL}/image/report`,
         details,
         {
           headers: {
@@ -246,7 +246,7 @@ export default function Component() {
     setDatabaseCredentials(data);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/connect", data, {
+      const response = await axios.post(`${MODEL_BASE_URL}/connect`, data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -367,7 +367,7 @@ export default function Component() {
         let newChat: ChatMessage = { msg: "", role: "User" };
         if (INVALID_RESPONSE_SET.has(cachedResponse)) {
           const response = await axios.post(
-            "http://127.0.0.1:5000/chat",
+            `${MODEL_BASE_URL}/chat`,
             { message: userPrompt, db: db_uri },
             {
               headers: {

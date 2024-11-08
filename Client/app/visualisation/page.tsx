@@ -73,6 +73,7 @@ export default function Component() {
   const [database, setDatabase] = useState("");
   const [options, setOptions] = useState("0");
   const [data, setData] = useState<Record<string, string>>();
+  const MODEL_BASE_URL = process.env.NEXT_PUBLIC_MODEL_URL;
 
   /* HANDLER FOR TABLE CHANGE */
   const handleTableChange = (value: any) => {
@@ -100,7 +101,7 @@ export default function Component() {
 
     try {
       let response = await axios.post(
-        "http://127.0.0.1:5000/fetch-table",
+        `${MODEL_BASE_URL}/fetch-table`,
         data,
         {
           headers: {
@@ -168,7 +169,7 @@ export default function Component() {
 
     try {
       let response = await axios.post(
-        "http://127.0.0.1:5000/fetch-table-data",
+        `${MODEL_BASE_URL}/fetch-table-data`,
         { ...data, db: Cookies.get("db") },
         {
           headers: {

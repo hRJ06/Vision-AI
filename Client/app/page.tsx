@@ -11,6 +11,13 @@ export default function Component() {
         <nav className="lg:ml-auto flex gap-4 sm:gap-6 justify-center items-center lg:w-auto w-full ">
           <ThemeSwitcher />
           <Link
+            href="/auth"
+            className="text-sm font-medium hover:underline underline-offset-4"
+            prefetch={false}
+          >
+            Login
+          </Link>
+          <Link
             href="#features"
             className="text-sm font-medium hover:underline underline-offset-4"
             prefetch={false}

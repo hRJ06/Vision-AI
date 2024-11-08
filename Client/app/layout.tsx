@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "@/components/providers/Provider";
+import Script from "next/script"; // Add this import
+
 const dosis = Dosis({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -31,6 +33,19 @@ export default function RootLayout({
         <Analytics />
         <SpeedInsights />
         <Toaster />
+        <Script id="crisp-widget" strategy="afterInteractive">
+          {`
+            window.$crisp=[];
+            window.CRISP_WEBSITE_ID="f832bfd1-c050-4c4a-9bd7-1416673a61a6";
+            (function() {
+              d=document;
+              s=d.createElement("script");
+              s.src="https://client.crisp.chat/l.js";
+              s.async=1;
+              d.getElementsByTagName("head")[0].appendChild(s);
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );

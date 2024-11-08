@@ -9,12 +9,12 @@ from langchain_groq import ChatGroq
 from flask import Flask, request, session, jsonify
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import google.generativeai as genai
-from langchain import OpenAI
+from langchain_community.llms import OpenAI
 import re
 import os
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
-from cryptography.fernet import Fernet  
+from cryptography.fernet import Fernet
 import random
 import schedule
 import time
@@ -40,11 +40,14 @@ app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
 key = Fernet.generate_key()
 cipher_suite = Fernet(key)
 
+
 def encrypt_data(data):
     return cipher_suite.encrypt(data.encode()).decode()
 
+
 def decrypt_data(encrypted_data):
     return cipher_suite.decrypt(encrypted_data.encode()).decode()
+
 
 def parse_db_uri(db_uri):
     parsed_uri = urlparse(db_uri)
@@ -68,8 +71,6 @@ def init_db(user, password, host, port, database):
     return db_uri
 
 
-
-
 def generator():
     return random.randint(10000000, 99999999)
 
@@ -88,7 +89,7 @@ def get_sql_chain(db):
     
     for example:
     Question: which 3 artists have the most tracks?
-    SQL Query: SELECT ArtistId, COUNT(*) FROM tracks GROUP BY ArtistId ORDER BY COUNT(*) DESC LIMIT 3;
+    SQL Query: SELECT ArtistId, COUNT(*) FROM tracks GROUP BY ArtistId ORDER BY COUNT() DESC LIMIT 3;
     Question: Name 10 artists
     SQL Query: SELECT Name FROM artists LIMIT 10;
     
@@ -220,7 +221,7 @@ def fetch_tables():
 
     try:
         db_uri = init_db(user, password, host, port, database)
-        tables_info =  SQLDatabase.from_uri(db_uri).get_table_info()
+        tables_info = SQLDatabase.from_uri(db_uri).get_table_info()
         prompt = f"Convert the following table information into a JSON object. Format is table names, then the column name and datatype. Dont add any space or backslash.The table info is:\n\n{tables_info}"
 
         response = genai.GenerativeModel("gemini-1.5-flash").generate_content(prompt)
@@ -366,7 +367,7 @@ def manipulate_csv():
 
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-    llm = OpenAI(temperature=0, openai_api_key="")
+    llm = OpenAI(temperature=0, openai_api_key=os.getenv("OPENAI_API_KEY"))
     try:
         agent = create_csv_agent(llm, filepath, verbose=True, allow_dangerous_code=True)
         if prompt:

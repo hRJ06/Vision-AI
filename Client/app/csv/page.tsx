@@ -31,6 +31,8 @@ export default function Component() {
     },
   ]);
 
+  const MODEL_BASE_URL = process.env.NEXT_PUBLIC_MODEL_URL;
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
@@ -51,7 +53,7 @@ export default function Component() {
     const data = { prompt: query, file: uploadedFile };
   
     try {
-      const response = await axios.post("http://127.0.0.1:5000/chat_csv", data);
+      const response = await axios.post(`${MODEL_BASE_URL}/chat_csv`, data);
       if (response) {
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -83,7 +85,7 @@ export default function Component() {
 
       try {
         const response = await axios.post(
-          "http://127.0.0.1:5000/upload_csv",
+          `${MODEL_BASE_URL}/upload_csv`,
           formData
         );
 
